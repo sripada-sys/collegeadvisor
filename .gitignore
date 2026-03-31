@@ -1,0 +1,15 @@
+# Secrets
+.env
+
+# Database (backed up via data/progress_backup.json)
+tutor.db
+
+# Uploaded images (local only — too large for git)
+uploads/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store

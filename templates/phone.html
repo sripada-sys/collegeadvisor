@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>MathTutor — Upload</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --border: #2e3348;
+            --text: #e4e4e7;
+            --text2: #9ca3af;
+            --accent: #6366f1;
+            --green: #22c55e;
+            --red: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; padding: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .header {
+            text-align: center; padding: 16px 0; margin-bottom: 16px;
+        }
+        .header h1 { font-size: 22px; font-weight: 700; }
+        .header h1 span { color: var(--accent); }
+        .header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+        .section {
+            background: var(--surface); border-radius: 12px;
+            padding: 20px; margin-bottom: 16px; border: 1px solid var(--border);
+        }
+        .section-title {
+            font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--text2); margin-bottom: 12px; font-weight: 600;
+        }
+
+        /* Subject picker — big tap targets */
+        .subject-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+        }
+        .subject-btn {
+            padding: 14px 8px; border-radius: 10px; border: 2px solid var(--border);
+            background: var(--bg); color: var(--text); font-size: 14px;
+            font-weight: 600; text-align: center; cursor: pointer;
+            transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+        }
+        .subject-btn.active {
+            border-color: var(--accent); background: rgba(99,102,241,0.1);
+            color: var(--accent);
+        }
+        .subject-btn .emoji { font-size: 24px; display: block; margin-bottom: 4px; }
+
+        /* Exam selector */
+        select {
+            width: 100%; padding: 12px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 10px;
+            color: var(--text); font-size: 15px; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        /* File upload buttons */
+        .upload-area {
+            border: 2px dashed var(--border); border-radius: 12px;
+            padding: 24px; text-align: center; cursor: pointer;
+            transition: all 0.2s; position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .upload-area:active, .upload-area.has-files {
+            border-color: var(--accent); background: rgba(99,102,241,0.05);
+        }
+        .upload-area .icon { font-size: 32px; margin-bottom: 8px; }
+        .upload-area .label { font-size: 15px; font-weight: 600; }
+        .upload-area .hint { font-size: 12px; color: var(--text2); margin-top: 4px; }
+        .upload-area input {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer;
+        }
+        .upload-area .file-count {
+            display: none; font-size: 13px; color: var(--green);
+            margin-top: 8px; font-weight: 600;
+        }
+        .upload-area.has-files .file-count { display: block; }
+
+        /* Problem numbers */
+        .problem-input {
+            width: 100%; padding: 12px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 10px;
+            color: var(--text); font-size: 15px;
+        }
+        .problem-input::placeholder { color: var(--text2); }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%; padding: 16px; border-radius: 12px; border: none;
+            background: var(--accent); color: white; font-size: 17px;
+            font-weight: 700; cursor: pointer; transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled {
+            opacity: 0.5; cursor: not-allowed; transform: none;
+        }
+
+        /* Status message */
+        .status-msg {
+            text-align: center; padding: 16px; border-radius: 12px;
+            margin-top: 16px; display: none; font-size: 15px; font-weight: 600;
+        }
+        .status-msg.processing {
+            display: block; background: rgba(99,102,241,0.1); color: var(--accent);
+        }
+        .status-msg.success {
+            display: block; background: rgba(34,197,94,0.1); color: var(--green);
+        }
+        .status-msg.error {
+            display: block; background: rgba(239,68,68,0.1); color: var(--red);
+        }
+
+        /* Preview thumbnails */
+        .preview-row {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;
+        }
+        .preview-row img {
+            width: 60px; height: 60px; object-fit: cover; border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Math<span>Tutor</span></h1>
+        <p>Upload questions &amp; answers → check PC for feedback</p>
+    </div>
+
+    <!-- Subject -->
+    <div class="section">
+        <div class="section-title">Subject</div>
+        <div class="subject-grid">
+            <div class="subject-btn active" data-subject="maths" onclick="selectSubject(this)">
+                <span class="emoji">📐</span>Maths
+            </div>
+            <div class="subject-btn" data-subject="physics" onclick="selectSubject(this)">
+                <span class="emoji">⚡</span>Physics
+            </div>
+            <div class="subject-btn" data-subject="chemistry" onclick="selectSubject(this)">
+                <span class="emoji">🧪</span>Chemistry
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam -->
+    <div class="section">
+        <div class="section-title">Exam</div>
+        <select id="exam-select">
+            <option value="jee_main">JEE Main</option>
+            <option value="jee_advanced">JEE Advanced</option>
+            <option value="isi">ISI</option>
+            <option value="cmi">CMI</option>
+            <option value="bitsat">BITSAT</option>
+            <option value="board">Board (CBSE)</option>
+            <option value="general" selected>General</option>
+        </select>
+    </div>
+
+    <!-- Question Photos -->
+    <div class="section">
+        <div class="section-title">Question Page</div>
+        <div class="upload-area" id="q-upload">
+            <div class="icon">📸</div>
+            <div class="label">Take Photo or Choose</div>
+            <div class="hint">Point camera at the question page</div>
+            <div class="file-count" id="q-count"></div>
+            <input type="file" accept="image/*" capture="environment" multiple
+                   onchange="handleFiles(this, 'q')">
+        </div>
+        <div class="preview-row" id="q-preview"></div>
+    </div>
+
+    <!-- Answer Photos -->
+    <div class="section">
+        <div class="section-title">Your Answers</div>
+        <div class="upload-area" id="a-upload">
+            <div class="icon">✍️</div>
+            <div class="label">Take Photo or Choose</div>
+            <div class="hint">Point camera at your written work</div>
+            <div class="file-count" id="a-count"></div>
+            <input type="file" accept="image/*" capture="environment" multiple
+                   onchange="handleFiles(this, 'a')">
+        </div>
+        <div class="preview-row" id="a-preview"></div>
+    </div>
+
+    <!-- Problem Numbers (optional) -->
+    <div class="section">
+        <div class="section-title">Problem Numbers (optional)</div>
+        <input type="text" class="problem-input" id="problem-numbers"
+               placeholder="e.g. 3, 7, 12">
+    </div>
+
+    <!-- Submit -->
+    <button class="submit-btn" id="submit-btn" onclick="submitWork()">
+        Check My Work
+    </button>
+
+    <div class="status-msg" id="status-msg"></div>
+
+<script>
+let selectedSubject = 'maths';
+let questionFiles = [];
+let answerFiles = [];
+
+function selectSubject(el) {
+    document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    selectedSubject = el.dataset.subject;
+}
+
+function handleFiles(input, type) {
+    const files = Array.from(input.files);
+    if (type === 'q') {
+        questionFiles = files;
+        document.getElementById('q-upload').classList.toggle('has-files', files.length > 0);
+        document.getElementById('q-count').textContent = `${files.length} photo${files.length > 1 ? 's' : ''} selected`;
+        showPreviews(files, 'q-preview');
+    } else {
+        answerFiles = files;
+        document.getElementById('a-upload').classList.toggle('has-files', files.length > 0);
+        document.getElementById('a-count').textContent = `${files.length} photo${files.length > 1 ? 's' : ''} selected`;
+        showPreviews(files, 'a-preview');
+    }
+}
+
+function showPreviews(files, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    files.forEach(f => {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(f);
+        container.appendChild(img);
+    });
+}
+
+async function submitWork() {
+    if (questionFiles.length === 0 && answerFiles.length === 0) {
+        showStatus('Upload at least one photo', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+    showStatus('Uploading photos...', 'processing');
+
+    const fd = new FormData();
+    fd.append('subject', selectedSubject);
+    fd.append('exam', document.getElementById('exam-select').value);
+    fd.append('problem_numbers', document.getElementById('problem-numbers').value);
+
+    questionFiles.forEach(f => fd.append('questions', f));
+    answerFiles.forEach(f => fd.append('answers', f));
+
+    try {
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (res.ok) {
+            showStatus('✓ Uploaded! Check the PC screen for results.', 'success');
+            // Reset form
+            questionFiles = [];
+            answerFiles = [];
+            document.getElementById('q-upload').classList.remove('has-files');
+            document.getElementById('a-upload').classList.remove('has-files');
+            document.getElementById('q-preview').innerHTML = '';
+            document.getElementById('a-preview').innerHTML = '';
+            document.getElementById('problem-numbers').value = '';
+            // Reset file inputs
+            document.querySelectorAll('input[type="file"]').forEach(i => i.value = '');
+        } else {
+            showStatus(data.error || 'Upload failed. Try again.', 'error');
+        }
+    } catch(e) {
+        showStatus('Network error. Make sure you\'re on the same WiFi.', 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Check My Work';
+}
+
+function showStatus(msg, type) {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.className = 'status-msg ' + type;
+}
+</script>
+</body>
+</html>
