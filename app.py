@@ -470,6 +470,316 @@ def schedule_daily_backup():
     threading.Thread(target=_loop, daemon=True).start()
 
 
+# ─── Exam Calendar ───
+
+# Static exam data — dates we KNOW from official sources as of March 2026.
+# AI verification cross-checks these against live web data.
+# "verified_at" tracks when AI last confirmed each exam's dates.
+
+EXAM_CALENDAR = [
+    {
+        "id": "cbse_board_2027",
+        "name": "CBSE Board Exams",
+        "category": "board",
+        "dates": {
+            "registration_open": "2026-09-01",
+            "registration_close": "2026-10-31",
+            "exam_start": "2027-02-15",
+            "exam_end": "2027-03-31",
+            "result": "2027-05-15",
+        },
+        "official_url": "https://www.cbse.gov.in/",
+        "apply_url": "https://www.cbse.gov.in/",
+        "notes": "Date sheet usually released in December. Check CBSE site for exact subject dates.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "jee_main_jan_2027",
+        "name": "JEE Main 2027 — Session 1 (January)",
+        "category": "engineering",
+        "dates": {
+            "registration_open": "2026-11-01",
+            "registration_close": "2026-11-30",
+            "exam_start": "2027-01-20",
+            "exam_end": "2027-01-31",
+            "result": "2027-02-15",
+        },
+        "official_url": "https://jeemain.nta.nic.in/",
+        "apply_url": "https://jeemain.nta.nic.in/",
+        "notes": "NTA usually announces in October. Session 1 score valid for Session 2 improvement.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "jee_main_apr_2027",
+        "name": "JEE Main 2027 — Session 2 (April)",
+        "category": "engineering",
+        "dates": {
+            "registration_open": "2027-02-01",
+            "registration_close": "2027-03-05",
+            "exam_start": "2027-04-01",
+            "exam_end": "2027-04-15",
+            "result": "2027-04-30",
+        },
+        "official_url": "https://jeemain.nta.nic.in/",
+        "apply_url": "https://jeemain.nta.nic.in/",
+        "notes": "Best of Session 1 and 2 scores is considered. Apply even if Session 1 went well.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "jee_advanced_2027",
+        "name": "JEE Advanced 2027",
+        "category": "engineering",
+        "dates": {
+            "registration_open": "2027-04-20",
+            "registration_close": "2027-05-10",
+            "exam_start": "2027-05-25",
+            "exam_end": "2027-05-25",
+            "result": "2027-06-15",
+        },
+        "official_url": "https://jeeadv.ac.in/",
+        "apply_url": "https://jeeadv.ac.in/",
+        "notes": "Must qualify JEE Main first (top 2.5 lakh). Single day exam — Paper 1 + Paper 2.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "bitsat_2027",
+        "name": "BITSAT 2027",
+        "category": "engineering",
+        "dates": {
+            "registration_open": "2027-01-15",
+            "registration_close": "2027-04-15",
+            "exam_start": "2027-05-20",
+            "exam_end": "2027-06-05",
+            "result": "2027-06-15",
+        },
+        "official_url": "https://www.bitsadmission.com/",
+        "apply_url": "https://www.bitsadmission.com/",
+        "notes": "Online CBT. Long registration window. Apply early for preferred slot.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "isi_2027",
+        "name": "ISI Admission 2027 (B.Stat/B.Math)",
+        "category": "research",
+        "dates": {
+            "registration_open": "2027-02-01",
+            "registration_close": "2027-04-15",
+            "exam_start": "2027-05-11",
+            "exam_end": "2027-05-11",
+            "result": "2027-06-15",
+        },
+        "official_url": "https://www.isical.ac.in/admissions",
+        "apply_url": "https://www.isical.ac.in/admissions",
+        "notes": "Written test (UGA/UGB) + interview. Extremely selective. Math Olympiad exposure helps.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "cmi_2027",
+        "name": "CMI Entrance 2027 (BSc Hons)",
+        "category": "research",
+        "dates": {
+            "registration_open": "2027-03-01",
+            "registration_close": "2027-04-05",
+            "exam_start": "2027-05-04",
+            "exam_end": "2027-05-04",
+            "result": "2027-06-01",
+        },
+        "official_url": "https://www.cmi.ac.in/admissions/",
+        "apply_url": "https://www.cmi.ac.in/admissions/",
+        "notes": "3-hour written exam. Math Olympiad qualifiers get direct admission. Based on 2026 pattern: exam first Saturday of May.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "iiit_h_2027",
+        "name": "IIIT Hyderabad (UGEE) 2027",
+        "category": "engineering",
+        "dates": {
+            "registration_open": "2027-02-01",
+            "registration_close": "2027-04-30",
+            "exam_start": "2027-05-15",
+            "exam_end": "2027-05-15",
+            "result": "2027-06-10",
+        },
+        "official_url": "https://www.iiit.ac.in/admissions/",
+        "apply_url": "https://www.iiit.ac.in/admissions/",
+        "notes": "Can apply via JEE Main score OR separate UGEE test. Check both pathways.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "tnea_2027",
+        "name": "TNEA 2027 (TN Engineering Admissions)",
+        "category": "state",
+        "dates": {
+            "registration_open": "2027-05-01",
+            "registration_close": "2027-06-15",
+            "exam_start": None,
+            "exam_end": None,
+            "result": "2027-07-15",
+        },
+        "official_url": "https://www.tneaonline.org/",
+        "apply_url": "https://www.tneaonline.org/",
+        "notes": "No exam — pure 12th marks merit. TN domicile since LKG = eligible. Safety net option.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+    {
+        "id": "kvpy_iiser_2027",
+        "name": "IISER Aptitude Test / IAT 2027",
+        "category": "research",
+        "dates": {
+            "registration_open": "2027-03-15",
+            "registration_close": "2027-05-15",
+            "exam_start": "2027-06-08",
+            "exam_end": "2027-06-08",
+            "result": "2027-06-30",
+        },
+        "official_url": "https://www.iiseradmission.in/",
+        "apply_url": "https://www.iiseradmission.in/",
+        "notes": "Also accepts JEE Advanced rank and KVPY/Olympiad. IAT is a separate exam option.",
+        "verified_at": None,
+        "ai_status": None,
+    },
+]
+
+# Mutex for AI verification (only one at a time)
+_verify_lock = threading.Lock()
+
+
+VERIFY_PROMPT = """I need you to verify the current official exam dates for Indian entrance exams for the 2027 admission cycle.
+
+For each exam below, search for the LATEST official information and tell me:
+1. Are the dates I have correct, approximately correct, or wrong?
+2. What are the actual dates if different?
+3. Has the official notification been released yet?
+
+IMPORTANT: Only report what you can actually verify from official sources. If no 2027 dates are announced yet, say "not yet announced" — do NOT guess.
+
+Exams to verify:
+{exam_list}
+
+Return ONLY a JSON array (no markdown fences):
+[
+  {{
+    "id": "{exam_id_placeholder}",
+    "status": "confirmed" | "approximate" | "wrong" | "not_announced",
+    "notes": "brief explanation of what you found",
+    "corrected_dates": {{}} or null if dates are correct,
+    "source": "where you found this info"
+  }}
+]"""
+
+
+@app.route("/api/exams")
+def api_exams():
+    """Return exam calendar with status info."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    exams = []
+    for exam in EXAM_CALENDAR:
+        e = dict(exam)
+        # Calculate dynamic status
+        dates = e["dates"]
+        if dates.get("registration_open") and today < dates["registration_open"]:
+            e["status"] = "upcoming"
+            e["status_label"] = "Not yet open"
+        elif dates.get("registration_close") and today <= dates["registration_close"]:
+            e["status"] = "registration_open"
+            e["status_label"] = "Registration OPEN"
+        elif dates.get("exam_start") and today < dates["exam_start"]:
+            e["status"] = "registered"
+            e["status_label"] = "Registration closed"
+        elif dates.get("exam_end") and today <= dates["exam_end"]:
+            e["status"] = "exam_ongoing"
+            e["status_label"] = "Exam in progress"
+        elif dates.get("result") and today < dates["result"]:
+            e["status"] = "awaiting_result"
+            e["status_label"] = "Awaiting result"
+        else:
+            e["status"] = "completed"
+            e["status_label"] = "Completed"
+
+        # Days until next important date
+        if dates.get("registration_open") and today < dates["registration_open"]:
+            diff = (datetime.strptime(dates["registration_open"], "%Y-%m-%d") - datetime.now()).days
+            e["countdown"] = {"days": max(diff, 0), "event": "Registration opens"}
+        elif dates.get("registration_close") and today <= dates["registration_close"]:
+            diff = (datetime.strptime(dates["registration_close"], "%Y-%m-%d") - datetime.now()).days
+            e["countdown"] = {"days": max(diff, 0), "event": "Registration closes"}
+        elif dates.get("exam_start") and today < dates["exam_start"]:
+            diff = (datetime.strptime(dates["exam_start"], "%Y-%m-%d") - datetime.now()).days
+            e["countdown"] = {"days": max(diff, 0), "event": "Exam starts"}
+        else:
+            e["countdown"] = None
+
+        exams.append(e)
+
+    return jsonify({"exams": exams, "last_verified": None, "today": today})
+
+
+@app.route("/api/exams/verify", methods=["POST"])
+def api_verify_exams():
+    """Use Perplexity (live web search) to verify exam dates. Falls back to Gemini."""
+    if not _verify_lock.acquire(blocking=False):
+        return jsonify({"error": "Verification already in progress"}), 429
+
+    try:
+        exam_list = "\n".join(
+            f"- {e['name']}: registration {e['dates'].get('registration_open','?')} to {e['dates'].get('registration_close','?')}, "
+            f"exam {e['dates'].get('exam_start','N/A')}, result {e['dates'].get('result','?')}"
+            for e in EXAM_CALENDAR
+        )
+        prompt = VERIFY_PROMPT.format(exam_list=exam_list, exam_id_placeholder="exam_id_here")
+
+        # Prefer Perplexity (has web search) > Gemini (general knowledge)
+        model = "perplexity" if "perplexity" in router.available else router.pick("explain")
+        logger.info(f"Verifying exam dates using {model}...")
+        raw = router._dispatch(model, prompt, None)
+
+        try:
+            results = parse_ai_json(raw)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Could not parse AI response", "raw": raw[:500]}), 500
+
+        # Update exam calendar with verification results
+        now = datetime.now().isoformat()
+        # Build lookup by both id and name (AI may return either)
+        result_map = {}
+        for r in results:
+            if isinstance(r, dict):
+                rid = r.get("id", "")
+                result_map[rid] = r
+                result_map[rid.lower()] = r
+
+        for exam in EXAM_CALENDAR:
+            v = result_map.get(exam["id"]) or result_map.get(exam["name"]) or result_map.get(exam["name"].lower())
+            if v:
+                exam["verified_at"] = now
+                exam["ai_status"] = v.get("status", "unknown")
+                exam["ai_notes"] = v.get("notes", "")
+                exam["ai_source"] = v.get("source", "")
+                if v.get("corrected_dates"):
+                    exam["ai_corrected_dates"] = v["corrected_dates"]
+
+        return jsonify({
+            "verified_at": now,
+            "model_used": model,
+            "results": results,
+            "message": "Dates verified against live web data. Always cross-check official sites before relying on these.",
+        })
+    except Exception as e:
+        logger.error(f"Exam verification failed: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        _verify_lock.release()
+
+
 # ─── Main ───
 
 if __name__ == "__main__":

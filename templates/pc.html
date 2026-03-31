@@ -286,6 +286,118 @@
             font-size: 10px; background: var(--surface2); padding: 1px 6px;
             border-radius: 8px; color: var(--text2);
         }
+
+        /* Exams Calendar */
+        .exam-toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .exam-toolbar h2 { font-size: 18px; }
+        .exam-toolbar .actions { display: flex; gap: 8px; align-items: center; }
+        .verify-btn {
+            padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text); font-size: 13px;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .verify-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .verify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .verify-btn.loading { color: var(--yellow); border-color: var(--yellow); }
+
+        .exam-warning {
+            background: rgba(234,179,8,0.1); border: 1px solid var(--yellow);
+            border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;
+            font-size: 13px; color: var(--yellow); line-height: 1.6;
+        }
+        .exam-warning strong { color: var(--text); }
+
+        .exam-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 16px;
+        }
+        .exam-card {
+            background: var(--surface); border-radius: 12px;
+            padding: 20px; border: 1px solid var(--border);
+            position: relative; transition: border-color 0.2s;
+        }
+        .exam-card:hover { border-color: var(--accent); }
+        .exam-card .exam-name {
+            font-size: 15px; font-weight: 700; margin-bottom: 6px;
+        }
+        .exam-card .exam-category {
+            font-size: 11px; padding: 2px 8px; border-radius: 10px;
+            font-weight: 600; text-transform: uppercase; display: inline-block;
+            margin-bottom: 12px;
+        }
+        .exam-category.engineering { background: rgba(99,102,241,0.15); color: var(--accent); }
+        .exam-category.research { background: rgba(168,85,247,0.15); color: #a855f7; }
+        .exam-category.board { background: rgba(249,115,22,0.15); color: var(--orange); }
+        .exam-category.state { background: rgba(34,197,94,0.15); color: var(--green); }
+
+        .exam-status-pill {
+            position: absolute; top: 16px; right: 16px;
+            font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600;
+        }
+        .exam-status-pill.upcoming { background: rgba(156,163,175,0.15); color: var(--text2); }
+        .exam-status-pill.registration_open { background: rgba(34,197,94,0.2); color: var(--green); animation: pulse-green 2s infinite; }
+        .exam-status-pill.registered { background: rgba(234,179,8,0.15); color: var(--yellow); }
+        .exam-status-pill.completed { background: rgba(156,163,175,0.1); color: var(--text2); }
+
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
+            50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+        }
+
+        .exam-dates {
+            display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;
+            font-size: 13px; margin-bottom: 12px;
+        }
+        .exam-dates .dl { color: var(--text2); }
+        .exam-dates .dv { color: var(--text); }
+        .exam-dates .dv.urgent { color: var(--red); font-weight: 600; }
+
+        .exam-countdown {
+            background: var(--bg); border-radius: 8px; padding: 10px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px; font-size: 13px;
+        }
+        .exam-countdown .days {
+            font-size: 22px; font-weight: 800; color: var(--accent);
+        }
+        .exam-countdown .days.urgent { color: var(--red); }
+        .exam-countdown .event { color: var(--text2); }
+
+        .exam-notes {
+            font-size: 12px; color: var(--text2); line-height: 1.5;
+            margin-bottom: 12px; font-style: italic;
+        }
+
+        .exam-links {
+            display: flex; gap: 8px; flex-wrap: wrap;
+        }
+        .exam-links a {
+            font-size: 12px; padding: 5px 12px; border-radius: 6px;
+            text-decoration: none; font-weight: 600; transition: all 0.2s;
+        }
+        .exam-links .link-official {
+            background: rgba(99,102,241,0.1); color: var(--accent);
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        .exam-links .link-official:hover { background: rgba(99,102,241,0.2); }
+        .exam-links .link-apply {
+            background: rgba(34,197,94,0.1); color: var(--green);
+            border: 1px solid rgba(34,197,94,0.2);
+        }
+        .exam-links .link-apply:hover { background: rgba(34,197,94,0.2); }
+
+        .exam-ai-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; padding: 2px 8px; border-radius: 10px;
+            margin-top: 8px;
+        }
+        .exam-ai-badge.confirmed { background: rgba(34,197,94,0.1); color: var(--green); }
+        .exam-ai-badge.approximate { background: rgba(234,179,8,0.1); color: var(--yellow); }
+        .exam-ai-badge.wrong { background: rgba(239,68,68,0.1); color: var(--red); }
+        .exam-ai-badge.not_announced { background: rgba(156,163,175,0.1); color: var(--text2); }
     </style>
 </head>
 <body>
@@ -298,6 +410,7 @@
         <button class="active" data-tab="dashboard">Dashboard</button>
         <button data-tab="practice">Practice</button>
         <button data-tab="progress">Progress</button>
+        <button data-tab="exams">Exams</button>
         <button data-tab="history">History</button>
     </nav>
 
@@ -390,6 +503,30 @@
             </div>
         </section>
 
+        <!-- Exams Tab -->
+        <section id="tab-exams" class="tab">
+            <div class="exam-warning">
+                <strong>⚠ IMPORTANT:</strong> Dates below are best estimates based on previous years' patterns.
+                Official 2027 notifications may not be released yet. <strong>ALWAYS check the official website</strong>
+                before any deadline. Use "Verify with AI" to cross-check, but don't blindly rely on it.
+                Click "Official Site" on each card to confirm yourself.
+            </div>
+
+            <div class="exam-toolbar">
+                <h2>Exam Calendar — JEE 2027 Cycle</h2>
+                <div class="actions">
+                    <span id="verify-status" style="font-size:12px;color:var(--text2)"></span>
+                    <button class="verify-btn" id="btn-verify" onclick="verifyExamDates()">
+                        🔍 Verify with AI (Perplexity)
+                    </button>
+                </div>
+            </div>
+
+            <div class="exam-grid" id="exam-grid">
+                <div class="empty-state"><p>Loading exams...</p></div>
+            </div>
+        </section>
+
         <!-- History Tab -->
         <section id="tab-history" class="tab">
             <table class="history-table">
@@ -442,6 +579,7 @@ document.querySelectorAll('nav button').forEach(btn => {
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
 
         if (btn.dataset.tab === 'progress') loadProgress();
+        if (btn.dataset.tab === 'exams') loadExams();
         if (btn.dataset.tab === 'history') loadHistory();
     });
 });
@@ -807,6 +945,121 @@ async function submitCanvas() {
     } catch(e) {
         console.error('Canvas submit error:', e);
     }
+}
+
+// ─── Exam Calendar ───
+async function loadExams() {
+    try {
+        const res = await fetch('/api/exams');
+        const data = await res.json();
+        renderExams(data.exams, data.today);
+    } catch(e) {
+        console.error('Exam load error:', e);
+        document.getElementById('exam-grid').innerHTML =
+            '<div class="empty-state"><p>Failed to load exams</p></div>';
+    }
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return 'TBA';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderExams(exams, today) {
+    const grid = document.getElementById('exam-grid');
+    if (!exams || exams.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><p>No exams configured</p></div>';
+        return;
+    }
+
+    // Sort: registration open first, then by next important date
+    exams.sort((a, b) => {
+        const priority = { registration_open: 0, upcoming: 1, registered: 2, exam_ongoing: 3, awaiting_result: 4, completed: 5 };
+        return (priority[a.status] || 9) - (priority[b.status] || 9);
+    });
+
+    grid.innerHTML = exams.map(e => {
+        const dates = e.dates || {};
+        const countdown = e.countdown;
+        const isUrgent = countdown && countdown.days <= 14;
+
+        // AI verification badge
+        let aiBadge = '';
+        if (e.ai_status) {
+            const labels = {
+                confirmed: '✓ AI verified',
+                approximate: '~ Approximate',
+                wrong: '✗ Dates may differ',
+                not_announced: '? Not yet announced'
+            };
+            aiBadge = `<div class="exam-ai-badge ${esc(e.ai_status)}">${labels[e.ai_status] || e.ai_status}</div>`;
+            if (e.ai_notes) {
+                aiBadge += `<div style="font-size:11px;color:var(--text2);margin-top:4px">${esc(e.ai_notes)}</div>`;
+            }
+        }
+
+        return `<div class="exam-card">
+            <span class="exam-status-pill ${esc(e.status)}">${esc(e.status_label)}</span>
+            <div class="exam-name">${esc(e.name)}</div>
+            <span class="exam-category ${esc(e.category)}">${esc(e.category)}</span>
+
+            ${countdown ? `<div class="exam-countdown">
+                <div>
+                    <span class="days ${isUrgent ? 'urgent' : ''}">${countdown.days}</span>
+                    <span style="font-size:12px;color:var(--text2)"> days</span>
+                </div>
+                <span class="event">${esc(countdown.event)}</span>
+            </div>` : ''}
+
+            <div class="exam-dates">
+                <span class="dl">Registration</span>
+                <span class="dv">${formatDate(dates.registration_open)} → ${formatDate(dates.registration_close)}</span>
+                ${dates.exam_start ? `<span class="dl">Exam</span><span class="dv ${isUrgent ? 'urgent' : ''}">${formatDate(dates.exam_start)}${dates.exam_end !== dates.exam_start ? ' → ' + formatDate(dates.exam_end) : ''}</span>` : ''}
+                ${dates.result ? `<span class="dl">Result</span><span class="dv">${formatDate(dates.result)}</span>` : ''}
+            </div>
+
+            ${e.notes ? `<div class="exam-notes">${esc(e.notes)}</div>` : ''}
+
+            <div class="exam-links">
+                <a href="${esc(e.official_url)}" target="_blank" rel="noopener" class="link-official">Official Site ↗</a>
+                <a href="${esc(e.apply_url)}" target="_blank" rel="noopener" class="link-apply">Apply ↗</a>
+            </div>
+
+            ${aiBadge}
+        </div>`;
+    }).join('');
+}
+
+async function verifyExamDates() {
+    const btn = document.getElementById('btn-verify');
+    const status = document.getElementById('verify-status');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    btn.innerHTML = '⏳ Searching web...';
+    status.textContent = '';
+
+    try {
+        const res = await fetch('/api/exams/verify', { method: 'POST' });
+        const data = await res.json();
+
+        if (res.ok) {
+            status.textContent = `Last verified: ${new Date().toLocaleTimeString()}`;
+            status.style.color = 'var(--green)';
+            // Reload exams with updated verification status
+            loadExams();
+        } else {
+            status.textContent = data.error || 'Verification failed';
+            status.style.color = 'var(--red)';
+        }
+    } catch(e) {
+        status.textContent = 'Network error';
+        status.style.color = 'var(--red)';
+    }
+
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.innerHTML = '🔍 Verify with AI (Perplexity)';
 }
 </script>
 </body>
