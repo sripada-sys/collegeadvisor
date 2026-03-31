@@ -258,6 +258,34 @@
             .form-row { flex-direction: column; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
         }
+
+        .alert-banner {
+            background: rgba(239,68,68,0.1); border: 1px solid var(--red);
+            border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;
+        }
+        .alert-banner h3 { color: var(--red); font-size: 14px; margin-bottom: 8px; }
+        .alert-banner .alert-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; font-size: 13px;
+        }
+        .alert-banner .alert-item .model-name { font-weight: 600; }
+        .alert-banner a {
+            color: var(--accent); text-decoration: underline; font-size: 13px;
+        }
+        .model-detail {
+            display: flex; align-items: center; gap: 6px; font-size: 12px;
+            color: var(--text2); padding: 4px 8px;
+        }
+        .model-detail .dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+        }
+        .model-detail .dot.ok { background: var(--green); }
+        .model-detail .dot.dead { background: var(--red); }
+        .model-detail .dot.off { background: var(--border); }
+        .model-detail .task-tag {
+            font-size: 10px; background: var(--surface2); padding: 1px 6px;
+            border-radius: 8px; color: var(--text2);
+        }
     </style>
 </head>
 <body>
@@ -274,6 +302,9 @@
     </nav>
 
     <main>
+        <!-- API Health Alerts -->
+        <div class="alert-banner" id="api-alerts" style="display:none"></div>
+
         <!-- Dashboard Tab -->
         <section id="tab-dashboard" class="tab active">
             <div class="qr-section">
@@ -416,13 +447,54 @@ document.querySelectorAll('nav button').forEach(btn => {
 });
 
 // ─── Model Status Badges ───
+const BILLING_URLS = {
+    gemini: 'https://aistudio.google.com/apikey',
+    claude: 'https://console.anthropic.com/settings/billing',
+    openai: 'https://platform.openai.com/settings/organization/billing',
+    perplexity: 'https://www.perplexity.ai/settings/api',
+};
+
 function renderModelBadges() {
     const all = ['gemini', 'claude', 'openai', 'perplexity'];
+    const health = modelStatus.health || {};
     const el = document.getElementById('model-badges');
+
     el.innerHTML = all.map(m => {
         const active = modelStatus.available.includes(m);
-        return `<span class="dot ${active ? 'active' : 'inactive'}"></span>${m}`;
-    }).join(' ');
+        const h = health[m];
+        let cls = 'off';
+        if (active) cls = 'ok';
+        else if (h && h.status === 'no_credits') cls = 'dead';
+
+        // Show which tasks use this model
+        const tasks = Object.entries(modelStatus.assignments || {})
+            .filter(([t, model]) => model === m)
+            .map(([t]) => t);
+        const taskTags = tasks.map(t => `<span class="task-tag">${t}</span>`).join('');
+
+        return `<div class="model-detail">
+            <span class="dot ${cls}"></span>${m}${taskTags}
+        </div>`;
+    }).join('');
+
+    // Alert banner for dead keys
+    const dead = all.filter(m => health[m] && health[m].status !== 'ok' && health[m].status);
+    const alertEl = document.getElementById('api-alerts');
+    if (dead.length > 0) {
+        alertEl.style.display = 'block';
+        alertEl.innerHTML = `<h3>⚠️ API Keys Need Attention</h3>` +
+            dead.map(m => {
+                const h = health[m];
+                const url = BILLING_URLS[m];
+                const status = h.status === 'no_credits' ? 'No credits' : 'Error';
+                return `<div class="alert-item">
+                    <span><span class="model-name">${m}</span> — ${status}</span>
+                    ${url ? `<a href="${esc(url)}" target="_blank">Refill credits →</a>` : ''}
+                </div>`;
+            }).join('');
+    } else {
+        alertEl.style.display = 'none';
+    }
 }
 renderModelBadges();
 
