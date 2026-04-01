@@ -127,7 +127,7 @@ Return a JSON array (no markdown fences, raw JSON only):
     "subtopic": "specific subtopic",
     "correctness": <0-5 where 0=completely wrong, 3=right idea but errors, 5=perfect>,
     "is_complete": <true if solution reaches a final answer>,
-    "difficulty": "<one of: easy, medium, hard, olympiad> based on the question itself — easy=textbook basics, medium=JEE Main level, hard=JEE Advanced/multi-concept, olympiad=ISI/CMI/competition level",
+    "source": "detected source if visible in the photo (e.g. book name, NCERT, HC Verma, Irodov, Cengage, DC Pandey, JEE Main 2024, coaching institute name from header/footer/watermark). null if not identifiable",
     "what_went_right": "specific thing done well",
     "where_it_broke": "exact step where reasoning went wrong, or 'nowhere' if correct",
     "mistakes": ["list of specific mistakes"],
@@ -216,7 +216,7 @@ Return raw JSON (no markdown fences):
     "problem_number": "the problem number as written",
     "question_summary": "1-line description of the question",
     "topic": "main topic",
-    "difficulty": "easy | medium | hard | olympiad",
+    "source": "detected source if visible in photo (book name, exam paper, coaching material header/footer). null if not identifiable",
     "hint_1": "vague nudge",
     "hint_2": "more specific direction",
     "hint_3": "nearly gives it away but still not the answer"
