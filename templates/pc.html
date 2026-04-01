@@ -132,6 +132,34 @@
         .feedback-item.hint .label { color: var(--yellow); }
         .feedback-item.encourage .label { color: var(--accent); }
 
+        /* Hint cards */
+        .hint-card {
+            background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(217,119,6,0.04));
+            border: 1px solid rgba(245,158,11,0.25); border-radius: 12px;
+            padding: 18px 20px; margin-bottom: 12px;
+        }
+        .hint-card .hint-header {
+            font-weight: 700; font-size: 14px; margin-bottom: 10px; color: var(--text);
+        }
+        .hint-card .hint-topic {
+            font-size: 12px; color: var(--yellow); margin-bottom: 12px; font-weight: 600;
+        }
+        .hint-card .hint-step {
+            margin-bottom: 8px; font-size: 13px; color: var(--text);
+            cursor: pointer; padding: 8px 12px; border-radius: 8px;
+            background: var(--surface); border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .hint-card .hint-step:hover { border-color: var(--yellow); }
+        .hint-card .hint-step .hint-num {
+            font-weight: 700; color: var(--yellow); margin-right: 8px;
+        }
+        .hint-card .hint-step .hint-text { display: none; }
+        .hint-card .hint-step.revealed .hint-text { display: inline; }
+        .hint-card .hint-step.revealed { background: rgba(245,158,11,0.06); }
+        .hint-card .hint-step .reveal-msg { color: var(--text2); font-size: 12px; font-style: italic; }
+        .hint-card .hint-step.revealed .reveal-msg { display: none; }
+
         .mistakes-list {
             display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
         }
@@ -527,8 +555,15 @@
 
             <div class="results-header">
                 <h2>Latest Results</h2>
-                <span class="status-pill live" id="poll-status">● Listening</span>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <button class="print-btn" id="btn-get-hints" onclick="getHintsForLatest()" style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(217,119,6,0.15));color:var(--yellow);border-color:rgba(245,158,11,0.3);font-weight:600">
+                        💡 Get Hints
+                    </button>
+                    <span class="status-pill live" id="poll-status">● Listening</span>
+                </div>
             </div>
+
+            <div id="hint-container" style="display:none;margin-bottom:16px"></div>
 
             <div id="results-container">
                 <div class="empty-state">
@@ -798,9 +833,108 @@ function startPolling() {
 }
 startPolling();
 
+// ─── Hints ───
+let latestQuestionImages = [];
+let latestSubject = 'maths';
+let latestExam = 'general';
+
+async function getHintsForLatest() {
+    if (!latestQuestionImages.length) {
+        // No batch yet — try fetching latest results to get images
+        try {
+            const res = await fetch('/api/results/latest');
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+                const r = data.results[0];
+                latestQuestionImages = typeof r.question_images === 'string' ? JSON.parse(r.question_images) : (r.question_images || []);
+                latestSubject = r.subject || 'maths';
+                latestExam = r.exam || 'general';
+            }
+        } catch(e) {}
+    }
+
+    if (!latestQuestionImages.length) {
+        document.getElementById('hint-container').style.display = 'block';
+        document.getElementById('hint-container').innerHTML = `<div class="hint-card"><div class="hint-header">No question images found. Upload a question from the phone first.</div></div>`;
+        return;
+    }
+
+    const btn = document.getElementById('btn-get-hints');
+    btn.disabled = true;
+    btn.textContent = '⏳ Thinking...';
+
+    try {
+        // Fetch actual image files from uploads/ and send to hint API
+        const fd = new FormData();
+        fd.append('subject', latestSubject);
+        fd.append('exam', latestExam);
+
+        for (const img of latestQuestionImages) {
+            const imgRes = await fetch('/uploads/' + img);
+            const blob = await imgRes.blob();
+            fd.append('questions', blob, img);
+        }
+
+        const res = await fetch('/api/hint', { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (data.hints && data.hints.length > 0) {
+            renderHints(data.hints);
+        } else {
+            document.getElementById('hint-container').style.display = 'block';
+            document.getElementById('hint-container').innerHTML = `<div class="hint-card"><div class="hint-header">Could not generate hints. Try again.</div></div>`;
+        }
+    } catch(e) {
+        console.error('Hint error:', e);
+        document.getElementById('hint-container').style.display = 'block';
+        document.getElementById('hint-container').innerHTML = `<div class="hint-card"><div class="hint-header">Error getting hints. Try again.</div></div>`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = '💡 Get Hints';
+}
+
+function renderHints(hints) {
+    const container = document.getElementById('hint-container');
+    container.style.display = 'block';
+
+    container.innerHTML = hints.map(h => `
+        <div class="hint-card">
+            <div class="hint-header">Q${esc(h.problem_number || '?')} — ${esc(h.question_summary || '')}</div>
+            <div class="hint-topic">📚 ${esc(h.topic || 'Topic')}</div>
+            <div class="hint-step" onclick="this.classList.add('revealed')">
+                <span class="hint-num">Hint 1:</span>
+                <span class="reveal-msg">tap to reveal</span>
+                <span class="hint-text">${esc(h.hint_1 || '')}</span>
+            </div>
+            <div class="hint-step" onclick="this.classList.add('revealed')">
+                <span class="hint-num">Hint 2:</span>
+                <span class="reveal-msg">tap to reveal</span>
+                <span class="hint-text">${esc(h.hint_2 || '')}</span>
+            </div>
+            <div class="hint-step" onclick="this.classList.add('revealed')">
+                <span class="hint-num">Hint 3:</span>
+                <span class="reveal-msg">tap to reveal</span>
+                <span class="hint-text">${esc(h.hint_3 || '')}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
 // ─── Render Results ───
 function renderResults(results) {
     const container = document.getElementById('results-container');
+
+    // Store question images for hint requests
+    if (results && results.length > 0) {
+        const r = results[0];
+        latestQuestionImages = typeof r.question_images === 'string' ? JSON.parse(r.question_images) : (r.question_images || []);
+        latestSubject = r.subject || 'maths';
+        latestExam = r.exam || 'general';
+        // Clear previous hints
+        document.getElementById('hint-container').style.display = 'none';
+    }
+
     if (!results || results.length === 0) {
         container.innerHTML = `<div class="empty-state"><div class="icon">📷</div>
             <p>Upload question & answer photos from your phone.<br>Results appear here.</p></div>`;

@@ -195,6 +195,32 @@ Give:
 
 Keep it concise but thorough. Use analogies if helpful."""
 
+HINT_PROMPT = """You are an expert {subject} tutor. A student is stuck on a problem and needs hints — NOT the answer.
+
+EXAM: {exam_context}
+
+Look at the question photo(s) carefully. For each problem visible:
+
+1. Identify the topic and what concept is being tested
+2. Give 3 PROGRESSIVE hints:
+   - Hint 1: A gentle nudge — what area/concept to think about (vague)
+   - Hint 2: A more specific direction — what formula, theorem, or technique applies
+   - Hint 3: Nearly gives it away — the key step or substitution, but still not the full answer
+
+Do NOT solve the problem. Do NOT give the final answer.
+
+Return raw JSON (no markdown fences):
+[
+  {{
+    "problem_number": "the problem number as written",
+    "question_summary": "1-line description of the question",
+    "topic": "main topic",
+    "hint_1": "vague nudge",
+    "hint_2": "more specific direction",
+    "hint_3": "nearly gives it away but still not the answer"
+  }}
+]"""
+
 
 # ─── Routes ───
 
@@ -403,6 +429,38 @@ def serve_upload(filename):
     if safe_name != filename:
         return jsonify({"error": "Invalid filename"}), 400
     return send_from_directory(UPLOAD_DIR, safe_name)
+
+
+@app.route("/api/hint", methods=["POST"])
+def api_hint():
+    """Get progressive hints for a question (no answer needed)."""
+    subject = request.form.get("subject", "maths")
+    exam = request.form.get("exam", "general")
+    question_files = request.files.getlist("questions")
+
+    if not question_files:
+        return jsonify({"error": "No question images uploaded"}), 400
+
+    q_paths = [save_upload(f) for f in question_files if f.filename]
+    if not q_paths:
+        return jsonify({"error": "No valid question images"}), 400
+
+    exam_context = EXAM_CONTEXTS.get(exam, EXAM_CONTEXTS["general"])
+    prompt = HINT_PROMPT.format(subject=subject, exam_context=exam_context)
+
+    problem_numbers = request.form.get("problem_numbers", "")
+    if problem_numbers:
+        prompt += f"\n\nFocus on these problem numbers: {problem_numbers}"
+
+    try:
+        raw_response = router.call("evaluate", prompt, images=q_paths)
+        hints = parse_ai_json(raw_response)
+        if isinstance(hints, dict):
+            hints = [hints]
+        return jsonify({"hints": hints})
+    except Exception as e:
+        logger.error(f"Hint generation failed: {e}", exc_info=True)
+        return jsonify({"error": "Failed to generate hints. Try again."}), 500
 
 
 @app.route("/api/guide/pdf")
