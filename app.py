@@ -482,25 +482,15 @@ def api_guide_pdf():
 @app.route("/api/guide/html")
 def api_guide_html():
     """Return the guide HTML body content for in-app reading."""
-    import re as _re
+    # Reads from pre-built static file — no Python imports, no weasyprint dependency.
+    guide_file = os.path.join(BASE_DIR, "data", "guide_content.html")
     try:
-        guide_path = os.path.join(BASE_DIR, "generate_guide.py")
-        source = Path(guide_path).read_text(encoding="utf-8")
-        m = _re.search(r'HTML_CONTENT\s*=\s*"""(.*?)"""', source, _re.DOTALL)
-        if not m:
-            return "<p>Could not extract guide content. Is generate_guide.py present?</p>", 500
-        html = m.group(1).strip()
-        body_start = html.find("<body>") + 6
-        body_end = html.find("</body>")
-        if body_start > 6:
-            # Slice to </body> if present, otherwise to end of string
-            return html[body_start:body_end] if body_end > body_start else html[body_start:]
-        # No body tag — strip head/style block and return everything after </head>
-        head_end = html.find("</head>")
-        return html[head_end + 7:] if head_end >= 0 else html
+        return Path(guide_file).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return "<p style='color:#f87171'>Guide file not found. Run: python3 generate_guide.py</p>", 404
     except Exception as e:
         logger.error(f"Guide HTML load failed: {e}", exc_info=True)
-        return f"<p>Error loading guide: {e}</p>", 500
+        return f"<p style='color:#f87171'>Error loading guide: {e}</p>", 500
 
 
 DEBATE_PROMPT = """You are a Socratic {subject} tutor debating a student's solution.
@@ -622,6 +612,11 @@ def auto_update():
         )
         if result.returncode == 0 and "Already up to date" not in result.stdout:
             logger.info(f"Updated from GitHub: {result.stdout.strip()}")
+            logger.info("New code pulled — restarting to apply updates...")
+            # Replace current process with fresh one so new code is loaded immediately.
+            # systemd will restart the service since it's set to Restart=always.
+            import sys
+            os.execv(sys.executable, [sys.executable] + sys.argv)
         else:
             logger.info("Code is up to date")
     except Exception as e:
