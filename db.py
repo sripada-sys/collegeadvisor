@@ -28,6 +28,9 @@ def init_db():
             exam TEXT DEFAULT 'general',
             problem_number TEXT,
             question_summary TEXT,
+            question_text TEXT,
+            correct_answer TEXT,
+            source TEXT,
             topic TEXT,
             subtopic TEXT,
             correctness INTEGER DEFAULT 0,
@@ -62,6 +65,13 @@ def init_db():
     """
     )
     conn.commit()
+    # Migrate existing databases — add new columns if they don't exist yet
+    for _col, _coltype in [("question_text", "TEXT"), ("correct_answer", "TEXT"), ("source", "TEXT")]:
+        try:
+            conn.execute(f"ALTER TABLE evaluations ADD COLUMN {_col} {_coltype}")
+            conn.commit()
+        except Exception:
+            pass  # Column already exists
     conn.close()
 
 
@@ -72,10 +82,11 @@ def save_evaluation(
     conn.execute(
         """INSERT INTO evaluations
            (batch_id, timestamp, subject, exam, problem_number, question_summary,
+            question_text, correct_answer, source,
             topic, subtopic, correctness, is_complete, what_went_right, where_it_broke,
             mistakes, missing_concept, hint, next_practice, encouragement,
             question_images, answer_images, raw_response)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             batch_id,
             datetime.now().isoformat(),
@@ -83,6 +94,9 @@ def save_evaluation(
             exam,
             str(result.get("problem_number", "")),
             result.get("question_summary", ""),
+            result.get("question_text", ""),
+            result.get("correct_answer", ""),
+            result.get("source", ""),
             result.get("topic", ""),
             result.get("subtopic", ""),
             result.get("correctness", 0),

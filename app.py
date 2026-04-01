@@ -122,6 +122,8 @@ Return a JSON array (no markdown fences, raw JSON only):
   {{
     "problem_number": "the problem number as written",
     "question_summary": "1-line description of the question",
+    "question_text": "complete question statement verbatim, exactly as written in the photo",
+    "correct_answer": "complete step-by-step correct solution with all key steps and final answer",
     "subject": "{subject}",
     "topic": "main topic (e.g. quadratics, thermodynamics, organic reactions)",
     "subtopic": "specific subtopic",
@@ -480,17 +482,126 @@ def api_guide_pdf():
 @app.route("/api/guide/html")
 def api_guide_html():
     """Return the guide HTML body content for in-app reading."""
+    import re as _re
     try:
-        import generate_guide
-        html = generate_guide.HTML_CONTENT
-        # Extract body content only
+        guide_path = os.path.join(BASE_DIR, "generate_guide.py")
+        source = Path(guide_path).read_text(encoding="utf-8")
+        m = _re.search(r'HTML_CONTENT\s*=\s*"""(.*?)"""', source, _re.DOTALL)
+        if not m:
+            return "<p>Could not extract guide content. Is generate_guide.py present?</p>", 500
+        html = m.group(1).strip()
         body_start = html.find("<body>") + 6
         body_end = html.find("</body>")
         if body_start > 6 and body_end > body_start:
             return html[body_start:body_end]
         return html
     except Exception as e:
+        logger.error(f"Guide HTML load failed: {e}", exc_info=True)
         return f"<p>Error loading guide: {e}</p>", 500
+
+
+DEBATE_PROMPT = """You are a Socratic {subject} tutor debating a student's solution.
+
+THE QUESTION: {question_text}
+Subject: {subject} | Exam: {exam} | Topic: {topic}
+
+Your previous evaluation:
+- Score: {correctness}/5
+- What went right: {what_went_right}
+- Where it broke: {where_it_broke}
+- Missing concept: {missing_concept}
+{history_text}Student message: {student_message}
+
+Rules:
+1. If student message is empty (opening move): Mention ONE specific, observable thing from the evaluation. Ask ONE probing question about their approach.
+2. If the student makes a MATHEMATICALLY VALID point you missed: Explicitly say "You're right, I missed that" — don't hedge.
+3. If the student is wrong: Guide with a question. Do NOT state the answer or lecture.
+4. Max 3 sentences + 1 question. Sharp and direct.
+5. No empty praise ("Great point!", "Good try"). Be a real tutor.
+6. Plain text only. No JSON, no markdown, no bullet lists."""
+
+
+@app.route("/api/hint/by-filename", methods=["POST"])
+def api_hint_by_filename():
+    """Get hints using image filenames already on the server — no re-upload needed."""
+    data = request.get_json() or {}
+    filenames = data.get("filenames", [])
+    subject = data.get("subject", "maths")
+    exam = data.get("exam", "general")
+
+    if not filenames:
+        return jsonify({"error": "No filenames provided"}), 400
+
+    q_paths = []
+    for fn in filenames[:10]:
+        safe = secure_filename(str(fn))
+        if safe != fn:
+            continue  # Skip potentially malicious filenames
+        path = os.path.join(UPLOAD_DIR, safe)
+        if os.path.isfile(path):
+            q_paths.append(path)
+
+    if not q_paths:
+        return jsonify({"error": "Images not found on server. Try re-uploading from phone."}), 404
+
+    exam_context = EXAM_CONTEXTS.get(exam, EXAM_CONTEXTS["general"])
+    prompt = HINT_PROMPT.format(subject=subject, exam_context=exam_context)
+
+    try:
+        raw_response = router.call("evaluate", prompt, images=q_paths)
+        hints = parse_ai_json(raw_response)
+        if isinstance(hints, dict):
+            hints = [hints]
+        return jsonify({"hints": hints})
+    except Exception as e:
+        logger.error(f"Hint generation failed: {e}", exc_info=True)
+        return jsonify({"error": "Could not generate hints. Check your internet and try again."}), 500
+
+
+@app.route("/api/debate", methods=["POST"])
+def api_debate():
+    """Socratic one-on-one debate about a student's solution."""
+    data = request.get_json() or {}
+    subject = str(data.get("subject", "maths"))[:50]
+    exam = str(data.get("exam", "general"))[:50]
+    question_text = str(data.get("question_text", ""))[:1500]
+    topic = str(data.get("topic", ""))[:100]
+    correctness = int(data.get("correctness", 0))
+    what_went_right = str(data.get("what_went_right", ""))[:500]
+    where_it_broke = str(data.get("where_it_broke", ""))[:500]
+    missing_concept = str(data.get("missing_concept", ""))[:300]
+    history = data.get("history", [])[:20]
+    message = str(data.get("message", ""))[:1000]
+
+    if not question_text:
+        return jsonify({"error": "No question context. Try re-evaluating first."}), 400
+
+    history_lines = []
+    for entry in history:
+        role = "Tutor" if entry.get("role") == "ai" else "Student"
+        content = str(entry.get("content", ""))[:500]
+        history_lines.append(f"{role}: {content}")
+    history_text = ("\nPrevious conversation:\n" + "\n".join(history_lines) + "\n\n") if history_lines else ""
+
+    prompt = DEBATE_PROMPT.format(
+        subject=subject,
+        exam=exam,
+        question_text=question_text or "Not available",
+        topic=topic or "General",
+        correctness=correctness,
+        what_went_right=what_went_right or "Nothing notable",
+        where_it_broke=where_it_broke or "Unclear",
+        missing_concept=missing_concept or "Unclear",
+        history_text=history_text,
+        student_message=message or "(Start the debate — ask an opening question)",
+    )
+
+    try:
+        reply = router.call("explain", prompt)
+        return jsonify({"reply": reply.strip()})
+    except Exception as e:
+        logger.error(f"Debate failed: {e}", exc_info=True)
+        return jsonify({"error": "Could not get AI response. Check your internet and try again."}), 500
 
 
 # ─── Auto-update & Backup ───
