@@ -603,9 +603,9 @@ def api_debate():
 def auto_update():
     """Pull latest code from GitHub on startup.
 
-    Strategy: fetch then checkout specific code files from origin/main.
-    This avoids --ff-only failures caused by local backup commits in data/
-    diverging from the remote history.
+    Uses a hash file (data/.last_code_update) to track the last applied
+    remote commit — completely independent of local git HEAD, which may
+    be ahead due to daily backup_to_git() commits in data/.
     """
     import sys
 
@@ -614,6 +614,7 @@ def auto_update():
         "requirements.txt", "mathtutor.py", "generate_guide.py",
         "templates/", "static/",
     ]
+    HASH_FILE = os.path.join(BASE_DIR, "data", ".last_code_update")
 
     try:
         # Step 1: fetch latest from remote (never modifies working tree)
@@ -625,17 +626,25 @@ def auto_update():
             logger.warning(f"Auto-update: fetch failed — {fetch.stderr.strip()}")
             return
 
-        # Step 2: count new commits on origin/main vs HEAD
-        diff = subprocess.run(
-            ["git", "rev-list", "HEAD..origin/main", "--count"],
+        # Step 2: get origin/main commit hash
+        remote_hash = subprocess.run(
+            ["git", "rev-parse", "origin/main"],
             cwd=BASE_DIR, capture_output=True, text=True, timeout=10,
-        )
-        new_commits = int(diff.stdout.strip() or "0")
-        if new_commits == 0:
+        ).stdout.strip()
+
+        # Step 3: compare against last applied hash (not git HEAD — that
+        # advances with backup commits and would diverge from origin/main)
+        last_hash = ""
+        try:
+            last_hash = Path(HASH_FILE).read_text().strip()
+        except FileNotFoundError:
+            pass  # First run — will update
+
+        if remote_hash == last_hash:
             logger.info("Auto-update: already up to date")
             return
 
-        # Step 3: overwrite only code files from origin/main (leaves data/ alone)
+        # Step 4: overwrite only code files from origin/main (data/ untouched)
         checkout = subprocess.run(
             ["git", "checkout", "origin/main", "--"] + CODE_FILES,
             cwd=BASE_DIR, capture_output=True, text=True, timeout=30,
@@ -644,13 +653,11 @@ def auto_update():
             logger.warning(f"Auto-update: checkout failed — {checkout.stderr.strip()}")
             return
 
-        # Step 4: advance HEAD to origin/main so next check sees correct baseline
-        subprocess.run(
-            ["git", "merge", "--ff-only", "origin/main"],
-            cwd=BASE_DIR, capture_output=True, text=True, timeout=10,
-        )
+        # Step 5: save applied hash so we don't re-apply on next restart
+        os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
+        Path(HASH_FILE).write_text(remote_hash)
 
-        logger.info(f"Auto-update: pulled {new_commits} new commit(s), restarting...")
+        logger.info(f"Auto-update: applied {remote_hash[:8]}, restarting...")
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
     except Exception as e:
