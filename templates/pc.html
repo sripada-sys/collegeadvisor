@@ -132,6 +132,16 @@
         .feedback-item.hint .label { color: var(--yellow); }
         .feedback-item.encourage .label { color: var(--accent); }
 
+        /* Difficulty badges */
+        .diff-badge {
+            font-size: 10px; padding: 2px 8px; border-radius: 10px;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .diff-badge.easy { background: rgba(34,197,94,0.15); color: var(--green); }
+        .diff-badge.medium { background: rgba(234,179,8,0.15); color: var(--yellow); }
+        .diff-badge.hard { background: rgba(239,68,68,0.15); color: var(--red); }
+        .diff-badge.olympiad { background: rgba(168,85,247,0.15); color: #a855f7; }
+
         /* Hint cards */
         .hint-card {
             background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(217,119,6,0.04));
@@ -901,7 +911,7 @@ function renderHints(hints) {
     container.innerHTML = hints.map(h => `
         <div class="hint-card">
             <div class="hint-header">Q${esc(h.problem_number || '?')} — ${esc(h.question_summary || '')}</div>
-            <div class="hint-topic">📚 ${esc(h.topic || 'Topic')}</div>
+            <div class="hint-topic">📚 ${esc(h.topic || 'Topic')} ${h.difficulty ? `<span class="diff-badge ${esc(h.difficulty)}">${esc(h.difficulty)}</span>` : ''}</div>
             <div class="hint-step" onclick="this.classList.add('revealed')">
                 <span class="hint-num">Hint 1:</span>
                 <span class="reveal-msg">tap to reveal</span>
@@ -964,7 +974,7 @@ function renderResults(results) {
 
         return `<div class="result-card">
             <div class="top-row">
-                <span class="problem-num">Q${esc(r.problem_number || '?')} — ${esc(r.subject || '')}</span>
+                <span class="problem-num">Q${esc(r.problem_number || '?')} — ${esc(r.subject || '')} ${r.difficulty ? `<span class="diff-badge ${esc(r.difficulty)}">${esc(r.difficulty)}</span>` : ''}</span>
                 <div class="score-bar">${blocks}<span class="label">${score}/5</span></div>
             </div>
             <div class="question-summary">${esc(r.question_summary || '')}</div>
