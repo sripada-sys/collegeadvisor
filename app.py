@@ -492,9 +492,12 @@ def api_guide_html():
         html = m.group(1).strip()
         body_start = html.find("<body>") + 6
         body_end = html.find("</body>")
-        if body_start > 6 and body_end > body_start:
-            return html[body_start:body_end]
-        return html
+        if body_start > 6:
+            # Slice to </body> if present, otherwise to end of string
+            return html[body_start:body_end] if body_end > body_start else html[body_start:]
+        # No body tag — strip head/style block and return everything after </head>
+        head_end = html.find("</head>")
+        return html[head_end + 7:] if head_end >= 0 else html
     except Exception as e:
         logger.error(f"Guide HTML load failed: {e}", exc_info=True)
         return f"<p>Error loading guide: {e}</p>", 500
