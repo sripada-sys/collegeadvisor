@@ -601,24 +601,58 @@ def api_debate():
 
 
 def auto_update():
-    """Pull latest code from GitHub on startup."""
+    """Pull latest code from GitHub on startup.
+
+    Strategy: fetch then checkout specific code files from origin/main.
+    This avoids --ff-only failures caused by local backup commits in data/
+    diverging from the remote history.
+    """
+    import sys
+
+    CODE_FILES = [
+        "app.py", "db.py", "models.py", "setup.sh",
+        "requirements.txt", "mathtutor.py", "generate_guide.py",
+        "templates/", "static/",
+    ]
+
     try:
-        result = subprocess.run(
-            ["git", "pull", "--ff-only"],
-            cwd=BASE_DIR,
-            capture_output=True,
-            text=True,
-            timeout=30,
+        # Step 1: fetch latest from remote (never modifies working tree)
+        fetch = subprocess.run(
+            ["git", "fetch", "origin", "main"],
+            cwd=BASE_DIR, capture_output=True, text=True, timeout=30,
         )
-        if result.returncode == 0 and "Already up to date" not in result.stdout:
-            logger.info(f"Updated from GitHub: {result.stdout.strip()}")
-            logger.info("New code pulled — restarting to apply updates...")
-            # Replace current process with fresh one so new code is loaded immediately.
-            # systemd will restart the service since it's set to Restart=always.
-            import sys
-            os.execv(sys.executable, [sys.executable] + sys.argv)
-        else:
-            logger.info("Code is up to date")
+        if fetch.returncode != 0:
+            logger.warning(f"Auto-update: fetch failed — {fetch.stderr.strip()}")
+            return
+
+        # Step 2: count new commits on origin/main vs HEAD
+        diff = subprocess.run(
+            ["git", "rev-list", "HEAD..origin/main", "--count"],
+            cwd=BASE_DIR, capture_output=True, text=True, timeout=10,
+        )
+        new_commits = int(diff.stdout.strip() or "0")
+        if new_commits == 0:
+            logger.info("Auto-update: already up to date")
+            return
+
+        # Step 3: overwrite only code files from origin/main (leaves data/ alone)
+        checkout = subprocess.run(
+            ["git", "checkout", "origin/main", "--"] + CODE_FILES,
+            cwd=BASE_DIR, capture_output=True, text=True, timeout=30,
+        )
+        if checkout.returncode != 0:
+            logger.warning(f"Auto-update: checkout failed — {checkout.stderr.strip()}")
+            return
+
+        # Step 4: advance HEAD to origin/main so next check sees correct baseline
+        subprocess.run(
+            ["git", "merge", "--ff-only", "origin/main"],
+            cwd=BASE_DIR, capture_output=True, text=True, timeout=10,
+        )
+
+        logger.info(f"Auto-update: pulled {new_commits} new commit(s), restarting...")
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+
     except Exception as e:
         logger.warning(f"Auto-update skipped: {e}")
 
