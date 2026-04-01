@@ -398,6 +398,77 @@
         .exam-ai-badge.approximate { background: rgba(234,179,8,0.1); color: var(--yellow); }
         .exam-ai-badge.wrong { background: rgba(239,68,68,0.1); color: var(--red); }
         .exam-ai-badge.not_announced { background: rgba(156,163,175,0.1); color: var(--text2); }
+
+        /* Exam Table View */
+        .exam-table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        .exam-table th {
+            text-align: left; padding: 10px 12px; background: var(--surface);
+            border-bottom: 2px solid var(--border); font-weight: 700;
+            color: var(--text); font-size: 12px; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .exam-table td {
+            padding: 10px 12px; border-bottom: 1px solid var(--border);
+            color: var(--text); vertical-align: top;
+        }
+        .exam-table tr:hover td { background: rgba(99,102,241,0.04); }
+        .exam-table .cat-badge {
+            font-size: 10px; padding: 2px 6px; border-radius: 8px;
+            font-weight: 600; text-transform: uppercase;
+        }
+        .exam-table .cat-badge.engineering { background: rgba(99,102,241,0.15); color: var(--accent); }
+        .exam-table .cat-badge.research { background: rgba(168,85,247,0.15); color: #a855f7; }
+        .exam-table .cat-badge.board { background: rgba(249,115,22,0.15); color: var(--orange); }
+        .exam-table .cat-badge.state { background: rgba(34,197,94,0.15); color: var(--green); }
+        .exam-table .status-badge {
+            font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; white-space: nowrap;
+        }
+        .exam-table .status-badge.upcoming { background: rgba(156,163,175,0.15); color: var(--text2); }
+        .exam-table .status-badge.registration_open { background: rgba(34,197,94,0.2); color: var(--green); }
+        .exam-table .status-badge.registered { background: rgba(234,179,8,0.15); color: var(--yellow); }
+        .exam-table .status-badge.completed { background: rgba(156,163,175,0.1); color: var(--text2); }
+        .exam-table .days-col { font-weight: 700; text-align: center; }
+        .exam-table .days-col.urgent { color: var(--red); }
+        .exam-table .notes-col { font-size: 12px; color: var(--text2); font-style: italic; max-width: 250px; }
+        .exam-table .link-col a {
+            font-size: 11px; color: var(--accent); text-decoration: none; font-weight: 600;
+        }
+        .exam-table .link-col a:hover { text-decoration: underline; }
+
+        .view-toggle {
+            padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text2); font-size: 12px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .view-toggle:hover { border-color: var(--accent); color: var(--accent); }
+        .view-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .print-btn {
+            padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text); font-size: 12px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .print-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Print-friendly styles */
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            header, nav, .exam-warning, .exam-toolbar .actions,
+            section:not(#tab-exams), .canvas-overlay { display: none !important; }
+            #tab-exams { display: block !important; }
+            .exam-toolbar h2 { color: #000; font-size: 20px; margin-bottom: 8px; }
+            .exam-grid { display: none !important; }
+            .exam-table-container { display: block !important; }
+            .exam-table { font-size: 11px; }
+            .exam-table th { background: #f0f0f0 !important; color: #000 !important; border-bottom: 2px solid #333; }
+            .exam-table td { border-bottom: 1px solid #ccc; color: #000 !important; }
+            .exam-table .cat-badge, .exam-table .status-badge { border: 1px solid #999; background: none !important; color: #000 !important; }
+            .exam-table .link-col a { color: #000 !important; }
+            .exam-table .days-col.urgent { color: red !important; }
+            .exam-table .notes-col { color: #333 !important; }
+            @page { margin: 1cm; size: landscape; }
+        }
     </style>
 </head>
 <body>
@@ -515,6 +586,9 @@
             <div class="exam-toolbar">
                 <h2>Exam Calendar — JEE 2027 Cycle</h2>
                 <div class="actions">
+                    <button class="view-toggle active" id="btn-view-table" onclick="setExamView('table')">📋 Table</button>
+                    <button class="view-toggle" id="btn-view-cards" onclick="setExamView('cards')">🃏 Cards</button>
+                    <button class="print-btn" onclick="window.print()">🖨 Print / PDF</button>
                     <span id="verify-status" style="font-size:12px;color:var(--text2)"></span>
                     <button class="verify-btn" id="btn-verify" onclick="verifyExamDates()">
                         🔍 Verify with AI (Perplexity)
@@ -522,7 +596,26 @@
                 </div>
             </div>
 
-            <div class="exam-grid" id="exam-grid">
+            <div class="exam-table-container" id="exam-table-container">
+                <table class="exam-table" id="exam-table">
+                    <thead>
+                        <tr>
+                            <th>Exam</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Days</th>
+                            <th>Registration</th>
+                            <th>Exam Date</th>
+                            <th>Result</th>
+                            <th>Notes</th>
+                            <th>Links</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exam-table-body"></tbody>
+                </table>
+            </div>
+
+            <div class="exam-grid" id="exam-grid" style="display:none">
                 <div class="empty-state"><p>Loading exams...</p></div>
             </div>
         </section>
@@ -948,15 +1041,30 @@ async function submitCanvas() {
 }
 
 // ─── Exam Calendar ───
+let examViewMode = 'table';
+let cachedExams = null;
+
+function setExamView(mode) {
+    examViewMode = mode;
+    document.getElementById('btn-view-table').classList.toggle('active', mode === 'table');
+    document.getElementById('btn-view-cards').classList.toggle('active', mode === 'cards');
+    document.getElementById('exam-table-container').style.display = mode === 'table' ? 'block' : 'none';
+    document.getElementById('exam-grid').style.display = mode === 'cards' ? 'grid' : 'none';
+    if (cachedExams) renderExams(cachedExams.exams, cachedExams.today);
+}
+
 async function loadExams() {
     try {
         const res = await fetch('/api/exams');
         const data = await res.json();
+        cachedExams = data;
         renderExams(data.exams, data.today);
     } catch(e) {
         console.error('Exam load error:', e);
         document.getElementById('exam-grid').innerHTML =
             '<div class="empty-state"><p>Failed to load exams</p></div>';
+        document.getElementById('exam-table-body').innerHTML =
+            '<tr><td colspan="9" style="text-align:center;padding:20px">Failed to load exams</td></tr>';
     }
 }
 
@@ -966,10 +1074,16 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+function formatDateShort(dateStr) {
+    if (!dateStr) return 'TBA';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
 function renderExams(exams, today) {
-    const grid = document.getElementById('exam-grid');
     if (!exams || exams.length === 0) {
-        grid.innerHTML = '<div class="empty-state"><p>No exams configured</p></div>';
+        document.getElementById('exam-grid').innerHTML = '<div class="empty-state"><p>No exams configured</p></div>';
+        document.getElementById('exam-table-body').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px">No exams configured</td></tr>';
         return;
     }
 
@@ -979,12 +1093,37 @@ function renderExams(exams, today) {
         return (priority[a.status] || 9) - (priority[b.status] || 9);
     });
 
+    // Render table
+    const tbody = document.getElementById('exam-table-body');
+    tbody.innerHTML = exams.map(e => {
+        const dates = e.dates || {};
+        const countdown = e.countdown;
+        const isUrgent = countdown && countdown.days <= 14;
+        const daysText = countdown ? countdown.days : '—';
+        const regText = dates.registration_open ? `${formatDateShort(dates.registration_open)} → ${formatDateShort(dates.registration_close)}` : 'TBA';
+        const examText = dates.exam_start ? (dates.exam_end !== dates.exam_start ? `${formatDateShort(dates.exam_start)} → ${formatDateShort(dates.exam_end)}` : formatDateShort(dates.exam_start)) : 'N/A';
+        const resultText = dates.result ? formatDateShort(dates.result) : 'TBA';
+
+        return `<tr>
+            <td><strong>${esc(e.name)}</strong></td>
+            <td><span class="cat-badge ${esc(e.category)}">${esc(e.category)}</span></td>
+            <td><span class="status-badge ${esc(e.status)}">${esc(e.status_label)}</span></td>
+            <td class="days-col ${isUrgent ? 'urgent' : ''}">${daysText}${countdown ? '<br><span style="font-size:10px;color:var(--text2)">' + esc(countdown.event) + '</span>' : ''}</td>
+            <td>${regText}</td>
+            <td>${examText}</td>
+            <td>${resultText}</td>
+            <td class="notes-col">${e.notes ? esc(e.notes) : ''}</td>
+            <td class="link-col"><a href="${esc(e.official_url)}" target="_blank" rel="noopener">Official ↗</a></td>
+        </tr>`;
+    }).join('');
+
+    // Render cards
+    const grid = document.getElementById('exam-grid');
     grid.innerHTML = exams.map(e => {
         const dates = e.dates || {};
         const countdown = e.countdown;
         const isUrgent = countdown && countdown.days <= 14;
 
-        // AI verification badge
         let aiBadge = '';
         if (e.ai_status) {
             const labels = {
