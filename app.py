@@ -405,6 +405,34 @@ def serve_upload(filename):
     return send_from_directory(UPLOAD_DIR, safe_name)
 
 
+@app.route("/api/guide/pdf")
+def api_guide_pdf():
+    """Download the college guide PDF."""
+    pdf_path = os.path.join(BASE_DIR, "output", "college_guide_2027.pdf")
+    if not os.path.exists(pdf_path):
+        return jsonify({"error": "Guide PDF not found. Run generate_guide.py first."}), 404
+    return send_from_directory(
+        os.path.join(BASE_DIR, "output"), "college_guide_2027.pdf",
+        as_attachment=True, download_name="College_Guide_JEE_2027.pdf"
+    )
+
+
+@app.route("/api/guide/html")
+def api_guide_html():
+    """Return the guide HTML body content for in-app reading."""
+    try:
+        import generate_guide
+        html = generate_guide.HTML_CONTENT
+        # Extract body content only
+        body_start = html.find("<body>") + 6
+        body_end = html.find("</body>")
+        if body_start > 6 and body_end > body_start:
+            return html[body_start:body_end]
+        return html
+    except Exception as e:
+        return f"<p>Error loading guide: {e}</p>", 500
+
+
 # ─── Auto-update & Backup ───
 
 
