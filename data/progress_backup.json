@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-04-04T19:03:00.751238",
+  "exported_at": "2026-04-04T19:09:52.086891",
   "evaluations": [
     {
       "id": 1,
@@ -442,6 +442,39 @@
       "difficulty": "medium",
       "problem_text": "Consider a galvanic cell represented as: $$\\text{Zn(s)} | \\text{Zn}^{2+}(0.1\\,\\text{M}) || \\text{Cu}^{2+}(1\\,\\text{M}) | \\text{Cu(s)}$$. Given that the standard reduction potentials are $E^\\circ_{\\text{Cu}^{2+}/\\text{Cu}} = +0.34\\,\\text{V}$ and $E^\\circ_{\\text{Zn}^{2+}/\\text{Zn}} = -0.76\\,\\text{V}$, calculate the cell potential at 298 K.\\n\\n1. $1.10\\,\\text{V}$\\n2. $1.05\\,\\text{V}$\\n3. $1.02\\,\\text{V}$\\n4. $0.97\\,\\text{V}$",
       "hints": "[\"Consider the Nernst equation for calculating the cell potential under non-standard conditions.\", \"Calculate the reaction quotient $Q$ using the given concentrations of Zn and Cu ions.\", \"Remember to include the number of electrons transferred when using the Nernst equation to adjust the potential.\"]",
+      "attempted": 0
+    },
+    {
+      "id": 8,
+      "timestamp": "2026-04-04T19:03:43.554946",
+      "subject": "chemistry",
+      "exam": "jee_main",
+      "topic": "electrochemistry",
+      "difficulty": "easy",
+      "problem_text": "Consider a galvanic cell made of two half-cells, one containing \\ce{Zn} in \\ce{ZnSO4} solution and the other containing \\ce{Cu} in \\ce{CuSO4} solution. Standard reduction potentials are given as: $E^\\circ_{\\ce{Zn^{2+}/Zn}} = -0.76 \\, \text{V}$ and $E^\\circ_{\\ce{Cu^{2+}/Cu}} = +0.34 \\, \text{V}$. Calculate the standard cell potential, $E^\\circ_{\text{cell}}$, for this galvanic cell.",
+      "hints": "[\"Start by writing the half-cell reactions.\", \"Use the formula for the standard cell potential: $E^\\\\circ_{\\text{cell}} = E^\\\\circ_{\\text{cathode}} - E^\\\\circ_{\\text{anode}}$.\", \"Identify which metal acts as the cathode and which as the anode based on their reduction potentials.\"]",
+      "attempted": 0
+    },
+    {
+      "id": 9,
+      "timestamp": "2026-04-04T19:03:45.948105",
+      "subject": "physics",
+      "exam": "jee_main",
+      "topic": "optics",
+      "difficulty": "easy",
+      "problem_text": "A ray of light is incident at an angle of $30^\\circ$ on a plane mirror. What is the angle of reflection? \n\n(a) $60^\\circ$ \n(b) $30^\\circ$ \n(c) $0^\\circ$ \n(d) $90^\\circ$",
+      "hints": "[\"Think about the law of reflection.\", \"The angle of reflection is related to the angle of incidence.\", \"For a plane mirror, the angle of reflection is equal to the angle of incidence.\"]",
+      "attempted": 0
+    },
+    {
+      "id": 10,
+      "timestamp": "2026-04-04T19:03:52.354038",
+      "subject": "physics",
+      "exam": "jee_main",
+      "topic": "optics",
+      "difficulty": "easy",
+      "problem_text": "A thin converging lens has a focal length of 20 cm. An object is placed 30 cm from the lens. Calculate the image distance from the lens. What type of image is formed? \\n\\n\\text{(A)} 60 \\text{ cm, virtual} \\n\\text{(B)} 60 \\text{ cm, real} \\n\\text{(C)} 12 \\text{ cm, real} \\n\\text{(D)} -12 \\text{ cm, virtual}",
+      "hints": "[\"Use the lens formula to solve for the image distance.\", \"The lens formula is given by \\\\( \\\\frac{1}{f} = \\\\frac{1}{v} - \\\\frac{1}{u} \\\\), where \\\\( u \\\\) is the object distance and \\\\( v \\\\) is the image distance.\", \"The focal length \\\\( f \\\\) is positive for a converging lens and \\\\( u \\\\) is negative since the object is placed on the opposite side of the light incident.\"]",
       "attempted": 0
     }
   ]
