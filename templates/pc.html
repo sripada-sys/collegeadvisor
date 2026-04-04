@@ -3,9 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MathTutor — Dashboard</title>
+    <title>MathMentor — Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInPage()"></script>
     <style>
         :root {
             --bg: #0f1117;
@@ -94,17 +99,140 @@
         .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
         .empty-state p { font-size: 14px; }
 
+        /* ── Session summary banner ── */
+        .session-summary {
+            background: var(--surface); border-radius: 12px;
+            padding: 18px 24px; margin-bottom: 16px; border: 1px solid var(--border);
+            display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+        }
+        .session-summary .ss-label {
+            font-size: 13px; color: var(--text2); margin-right: 20px; font-weight: 500;
+        }
+        .session-summary .ss-stat {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+            margin-right: 8px;
+        }
+        .ss-stat.good  { background: rgba(34,197,94,0.12);  color: var(--green); }
+        .ss-stat.warn  { background: rgba(234,179,8,0.12);  color: var(--yellow); }
+        .ss-stat.bad   { background: rgba(239,68,68,0.12);  color: var(--red); }
+        .ss-stat.total { background: rgba(99,102,241,0.10); color: var(--accent); }
+        .ss-attention-note {
+            margin-left: auto; font-size: 12px; color: var(--text2); font-style: italic;
+        }
+
+        /* ── Question row (collapsed) ── */
+        .q-row {
+            background: var(--surface); border-radius: 12px;
+            margin-bottom: 8px; border: 1px solid var(--border);
+            overflow: hidden; transition: border-color 0.2s;
+        }
+        .q-row:hover { border-color: rgba(99,102,241,0.4); }
+        .q-row.needs-attention { border-left: 3px solid var(--red); }
+        .q-row.almost-there   { border-left: 3px solid var(--yellow); }
+        .q-row.nailed-it      { border-left: 3px solid var(--green); }
+
+        .q-row-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 18px; cursor: pointer; user-select: none;
+        }
+        .q-num {
+            font-size: 13px; font-weight: 700; color: var(--text2);
+            min-width: 30px;
+        }
+        .q-topic {
+            flex: 1; font-size: 14px; color: var(--text); font-weight: 500;
+        }
+        .q-topic .q-subtopic {
+            font-size: 12px; color: var(--text2); font-weight: 400; margin-left: 6px;
+        }
+        .q-dots {
+            display: flex; gap: 3px; align-items: center; flex-shrink: 0;
+        }
+        .q-dot {
+            width: 10px; height: 10px; border-radius: 50%; background: var(--border);
+        }
+        .q-dot.on-g { background: var(--green); }
+        .q-dot.on-y { background: var(--yellow); }
+        .q-dot.on-r { background: var(--red); }
+        .q-status-pill {
+            font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600;
+            flex-shrink: 0;
+        }
+        .q-status-pill.nailed   { background: rgba(34,197,94,0.12);  color: var(--green); }
+        .q-status-pill.almost   { background: rgba(234,179,8,0.12);  color: var(--yellow); }
+        .q-status-pill.struggling { background: rgba(239,68,68,0.12); color: var(--red); }
+        .q-chevron {
+            color: var(--text2); font-size: 12px; transition: transform 0.2s; flex-shrink: 0;
+        }
+        .q-row.open .q-chevron { transform: rotate(180deg); }
+
+        /* ── Question detail (expanded) ── */
+        .q-detail {
+            display: none; padding: 0 18px 18px; border-top: 1px solid var(--border);
+        }
+        .q-row.open .q-detail { display: block; }
+
+        .q-question-box {
+            background: var(--bg); border-radius: 8px; padding: 12px 16px;
+            margin: 14px 0; border-left: 3px solid var(--accent); font-size: 14px;
+            line-height: 1.7;
+        }
+        .q-question-box .q-qlabel {
+            font-size: 11px; font-weight: 700; color: var(--accent);
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+        }
+
+        /* Feedback pills — short, human */
+        .q-feedback-section { margin: 14px 0; }
+        .q-feedback-section .q-fb-title {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 8px;
+        }
+        .q-feedback-section.good   .q-fb-title { color: var(--green); }
+        .q-feedback-section.bad    .q-fb-title { color: var(--red); }
+        .q-feedback-section.study  .q-fb-title { color: var(--yellow); }
+        .q-feedback-section.next   .q-fb-title { color: var(--text2); }
+        .q-feedback-section .q-fb-body {
+            font-size: 14px; color: var(--text); line-height: 1.6;
+        }
+        .mistake-tag {
+            font-size: 12px; background: rgba(239,68,68,0.1); color: var(--red);
+            padding: 3px 10px; border-radius: 20px; display: inline-block; margin: 2px 3px 2px 0;
+        }
+        .q-encouragement {
+            font-size: 13px; color: var(--text2); font-style: italic;
+            margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+            line-height: 1.6;
+        }
+
+        /* ── Voice button ── */
+        #voice-panel {
+            position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+        }
+        #voice-indicator {
+            font-size: 12px; color: var(--text2); font-style: italic; text-align: right;
+            min-height: 18px;
+        }
+        .voice-btn {
+            padding: 12px 22px; border-radius: 30px; border: none; cursor: pointer;
+            font-size: 14px; font-weight: 600; transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+        }
+        .voice-btn.voice-idle      { background: var(--accent); color: #fff; }
+        .voice-btn.voice-listening { background: var(--red); color: #fff; animation: vpulse 1.4s infinite; }
+        .voice-btn.voice-speaking  { background: var(--green); color: #fff; }
+        .voice-btn:disabled        { opacity: 0.6; cursor: default; animation: none; }
+        @keyframes vpulse {
+            0%,100% { box-shadow: 0 4px 14px rgba(239,68,68,0.4); }
+            50%      { box-shadow: 0 4px 22px rgba(239,68,68,0.75), 0 0 0 7px rgba(239,68,68,0.12); }
+        }
+
+        /* Keep old classes used by answer-reveal, debate, etc. */
         .result-card {
             background: var(--surface); border-radius: 12px;
             padding: 20px; margin-bottom: 12px; border: 1px solid var(--border);
-        }
-        .result-card .top-row {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px;
-        }
-        .result-card .problem-num {
-            font-size: 13px; font-weight: 600; color: var(--accent);
-            background: rgba(99,102,241,0.1); padding: 4px 10px; border-radius: 6px;
         }
         .score-bar {
             display: flex; gap: 3px; align-items: center;
@@ -629,7 +757,7 @@
 </head>
 <body>
     <header>
-        <h1>Math<span>Tutor</span></h1>
+        <h1>Math<span>Mentor</span></h1>
         <div class="models-badge" id="model-badges"></div>
     </header>
 
@@ -1028,6 +1156,8 @@ function renderHints(hints) {
             </div>
         </div>
     `).join('');
+
+    renderMathEl(container);
 }
 
 // ─── Render Results ───
@@ -1042,6 +1172,8 @@ function renderResults(results) {
         latestExam = r.exam || 'general';
         document.getElementById('hint-container').style.display = 'none';
     }
+    // Keep raw results for voice context
+    window._latestResultsRaw = results || [];
 
     if (!results || results.length === 0) {
         container.innerHTML = `<div class="empty-state"><div class="icon">📷</div>
@@ -1053,86 +1185,162 @@ function renderResults(results) {
     resultDebateContexts = {};
     debateHistories = {};
 
-    container.innerHTML = results.map((r, idx) => {
-        const score = r.correctness || 0;
-        const cardId = `rcard-${idx}`;
-        const blocks = Array(5).fill(0).map((_, i) => {
-            const cls = i < score ? (score >= 4 ? 'filled' : score >= 2 ? 'mid' : 'low') : '';
-            return `<div class="block ${cls}"></div>`;
-        }).join('');
+    // ── Compute summary numbers ────────────────────────────────────────────
+    const total = results.length;
+    const nailed  = results.filter(r => (r.correctness || 0) >= 4).length;
+    const almost  = results.filter(r => (r.correctness || 0) === 3).length;
+    const needsAttn = results.filter(r => (r.correctness || 0) <= 2).length;
 
+    const summaryNote = needsAttn > 0
+        ? `${needsAttn} question${needsAttn > 1 ? 's' : ''} need${needsAttn === 1 ? 's' : ''} your attention`
+        : 'Looking good across the board!';
+
+    const summaryHtml = `
+    <div class="session-summary">
+        <span class="ss-label">This session</span>
+        <span class="ss-stat total">${total} questions</span>
+        ${nailed  ? `<span class="ss-stat good">✓ ${nailed} solid</span>` : ''}
+        ${almost  ? `<span class="ss-stat warn">~ ${almost} almost</span>` : ''}
+        ${needsAttn ? `<span class="ss-stat bad">✗ ${needsAttn} need work</span>` : ''}
+        <span class="ss-attention-note">${esc(summaryNote)}</span>
+    </div>`;
+
+    // ── Build one collapsible row per question ─────────────────────────────
+    const rowsHtml = results.map((r, idx) => {
+        const score    = r.correctness || 0;
+        const cardId   = `rcard-${idx}`;
+
+        const rowClass = score >= 4 ? 'nailed-it' : score === 3 ? 'almost-there' : 'needs-attention';
+        const pillText = score >= 4 ? 'Nailed it' : score === 3 ? 'Almost there' : 'Needs work';
+        const pillCls  = score >= 4 ? 'nailed' : score === 3 ? 'almost' : 'struggling';
+        const dotCls   = score >= 4 ? 'on-g'   : score === 3 ? 'on-y'   : 'on-r';
+
+        const dots = Array(5).fill(0).map((_, i) =>
+            `<div class="q-dot ${i < score ? dotCls : ''}"></div>`
+        ).join('');
+
+        const topic    = esc(r.topic || r.question_summary || '');
+        const subtopic = r.subtopic ? `<span class="q-subtopic">· ${esc(r.subtopic)}</span>` : '';
+        const src      = r.source   ? ` <span class="source-badge">${esc(r.source)}</span>` : '';
+
+        // ── Detail content ─────────────────────────────────────────────────
         let mistakesHtml = '';
         try {
             const m = typeof r.mistakes === 'string' ? JSON.parse(r.mistakes) : (r.mistakes || []);
-            if (m.length) {
-                mistakesHtml = `<div class="feedback-item bad">
-                    <span class="label">✗ Mistakes</span>
-                    <div class="mistakes-list">${m.map(x => `<span class="mistake-tag">${esc(x)}</span>`).join('')}</div>
-                </div>`;
-            }
+            if (m.length) mistakesHtml = m.map(x => `<span class="mistake-tag">${esc(x)}</span>`).join('');
         } catch(e) {}
 
-        // Store debate context keyed by cardId (no personal data, just evaluation facts)
-        resultDebateContexts[cardId] = {
-            subject: r.subject || 'maths',
-            exam: r.exam || 'general',
-            question_text: r.question_text || r.question_summary || '',
-            topic: r.topic || '',
-            correctness: score,
-            what_went_right: r.what_went_right || '',
-            where_it_broke: r.where_it_broke || '',
-            missing_concept: r.missing_concept || '',
-        };
+        const questionBox = (r.question_text || r.question_summary) ? `
+            <div class="q-question-box">
+                <div class="q-qlabel">Question</div>
+                ${esc(r.question_text || r.question_summary)}
+            </div>` : '';
 
-        return `<div class="result-card" id="${cardId}">
-            <div class="top-row">
-                <span class="problem-num">Q${esc(String(r.problem_number || '?'))} \u2014 ${esc(r.subject || '')}${r.source ? ` <span class="source-badge">${esc(r.source)}</span>` : ''}</span>
-                <div class="score-bar">${blocks}<span class="label">${score}/5</span></div>
-            </div>
+        const goodSection = r.what_went_right ? `
+            <div class="q-feedback-section good">
+                <div class="q-fb-title">What you got right</div>
+                <div class="q-fb-body">${esc(r.what_went_right)}</div>
+            </div>` : '';
 
-            ${r.question_text ? `
-            <div class="question-extracted">
-                <div class="qe-label">📝 Question</div>
-                <div class="qe-text">${esc(r.question_text)}</div>
-            </div>` : r.question_summary ? `
-            <div class="question-summary">${esc(r.question_summary)}</div>` : ''}
+        const slippedSection = (r.where_it_broke && r.where_it_broke.toLowerCase() !== 'nowhere') ? `
+            <div class="q-feedback-section bad">
+                <div class="q-fb-title">Where it slipped</div>
+                <div class="q-fb-body">${esc(r.where_it_broke)}
+                    ${mistakesHtml ? `<div style="margin-top:8px">${mistakesHtml}</div>` : ''}
+                </div>
+            </div>` : (mistakesHtml ? `
+            <div class="q-feedback-section bad">
+                <div class="q-fb-title">Mistakes</div>
+                <div class="q-fb-body">${mistakesHtml}</div>
+            </div>` : '');
 
-            ${r.what_went_right ? `<div class="feedback-item good"><span class="label">✓ Good</span><span>${esc(r.what_went_right)}</span></div>` : ''}
-            ${r.where_it_broke && r.where_it_broke.toLowerCase() !== 'nowhere' ? `<div class="feedback-item bad"><span class="label">✗ Broke here</span><span>${esc(r.where_it_broke)}</span></div>` : ''}
-            ${mistakesHtml}
-            ${r.missing_concept && r.missing_concept.toLowerCase() !== 'none' ? `<div class="feedback-item"><span class="label">📚 Study</span><span>${esc(r.missing_concept)}</span></div>` : ''}
-            ${r.hint ? `<div class="feedback-item hint"><span class="label">💡 Hint</span><span>${esc(r.hint)}</span></div>` : ''}
-            ${r.next_practice ? `<div class="feedback-item"><span class="label">→ Next</span><span>${esc(r.next_practice)}</span></div>` : ''}
-            ${r.encouragement ? `<div class="feedback-item encourage"><span class="label">Note</span><span>${esc(r.encouragement)}</span></div>` : ''}
+        const studySection = (r.missing_concept && r.missing_concept.toLowerCase() !== 'none') ? `
+            <div class="q-feedback-section study">
+                <div class="q-fb-title">Brush up on</div>
+                <div class="q-fb-body">${esc(r.missing_concept)}</div>
+            </div>` : '';
 
-            ${r.correct_answer ? `
-            <div class="answer-reveal" id="${cardId}-ans">
+        const nextSection = r.next_practice ? `
+            <div class="q-feedback-section next">
+                <div class="q-fb-title">Try next</div>
+                <div class="q-fb-body">${esc(r.next_practice)}</div>
+            </div>` : '';
+
+        const encouragement = r.encouragement ? `
+            <div class="q-encouragement">${esc(r.encouragement)}</div>` : '';
+
+        const answerReveal = r.correct_answer ? `
+            <div class="answer-reveal" id="${cardId}-ans" style="margin-top:14px">
                 <button class="answer-reveal-btn" onclick="toggleAnswer('${cardId}-ans')">
                     📖 See correct answer <span class="reveal-arrow">▼</span>
                 </button>
                 <div class="answer-reveal-body">
                     <div class="answer-reveal-text">${esc(r.correct_answer)}</div>
                 </div>
-            </div>` : ''}
+            </div>` : '';
 
-            <div class="card-actions">
-                <button class="debate-btn" id="${cardId}-dbtn" onclick="openDebate('${cardId}')">
-                    🗣 Debate my answer
-                </button>
+        // Store debate context
+        resultDebateContexts[cardId] = {
+            subject: r.subject || 'maths', exam: r.exam || 'general',
+            question_text: r.question_text || r.question_summary || '',
+            topic: r.topic || '', correctness: score,
+            what_went_right: r.what_went_right || '',
+            where_it_broke: r.where_it_broke || '',
+            missing_concept: r.missing_concept || '',
+        };
+
+        return `
+        <div class="q-row ${rowClass}" id="${cardId}">
+            <div class="q-row-header" onclick="toggleQRow('${cardId}')">
+                <span class="q-num">Q${esc(String(r.problem_number || idx + 1))}</span>
+                <span class="q-topic">${topic}${subtopic}${src}</span>
+                <div class="q-dots">${dots}</div>
+                <span class="q-status-pill ${pillCls}">${pillText}</span>
+                <span class="q-chevron">▼</span>
             </div>
-
-            <div class="debate-section" id="${cardId}-debate" style="display:none">
-                <div class="debate-header">Socratic Debate \u2014 Q${esc(String(r.problem_number || '?'))}</div>
-                <div class="debate-messages" id="${cardId}-msgs"></div>
-                <div class="debate-input-row">
-                    <input type="text" class="debate-input" id="${cardId}-dinput"
-                        placeholder="Type your argument and press Enter\u2026"
-                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDebate('${cardId}');}">
-                    <button class="debate-send-btn" id="${cardId}-dsend" onclick="sendDebate('${cardId}')">Send</button>
+            <div class="q-detail">
+                ${questionBox}
+                ${goodSection}
+                ${slippedSection}
+                ${studySection}
+                ${nextSection}
+                ${encouragement}
+                ${answerReveal}
+                <div class="card-actions" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px">
+                    <button class="debate-btn" id="${cardId}-dbtn" onclick="openDebate('${cardId}')">
+                        🗣 Discuss with mentor
+                    </button>
+                </div>
+                <div class="debate-section" id="${cardId}-debate" style="display:none">
+                    <div class="debate-header">Chat — Q${esc(String(r.problem_number || idx + 1))}</div>
+                    <div class="debate-messages" id="${cardId}-msgs"></div>
+                    <div class="debate-input-row">
+                        <input type="text" class="debate-input" id="${cardId}-dinput"
+                            placeholder="Ask anything about this problem\u2026"
+                            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDebate('${cardId}');}">
+                        <button class="debate-send-btn" id="${cardId}-dsend" onclick="sendDebate('${cardId}')">Send</button>
+                    </div>
                 </div>
             </div>
         </div>`;
     }).join('');
+
+    container.innerHTML = summaryHtml + rowsHtml;
+
+    // Auto-expand any "needs attention" questions if there are few of them
+    if (needsAttn > 0 && needsAttn <= 3) {
+        results.forEach((r, idx) => {
+            if ((r.correctness || 0) <= 2) {
+                document.getElementById(`rcard-${idx}`)?.classList.add('open');
+            }
+        });
+    }
+
+    renderMathEl(container);
+}
+
+function toggleQRow(cardId) {
+    document.getElementById(cardId)?.classList.toggle('open');
 }
 
 function esc(s) {
@@ -1140,6 +1348,32 @@ function esc(s) {
     const d = document.createElement('div');
     d.textContent = s;
     return d.innerHTML;
+}
+
+// Render math (KaTeX auto-render) inside a container element
+function renderMathEl(el) {
+    if (typeof renderMathInElement === 'function') {
+        renderMathInElement(el, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true},
+            ],
+            throwOnError: false,
+        });
+    }
+}
+
+// Page-wide re-render (called after KaTeX loads and after dynamic content is injected)
+function renderMathInPage() {
+    renderMathEl(document.body);
+}
+
+// Inject HTML string and then render math inside a target element
+function setHTMLAndRenderMath(el, html) {
+    el.innerHTML = html;
+    renderMathEl(el);
 }
 
 // ─── Answer Reveal ───
@@ -1198,7 +1432,7 @@ async function sendDebateMessage(cardId, message) {
     if (msgs) {
         msgs.insertAdjacentHTML('beforeend',
             `<div class="debate-msg ai" id="${typingId}">` +
-            `<span class="debate-role">🤖 Tutor</span>` +
+            `<span class="debate-role">🤖 Mentor</span>` +
             `<div class="debate-text" style="color:var(--text2);font-style:italic">Thinking…</div></div>`
         );
         msgs.scrollTop = msgs.scrollHeight;
@@ -1236,12 +1470,14 @@ function appendDebateMsg(cardId, role, content) {
     const msgs = document.getElementById(cardId + '-msgs');
     if (!msgs) return;
     const cls = role === 'ai' ? 'ai' : 'student';
-    const label = role === 'ai' ? '🤖 Tutor' : '👤 You';
-    msgs.insertAdjacentHTML('beforeend',
-        `<div class="debate-msg ${cls}">` +
+    const label = role === 'ai' ? '🤖 Mentor' : '👤 You';
+    const wrapper = document.createElement('div');
+    wrapper.className = `debate-msg ${cls}`;
+    wrapper.innerHTML =
         `<span class="debate-role">${label}</span>` +
-        `<div class="debate-text">${esc(content)}</div></div>`
-    );
+        `<div class="debate-text">${esc(content)}</div>`;
+    renderMathEl(wrapper);
+    msgs.appendChild(wrapper);
     msgs.scrollTop = msgs.scrollHeight;
 }
 
@@ -1282,7 +1518,8 @@ function renderPractice(data) {
         </div>
     `).join('');
 
-    document.getElementById('practice-result').innerHTML = `
+    const target = document.getElementById('practice-result');
+    target.innerHTML = `
         <div class="problem-display">
             <div style="display:flex;gap:8px;margin-bottom:16px;">
                 <span class="subject-badge ${esc(data.subject || 'maths')}">${esc(data.subject || '')}</span>
@@ -1293,6 +1530,7 @@ function renderPractice(data) {
             <button class="btn btn-primary" style="margin-top:16px" onclick="openCanvas()">Open Scratch Pad</button>
         </div>
     `;
+    renderMathEl(target);
 }
 
 // ─── Progress ───
@@ -1673,6 +1911,154 @@ async function verifyExamDates() {
     btn.classList.remove('loading');
     btn.innerHTML = '🔍 Verify with AI (Perplexity)';
 }
+
+// ─── Voice mode (Gemini Live) ──────────────────────────────────────
+let _voiceWs     = null;
+let _voiceMicCtx = null;   // AudioContext for mic capture @ 16 kHz
+let _voicePlayCtx = null;  // AudioContext for playback @ 24 kHz
+let _voiceStream = null;
+let _voiceProc   = null;
+let _voiceActive = false;
+let _voicePlayT  = 0;      // next scheduled play time
+
+function toggleVoice() {
+    _voiceActive ? _stopVoice() : _startVoice();
+}
+
+async function _startVoice() {
+    const btn = document.getElementById('voice-btn');
+    btn.textContent = '⏳ Connecting…';
+    btn.disabled = true;
+
+    // Request mic
+    try {
+        _voiceStream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 16000 }
+        });
+    } catch(e) {
+        _setVoiceStatus('idle');
+        btn.disabled = false;
+        alert('Microphone access is needed. Please allow the mic and try again.');
+        return;
+    }
+
+    // Fetch full student dossier from server (DB history + today's session)
+    let dossier = 'No history yet.';
+    try {
+        btn.textContent = '⏳ Loading your history…';
+        const resp = await fetch('/api/voice/context');
+        const ctxData = await resp.json();
+        dossier = ctxData.dossier || dossier;
+    } catch(e) {
+        // non-fatal — Gemini will still work, just without history
+    }
+
+    // Connect to Flask relay
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    _voiceWs = new WebSocket(`${proto}//${location.host}/ws/voice`);
+
+    _voiceWs.onopen = () => {
+        _voiceWs.send(JSON.stringify({ context: { dossier } }));
+    };
+
+    _voiceWs.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'ready') {
+            _voiceActive = true;
+            _startMic();
+            _setVoiceStatus('listening');
+        } else if (msg.type === 'audio') {
+            _setVoiceStatus('speaking');
+            _playPCM(msg.data);
+        } else if (msg.type === 'turn_done') {
+            _setVoiceStatus('listening');
+        } else if (msg.type === 'error') {
+            _stopVoice();
+            alert('Voice error: ' + msg.message);
+        }
+    };
+
+    _voiceWs.onclose = () => _stopVoice();
+    _voiceWs.onerror = () => { _stopVoice(); alert('Voice connection failed.'); };
+}
+
+function _startMic() {
+    _voiceMicCtx  = new AudioContext({ sampleRate: 16000 });
+    _voicePlayCtx = new AudioContext({ sampleRate: 24000 });
+    _voicePlayT   = _voicePlayCtx.currentTime;
+
+    const src  = _voiceMicCtx.createMediaStreamSource(_voiceStream);
+    _voiceProc = _voiceMicCtx.createScriptProcessor(4096, 1, 1);
+
+    _voiceProc.onaudioprocess = (e) => {
+        if (!_voiceActive || !_voiceWs || _voiceWs.readyState !== WebSocket.OPEN) return;
+        const f32 = e.inputBuffer.getChannelData(0);
+        const i16 = new Int16Array(f32.length);
+        for (let i = 0; i < f32.length; i++) {
+            const s = Math.max(-1, Math.min(1, f32[i]));
+            i16[i] = s < 0 ? s * 32768 : s * 32767;
+        }
+        // base64-encode the raw PCM bytes
+        const bytes = new Uint8Array(i16.buffer);
+        let bin = '';
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        _voiceWs.send(JSON.stringify({ type: 'audio', data: btoa(bin) }));
+    };
+
+    src.connect(_voiceProc);
+    _voiceProc.connect(_voiceMicCtx.destination);
+
+    const btn = document.getElementById('voice-btn');
+    btn.textContent = '⏹ Stop';
+    btn.disabled = false;
+}
+
+function _playPCM(b64) {
+    if (!_voicePlayCtx) return;
+    // Decode base64 → Int16Array → Float32Array → AudioBuffer
+    const bin   = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const i16   = new Int16Array(bytes.buffer);
+    const f32   = new Float32Array(i16.length);
+    for (let i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768.0;
+
+    const buf = _voicePlayCtx.createBuffer(1, f32.length, 24000);
+    buf.copyToChannel(f32, 0);
+    const src = _voicePlayCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(_voicePlayCtx.destination);
+    const t = Math.max(_voicePlayCtx.currentTime, _voicePlayT);
+    src.start(t);
+    _voicePlayT = t + buf.duration;
+}
+
+function _stopVoice() {
+    _voiceActive = false;
+    if (_voiceWs)    { try { _voiceWs.send(JSON.stringify({type:'stop'})); _voiceWs.close(); } catch(e){} _voiceWs = null; }
+    if (_voiceProc)  { _voiceProc.disconnect(); _voiceProc = null; }
+    if (_voiceMicCtx){ _voiceMicCtx.close();  _voiceMicCtx = null; }
+    if (_voicePlayCtx){ _voicePlayCtx.close(); _voicePlayCtx = null; }
+    if (_voiceStream){ _voiceStream.getTracks().forEach(t => t.stop()); _voiceStream = null; }
+    _setVoiceStatus('idle');
+}
+
+function _setVoiceStatus(state) {
+    const btn = document.getElementById('voice-btn');
+    const ind = document.getElementById('voice-indicator');
+    if (!btn || !ind) return;
+    btn.className = `voice-btn voice-${state}`;
+    if (state === 'listening') { ind.textContent = '● Listening…'; btn.textContent = '⏹ Stop'; btn.disabled = false; }
+    else if (state === 'speaking') { ind.textContent = '◆ Mentor speaking…'; }
+    else { ind.textContent = ''; btn.textContent = '🎙 Talk to mentor'; btn.disabled = false; }
+}
 </script>
+
+<!-- Floating voice button -->
+<div id="voice-panel">
+    <div id="voice-indicator"></div>
+    <button id="voice-btn" class="voice-btn voice-idle" onclick="toggleVoice()">🎙 Talk to mentor</button>
+</div>
+
 </body>
 </html>

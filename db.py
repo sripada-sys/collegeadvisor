@@ -1,4 +1,4 @@
-"""Database layer for tutor progress tracking."""
+"""Database layer for mentor progress tracking."""
 
 import json
 import os
@@ -221,6 +221,128 @@ def get_history(limit=50):
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+def get_voice_context():
+    """Build a rich student dossier for Gemini Live's system prompt.
+
+    Returns a plain-text string covering:
+    - Today's session (latest batch)
+    - 30-day recurring weak concepts and mistakes
+    - Subject-wise strengths and averages
+    - Overall stats
+    """
+    conn = get_db()
+
+    # ── Overall stats ──────────────────────────────────────────────────────
+    total = conn.execute("SELECT COUNT(*) FROM evaluations").fetchone()[0]
+    if total == 0:
+        conn.close()
+        return "No evaluation history yet. This is a fresh start."
+
+    avg = conn.execute("SELECT ROUND(AVG(correctness),1) FROM evaluations").fetchone()[0] or 0
+
+    # ── Latest batch (today's session) ────────────────────────────────────
+    batch_row = conn.execute(
+        "SELECT DISTINCT batch_id FROM evaluations ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    latest_lines = []
+    if batch_row:
+        rows = conn.execute(
+            "SELECT problem_number, topic, subtopic, correctness, where_it_broke, "
+            "missing_concept, what_went_right, question_text FROM evaluations "
+            "WHERE batch_id = ? ORDER BY id",
+            (batch_row["batch_id"],),
+        ).fetchall()
+        for r in rows:
+            score = r["correctness"] or 0
+            status = "correct" if score >= 4 else "almost" if score == 3 else "needs work"
+            line = f"  Q{r['problem_number']} ({r['topic'] or 'unknown'}) — {status} [{score}/5]"
+            if r["where_it_broke"] and r["where_it_broke"].lower() not in ("nowhere", "none", ""):
+                line += f". Slipped: {r['where_it_broke']}"
+            if r["missing_concept"] and r["missing_concept"].lower() not in ("none", ""):
+                line += f". Missing: {r['missing_concept']}"
+            latest_lines.append(line)
+
+    # ── 30-day weak concepts (frequency ranked) ───────────────────────────
+    mc_rows = conn.execute(
+        """SELECT missing_concept, COUNT(*) as cnt
+           FROM evaluations
+           WHERE missing_concept != '' AND missing_concept IS NOT NULL
+             AND LOWER(missing_concept) NOT IN ('none','n/a','unknown','')
+             AND timestamp >= datetime('now','-30 days')
+           GROUP BY LOWER(missing_concept)
+           ORDER BY cnt DESC LIMIT 8"""
+    ).fetchall()
+
+    # ── 30-day recurring mistakes ─────────────────────────────────────────
+    mistake_rows = conn.execute(
+        "SELECT mistakes FROM evaluations "
+        "WHERE mistakes != '[]' AND timestamp >= datetime('now','-30 days')"
+    ).fetchall()
+    all_mistakes: list = []
+    for r in mistake_rows:
+        try:
+            all_mistakes.extend(json.loads(r["mistakes"]))
+        except Exception:
+            pass
+    mistake_counts = Counter(all_mistakes).most_common(6)
+
+    # ── Subject averages (last 30 days) ───────────────────────────────────
+    subj_rows = conn.execute(
+        """SELECT subject, COUNT(*) as cnt, ROUND(AVG(correctness),1) as avg
+           FROM evaluations
+           WHERE timestamp >= datetime('now','-30 days')
+           GROUP BY subject ORDER BY avg ASC"""
+    ).fetchall()
+
+    # ── Weak topics (all time) ────────────────────────────────────────────
+    weak_rows = conn.execute(
+        """SELECT topic, subject, COUNT(*) as cnt, ROUND(AVG(correctness),1) as avg
+           FROM evaluations WHERE topic != ''
+           GROUP BY topic HAVING cnt >= 2
+           ORDER BY avg ASC LIMIT 6"""
+    ).fetchall()
+
+    conn.close()
+
+    # ── Assemble plain-text dossier ───────────────────────────────────────
+    lines = [
+        f"STUDENT DOSSIER (Class 12, JEE prep)",
+        f"Total questions evaluated all-time: {total} | Overall avg score: {avg}/5",
+        "",
+    ]
+
+    if latest_lines:
+        lines.append("TODAY'S SESSION:")
+        lines.extend(latest_lines)
+        lines.append("")
+
+    if mc_rows:
+        lines.append("TOP RECURRING KNOWLEDGE GAPS (last 30 days):")
+        for r in mc_rows:
+            lines.append(f"  • {r['missing_concept']} (missed {r['cnt']} time{'s' if r['cnt']>1 else ''})")
+        lines.append("")
+
+    if mistake_counts:
+        lines.append("MOST COMMON MISTAKES (last 30 days):")
+        for m, cnt in mistake_counts:
+            lines.append(f"  • {m} ({cnt}x)")
+        lines.append("")
+
+    if weak_rows:
+        lines.append("WEAKEST TOPICS (all-time, ≥2 attempts):")
+        for r in weak_rows:
+            lines.append(f"  • {r['topic']} ({r['subject']}) — avg {r['avg']}/5 over {r['cnt']} questions")
+        lines.append("")
+
+    if subj_rows:
+        lines.append("SUBJECT PERFORMANCE (last 30 days):")
+        for r in subj_rows:
+            lines.append(f"  • {r['subject'].capitalize()}: avg {r['avg']}/5 ({r['cnt']} questions)")
+        lines.append("")
+
+    return "\n".join(lines)
 
 
 def export_for_backup():

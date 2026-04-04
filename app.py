@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MathTutor Web — AI tutor for JEE, ISI, CMI, Board exams.
+MathMentor — AI mentor for JEE, ISI, CMI, Board exams.
 Subjects: Maths, Physics, Chemistry.
 
 Architecture:
@@ -33,6 +33,7 @@ from flask import (
     request,
     send_from_directory,
 )
+from flask_sock import Sock
 from werkzeug.utils import secure_filename
 
 import db
@@ -40,7 +41,7 @@ from models import ModelRouter
 
 # ─── Config ───
 
-PORT = 5000
+PORT = int(os.environ.get("PORT", 5000))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -64,6 +65,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
+sock = Sock(app)
 
 db.init_db()
 router = ModelRouter()
@@ -93,6 +95,7 @@ def save_upload(file):
 
 
 def parse_ai_json(text):
+    import re
     text = text.strip()
     if text.startswith("```"):
         text = text.split("\n", 1)[1] if "\n" in text else text[3:]
@@ -100,17 +103,38 @@ def parse_ai_json(text):
         text = text[:-3]
     if text.startswith("json"):
         text = text[4:]
-    return json.loads(text.strip())
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # AI often writes raw LaTeX backslashes (\int, \frac, \,) inside JSON strings
+        # which are invalid JSON escape sequences. Fix by doubling lone backslashes.
+        # Only keep \\ \" \/ \n \r \t \uXXXX as valid — everything else must be doubled.
+        repaired = re.sub(r'\\(?!["\\\/nrtu])', r'\\\\', text)
+        return json.loads(repaired)
 
 
 # ─── Prompts ───
 
-EVALUATE_PROMPT = """You are an expert tutor evaluating a student's work.
+MATH_JSON_NOTE = """MATH NOTATION IN JSON: Write ALL math using LaTeX \u2014 $...$ for inline, $$...$$ for display.
+CRITICAL: Since your output is JSON, every LaTeX backslash MUST be doubled.
+Write \\\\frac not \\frac, \\\\int not \\int, \\\\sqrt not \\sqrt, \\\\, not \\,, \\\\pi not \\pi.
+Example inline: $\\\\frac{{1}}{{2}}$  or  $x^2 - \\\\sqrt{{b^2 - 4ac}}$
+Example display: $$\\\\int_0^\\\\pi \\\\sin x \\\\, dx = 2$$
+"""
+
+EVALUATE_PROMPT = """You are an expert mentor evaluating a student's work.
 
 SUBJECT: {subject}
 EXAM: {exam_context}
 
 You are given photo(s) of questions from a textbook/paper, and photo(s) of the student's handwritten answers.
+
+MATH NOTATION: Write ALL mathematical expressions using LaTeX delimiters.
+- Inline math: $expression$ (e.g. $x^2 + 3x - 4 = 0$, $F = ma$)
+- Display math (own line): $$expression$$
+- Chemistry: use \\ce{{...}} for chemical formulas (e.g. \\ce{{H2SO4}}, \\ce{{2H2 + O2 -> 2H2O}}, \\ce{{Fe^{{2+}}}})
+Use LaTeX for ALL: fractions, roots, integrals, Greek letters, vectors, units. Never plain text like "x^2" or "H2O".
 
 Carefully:
 1. Identify each problem number visible in both question and answer images
@@ -122,8 +146,8 @@ Return a JSON array (no markdown fences, raw JSON only):
   {{
     "problem_number": "the problem number as written",
     "question_summary": "1-line description of the question",
-    "question_text": "complete question statement verbatim, exactly as written in the photo",
-    "correct_answer": "complete step-by-step correct solution with all key steps and final answer",
+    "question_text": "complete question statement verbatim, exactly as written in the photo — use LaTeX for all math",
+    "correct_answer": "complete step-by-step correct solution with all key steps and final answer — use LaTeX for all math",
     "subject": "{subject}",
     "topic": "main topic (e.g. quadratics, thermodynamics, organic reactions)",
     "subtopic": "specific subtopic",
@@ -131,7 +155,7 @@ Return a JSON array (no markdown fences, raw JSON only):
     "is_complete": <true if solution reaches a final answer>,
     "source": "detected source if visible in the photo (e.g. book name, NCERT, HC Verma, Irodov, Cengage, DC Pandey, JEE Main 2024, coaching institute name from header/footer/watermark). null if not identifiable",
     "what_went_right": "specific thing done well",
-    "where_it_broke": "exact step where reasoning went wrong, or 'nowhere' if correct",
+    "where_it_broke": "exact step where reasoning went wrong, or 'nowhere' if correct — use LaTeX for any math",
     "mistakes": ["list of specific mistakes"],
     "missing_concept": "key concept to learn, or 'none' if correct",
     "hint_not_answer": "a hint to fix it WITHOUT giving the answer",
@@ -157,6 +181,9 @@ EXAM_CONTEXTS = {
 PRACTICE_PROMPT = """Generate ONE {difficulty} {subject} problem for {exam} preparation.
 Topic: {topic}
 
+MATH: Write all math using LaTeX — $...$ for inline math, $$...$$ for display equations.
+For chemistry use \\ce{{...}} notation (e.g. \\ce{{H2SO4}}, \\ce{{A -> B + C}}, \\ce{{Fe^{{2+}}}}).
+
 Requirements:
 - Solvable by a Class 11-12 student
 - {exam_specific}
@@ -166,7 +193,7 @@ Requirements:
 
 Return raw JSON (no markdown fences):
 {{
-  "problem": "the full problem statement",
+  "problem": "the full problem statement with LaTeX math",
   "topic": "topic",
   "subtopic": "subtopic",
   "difficulty": "{difficulty}",
@@ -198,9 +225,12 @@ Give:
 
 Keep it concise but thorough. Use analogies if helpful."""
 
-HINT_PROMPT = """You are an expert {subject} tutor. A student is stuck on a problem and needs hints — NOT the answer.
+HINT_PROMPT = """You are an expert {subject} mentor. A student is stuck on a problem and needs hints — NOT the answer.
 
 EXAM: {exam_context}
+
+MATH: Write all math using LaTeX — $...$ for inline math, $$...$$ for display equations.
+For chemistry use \\ce{{...}} notation (e.g. \\ce{{H2SO4}}, \\ce{{Fe^{{2+}}}}).
 
 Look at the question photo(s) carefully. For each problem visible:
 
@@ -216,12 +246,12 @@ Return raw JSON (no markdown fences):
 [
   {{
     "problem_number": "the problem number as written",
-    "question_summary": "1-line description of the question",
+    "question_summary": "1-line description",
     "topic": "main topic",
-    "source": "detected source if visible in photo (book name, exam paper, coaching material header/footer). null if not identifiable",
+    "source": "book/exam name if visible, else null",
     "hint_1": "vague nudge",
     "hint_2": "more specific direction",
-    "hint_3": "nearly gives it away but still not the answer"
+    "hint_3": "nearly gives it away but not the answer"
   }}
 ]"""
 
@@ -493,7 +523,7 @@ def api_guide_html():
         return f"<p style='color:#f87171'>Error loading guide: {e}</p>", 500
 
 
-DEBATE_PROMPT = """You are a Socratic {subject} tutor debating a student's solution.
+DEBATE_PROMPT = """You are a Socratic {subject} mentor discussing a student's solution.
 
 THE QUESTION: {question_text}
 Subject: {subject} | Exam: {exam} | Topic: {topic}
@@ -510,7 +540,7 @@ Rules:
 2. If the student makes a MATHEMATICALLY VALID point you missed: Explicitly say "You're right, I missed that" — don't hedge.
 3. If the student is wrong: Guide with a question. Do NOT state the answer or lecture.
 4. Max 3 sentences + 1 question. Sharp and direct.
-5. No empty praise ("Great point!", "Good try"). Be a real tutor.
+5. No empty praise ("Great point!", "Good try"). Be a real mentor.
 6. Plain text only. No JSON, no markdown, no bullet lists."""
 
 
@@ -571,7 +601,7 @@ def api_debate():
 
     history_lines = []
     for entry in history:
-        role = "Tutor" if entry.get("role") == "ai" else "Student"
+        role = "Mentor" if entry.get("role") == "ai" else "Student"
         content = str(entry.get("content", ""))[:500]
         history_lines.append(f"{role}: {content}")
     history_text = ("\nPrevious conversation:\n" + "\n".join(history_lines) + "\n\n") if history_lines else ""
@@ -595,6 +625,202 @@ def api_debate():
     except Exception as e:
         logger.error(f"Debate failed: {e}", exc_info=True)
         return jsonify({"error": "Could not get AI response. Check your internet and try again."}), 500
+
+
+# ─── Voice (Gemini Live relay) ───
+
+_GEMINI_LIVE_URL = (
+    "wss://generativelanguage.googleapis.com/ws/"
+    "google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent"
+)
+
+_VOICE_SYSTEM_PROMPT = """\
+You are a warm, personal math mentor for a Class 12 student (CBSE, preparing for JEE 2027).
+You know this student deeply — their history, weak spots, and where they are right now.
+Here is everything you know about them:
+
+{dossier}
+
+YOUR STYLE:
+- Talk like you're sitting right next to them — casual, warm, zero jargon unless they ask.
+- Keep each response SHORT (2-3 sentences) then ask ONE question to keep them engaged.
+- Never lecture. Guide them to the answer with questions.
+- When stating formulas, speak them in plain English — never read LaTeX syntax aloud.
+  (e.g. say "integral of u dv equals u v minus integral of v du" not "\\int u dv")
+- Use their first name occasionally if they introduce themselves.
+- Stay positive even when they're struggling. Celebrate small wins.
+
+WHAT YOU CAN DO (respond to ANY of these naturally):
+- Review specific formulas they keep missing
+- Quiz them on weak topics (ask them to state the formula, then check)
+- Explain why a concept works from first principles
+- Discuss today's session — any question number they ask about
+- Run a 15-minute formula drill (say "let's do 5 formulas, I'll say the name, you recall it")
+- Answer general doubts about Maths, Physics, Chemistry for JEE/Board level
+- Give exam strategy tips specific to JEE
+- Be a study buddy — if they're stressed, acknowledge it first
+
+IF THEY ASK TO REVIEW WEAK AREAS / DO A FORMULA DRILL:
+  Pick the top 3-5 gaps from their dossier above. Run the drill: state the topic name,
+  ask them to recall the formula verbally, then confirm or gently correct.
+  Keep the energy up. Move at their pace. After each correct recall say something like
+  "yes, nailed it" or "exactly right".
+
+Remember: you have their full history. Use it. Be their mentor, not a Wikipedia page.
+"""
+
+
+@app.route("/api/voice/context")
+def api_voice_context():
+    """Return the full student dossier for the voice session system prompt."""
+    try:
+        dossier = db.get_voice_context()
+        return jsonify({"dossier": dossier})
+    except Exception as e:
+        logger.error("voice/context failed: %s", e)
+        return jsonify({"dossier": "No history available yet."})
+
+
+@sock.route("/ws/voice")
+def ws_voice(ws):
+    """Browser <-> Gemini Live bidirectional audio relay.
+
+    Protocol (JSON text frames both directions):
+      Browser → Server:
+        First frame:  {"context": {"subject": ..., "exam": ..., "questions_text": ...}}
+        Audio frames: {"type": "audio", "data": "<base64 PCM16 16kHz>"}
+        Stop:         {"type": "stop"}
+      Server → Browser:
+        {"type": "ready"}
+        {"type": "audio", "data": "<base64 PCM16 24kHz>", "mime": "audio/pcm;rate=24000"}
+        {"type": "turn_done"}
+        {"type": "error", "message": "..."}
+    """
+    import websocket as _ws_client  # websocket-client package
+
+    api_key = os.environ.get("GEMINI_API_KEY", "")
+    if not api_key:
+        ws.send(json.dumps({"type": "error", "message": "No Gemini API key configured"}))
+        return
+
+    # ── Receive setup context from browser ──
+    try:
+        first_raw = ws.receive(timeout=10)
+        if first_raw is None:
+            return
+        ctx = json.loads(first_raw).get("context", {})
+    except Exception as e:
+        ws.send(json.dumps({"type": "error", "message": f"Setup failed: {e}"}))
+        return
+
+    dossier = str(ctx.get("dossier", "No history yet."))[:4000]
+    system_prompt = _VOICE_SYSTEM_PROMPT.format(dossier=dossier)
+
+    # ── Connect to Gemini Live ──
+    gemini_url = f"{_GEMINI_LIVE_URL}?key={api_key}"
+    try:
+        gws = _ws_client.create_connection(gemini_url, timeout=15)
+    except Exception as e:
+        ws.send(json.dumps({"type": "error", "message": f"Gemini connect failed: {e}"}))
+        return
+
+    # Send setup
+    gws.send(json.dumps({
+        "setup": {
+            "model": "models/gemini-2.0-flash-live-001",
+            "generation_config": {
+                "response_modalities": ["AUDIO"],
+                "speech_config": {
+                    "voice_config": {
+                        "prebuilt_voice_config": {"voice_name": "Puck"}
+                    }
+                },
+            },
+            "system_instruction": {
+                "parts": [{"text": system_prompt}]
+            },
+        }
+    }))
+
+    # Wait for setupComplete
+    try:
+        setup_resp = json.loads(gws.recv())
+        if "setupComplete" not in setup_resp:
+            ws.send(json.dumps({"type": "error", "message": "Gemini setup failed"}))
+            gws.close()
+            return
+    except Exception as e:
+        ws.send(json.dumps({"type": "error", "message": f"Gemini setup error: {e}"}))
+        gws.close()
+        return
+
+    ws.send(json.dumps({"type": "ready"}))
+    logger.info("Voice session started (subject=%s exam=%s)", subject, exam)
+
+    stop_event = threading.Event()
+
+    def gemini_to_browser():
+        """Relay Gemini audio replies → browser."""
+        while not stop_event.is_set():
+            try:
+                raw = gws.recv()
+            except Exception:
+                break
+            try:
+                msg = json.loads(raw)
+            except Exception:
+                continue
+
+            sc = msg.get("serverContent", {})
+            for part in sc.get("modelTurn", {}).get("parts", []):
+                inline = part.get("inlineData", {})
+                if inline.get("data"):
+                    try:
+                        ws.send(json.dumps({
+                            "type": "audio",
+                            "data": inline["data"],
+                            "mime": inline.get("mimeType", "audio/pcm;rate=24000"),
+                        }))
+                    except Exception:
+                        stop_event.set()
+                        return
+            if sc.get("turnComplete"):
+                try:
+                    ws.send(json.dumps({"type": "turn_done"}))
+                except Exception:
+                    stop_event.set()
+                    return
+
+    relay = threading.Thread(target=gemini_to_browser, daemon=True)
+    relay.start()
+
+    # ── Main loop: browser audio → Gemini ──
+    try:
+        while not stop_event.is_set():
+            raw = ws.receive()
+            if raw is None:
+                break
+            msg = json.loads(raw)
+            if msg.get("type") == "audio":
+                gws.send(json.dumps({
+                    "realtimeInput": {
+                        "mediaChunks": [{
+                            "mimeType": "audio/pcm;rate=16000",
+                            "data": msg["data"],
+                        }]
+                    }
+                }))
+            elif msg.get("type") == "stop":
+                break
+    except Exception as e:
+        logger.info("Voice session ended: %s", e)
+    finally:
+        stop_event.set()
+        try:
+            gws.close()
+        except Exception:
+            pass
+        logger.info("Voice session closed")
 
 
 # ─── Auto-update & Backup ───
@@ -1026,7 +1252,7 @@ if __name__ == "__main__":
     models = ", ".join(router.available.keys())
 
     logger.info("=" * 50)
-    logger.info("  MathTutor is running!")
+    logger.info("  MathMentor is running!")
     logger.info(f"  PC dashboard : http://localhost:{PORT}/pc")
     logger.info(f"  Phone upload : {url}/phone")
     logger.info(f"  Models       : {models}")
