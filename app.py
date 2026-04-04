@@ -879,7 +879,18 @@ def auto_update():
             logger.warning(f"Auto-update: checkout failed — {checkout.stderr.strip()}")
             return
 
-        # Step 5: save applied hash so we don't re-apply on next restart
+        # Step 5: install any new/updated packages silently
+        pip = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-r",
+             os.path.join(BASE_DIR, "requirements.txt"), "-q", "--disable-pip-version-check"],
+            cwd=BASE_DIR, capture_output=True, text=True, timeout=120,
+        )
+        if pip.returncode != 0:
+            logger.warning(f"Auto-update: pip install warning — {pip.stderr.strip()[:200]}")
+        else:
+            logger.info("Auto-update: packages up to date")
+
+        # Step 6: save applied hash so we don't re-apply on next restart
         os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
         Path(HASH_FILE).write_text(remote_hash)
 
