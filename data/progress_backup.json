@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-04-04T18:52:11.781672",
+  "exported_at": "2026-04-04T18:55:48.393322",
   "evaluations": [
     {
       "id": 1,
@@ -420,6 +420,28 @@
       "difficulty": "medium",
       "problem_text": "{\n  \"problem\": \"Evaluate the integral $$I = \\int_0^{\\frac{\\pi}{4}} \\frac{\\sin(x) + \\cos(x)}{1 + \\sin(2x)} \\, dx$$. \\n\\nChoose the correct option:\\n(A) $\\\\frac{\\pi}{8}$\\n(B) $\\\\frac{\\pi}{4}$\\n(C) $\\\\frac{\\pi}{16}$\\n(D) $\\\\frac{\\pi}{6}$\",\n  \"topic\": \"integration\",\n  \"subtopic\": \"definite integration\",\n  \"difficulty\": \"medium\",\n  \"hints\": [\n    \"Consider simplifying the denominator.\",\n    \"Use the identity $1 + \\\\sin(2x) = \\\\cos^2(x) + \\\\sin^2(x) + 2\\\\sin(x)\\\\cos(x)$.\",\n    \"Try substituting $t = \\\\tan(x)$ to simplify the integral further.\"\n  ],\n  \"exam\": \"jee_main\",\n  \"subject\": \"maths\"\n}",
       "hints": "[]",
+      "attempted": 0
+    },
+    {
+      "id": 6,
+      "timestamp": "2026-04-04T18:52:52.926968",
+      "subject": "maths",
+      "exam": "jee_main",
+      "topic": "calculus",
+      "difficulty": "medium",
+      "problem_text": "Evaluate the integral $$\\int_0^1 x e^{x^2} \\, dx$$ and select the correct option. \n\n(a) $\\frac{e}{2} - 1$ \n\n(b) $\\frac{e}{2}$ \n\n(c) $e - 1$ \n\n(d) $1 - \\frac{e}{2}$",
+      "hints": "[\"Consider using substitution to simplify the integration.\", \"Let $u = x^2$, then $du = 2x \\\\, dx$. Adjust the integral accordingly.\", \"After substitution, you will have an exponential integral that can be solved directly.\"]",
+      "attempted": 0
+    },
+    {
+      "id": 7,
+      "timestamp": "2026-04-04T18:55:23.094388",
+      "subject": "chemistry",
+      "exam": "jee_main",
+      "topic": "electrochemistry",
+      "difficulty": "medium",
+      "problem_text": "Consider a galvanic cell represented as: $$\\text{Zn(s)} | \\text{Zn}^{2+}(0.1\\,\\text{M}) || \\text{Cu}^{2+}(1\\,\\text{M}) | \\text{Cu(s)}$$. Given that the standard reduction potentials are $E^\\circ_{\\text{Cu}^{2+}/\\text{Cu}} = +0.34\\,\\text{V}$ and $E^\\circ_{\\text{Zn}^{2+}/\\text{Zn}} = -0.76\\,\\text{V}$, calculate the cell potential at 298 K.\\n\\n1. $1.10\\,\\text{V}$\\n2. $1.05\\,\\text{V}$\\n3. $1.02\\,\\text{V}$\\n4. $0.97\\,\\text{V}$",
+      "hints": "[\"Consider the Nernst equation for calculating the cell potential under non-standard conditions.\", \"Calculate the reaction quotient $Q$ using the given concentrations of Zn and Cu ions.\", \"Remember to include the number of electrons transferred when using the Nernst equation to adjust the potential.\"]",
       "attempted": 0
     }
   ]
