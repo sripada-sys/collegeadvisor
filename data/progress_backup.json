@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-04-01T21:03:25.644296",
+  "exported_at": "2026-04-04T18:38:32.790276",
   "evaluations": [
     {
       "id": 1,
@@ -338,6 +338,32 @@
       "question_text": null,
       "correct_answer": null,
       "source": null
+    },
+    {
+      "id": 14,
+      "batch_id": "smoke01",
+      "timestamp": "2026-04-01T21:05:27.667728",
+      "subject": "maths",
+      "exam": "jee_main",
+      "problem_number": "1",
+      "question_summary": "x^2=4",
+      "topic": "algebra",
+      "subtopic": "",
+      "correctness": 4,
+      "is_complete": 0,
+      "what_went_right": "ok",
+      "where_it_broke": "nowhere",
+      "mistakes": "[]",
+      "missing_concept": "none",
+      "hint": "",
+      "next_practice": "",
+      "encouragement": "good",
+      "question_images": "[\"q.jpg\"]",
+      "answer_images": "[\"a.jpg\"]",
+      "raw_response": null,
+      "question_text": "Solve x^2=4",
+      "correct_answer": "x=+-2",
+      "source": "NCERT"
     }
   ],
   "practice_problems": [
