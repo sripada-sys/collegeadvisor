@@ -894,6 +894,10 @@ def auto_update():
         os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
         Path(HASH_FILE).write_text(remote_hash)
 
+        # Back up local DB before restarting so no evaluated work is lost
+        logger.info("Auto-update: backing up local data before restart...")
+        backup_to_git()
+
         logger.info(f"Auto-update: applied {remote_hash[:8]}, restarting...")
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
@@ -1271,7 +1275,8 @@ if __name__ == "__main__":
 
     auto_update()
     schedule_daily_backup()
-    threading.Thread(target=backup_to_git, daemon=True).start()
+    # Back up on every startup (blocking — ensures data is safe before serving)
+    threading.Thread(target=backup_to_git, daemon=False).start()
 
     webbrowser.open(f"http://localhost:{PORT}/pc")
 
