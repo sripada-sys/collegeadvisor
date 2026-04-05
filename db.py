@@ -63,7 +63,7 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_eval_subject ON evaluations(subject);
         CREATE INDEX IF NOT EXISTS idx_eval_batch ON evaluations(batch_id);
 
-        CREATE TABLE IF NOT EXISTS aha_notes (
+        CREATE TABLE IF NOT EXISTS wow_notes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT NOT NULL,
             subject TEXT,
@@ -71,11 +71,17 @@ def init_db():
             note TEXT NOT NULL,
             source TEXT DEFAULT 'debate'
         );
-        CREATE INDEX IF NOT EXISTS idx_aha_timestamp ON aha_notes(timestamp);
+        CREATE INDEX IF NOT EXISTS idx_wow_timestamp ON wow_notes(timestamp);
     """
     )
     conn.commit()
-    # Migrate existing databases — add new columns if they don't exist yet
+    # Migrate existing databases — rename aha_notes → wow_notes if old name exists
+    try:
+        conn.execute("ALTER TABLE aha_notes RENAME TO wow_notes")
+        conn.commit()
+    except Exception:
+        pass  # Already renamed or doesn't exist
+    # Add new columns if they don't exist yet
     for _col, _coltype in [("question_text", "TEXT"), ("correct_answer", "TEXT"), ("source", "TEXT")]:
         try:
             conn.execute(f"ALTER TABLE evaluations ADD COLUMN {_col} {_coltype}")
@@ -233,20 +239,20 @@ def get_history(limit=50):
     return [dict(r) for r in rows]
 
 
-def save_aha_note(note, subject="", topic="", source="debate"):
+def save_wow_note(note, subject="", topic="", source="debate"):
     conn = get_db()
     conn.execute(
-        "INSERT INTO aha_notes (timestamp, subject, topic, note, source) VALUES (?,?,?,?,?)",
+        "INSERT INTO wow_notes (timestamp, subject, topic, note, source) VALUES (?,?,?,?,?)",
         (datetime.now().isoformat(), subject, topic, note, source),
     )
     conn.commit()
     conn.close()
 
 
-def get_aha_notes(limit=100):
+def get_wow_notes(limit=100):
     conn = get_db()
     rows = conn.execute(
-        "SELECT * FROM aha_notes ORDER BY id DESC LIMIT ?", (limit,)
+        "SELECT * FROM wow_notes ORDER BY id DESC LIMIT ?", (limit,)
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
@@ -371,15 +377,15 @@ def get_voice_context():
             lines.append(f"  • {r['subject'].capitalize()}: avg {r['avg']}/5 ({r['cnt']} questions)")
         lines.append("")
 
-    # ── Recent aha notes (last 20) ────────────────────────────────────────
+    # ── Recent wow notes (last 20) ────────────────────────────────────────
     conn2 = get_db()
-    aha_rows = conn2.execute(
-        "SELECT note, subject, topic, source FROM aha_notes ORDER BY id DESC LIMIT 20"
+    wow_rows = conn2.execute(
+        "SELECT note, subject, topic, source FROM wow_notes ORDER BY id DESC LIMIT 20"
     ).fetchall()
     conn2.close()
-    if aha_rows:
-        lines.append("STUDENT'S AHA NOTES (key insights they've captured):")
-        for r in aha_rows:
+    if wow_rows:
+        lines.append("STUDENT'S WOW NOTES (key insights they've captured):")
+        for r in wow_rows:
             tag = "(student)" if r["source"] == "debate" and r["source"] != "auto" else "(auto-captured)"
             lines.append(f"  • [{r['topic'] or r['subject'] or 'general'}] {r['note']} {tag}")
         lines.append("")

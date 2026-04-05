@@ -206,35 +206,35 @@
             line-height: 1.6;
         }
 
-        /* ── Aha notes ── */
-        .aha-save-btn {
+        /* ── Wow notes ── */
+        .wow-save-btn {
             background: rgba(234,179,8,0.12); color: var(--yellow);
             border: 1px solid rgba(234,179,8,0.3); border-radius: 20px;
             padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
             transition: background 0.2s;
         }
-        .aha-save-btn:hover { background: rgba(234,179,8,0.22); }
-        .aha-input {
+        .wow-save-btn:hover { background: rgba(234,179,8,0.22); }
+        .wow-input {
             width: 100%; margin-top: 8px; padding: 8px 12px;
             background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
             color: var(--text); font-size: 13px; box-sizing: border-box;
         }
-        .aha-input:focus { outline: none; border-color: var(--yellow); }
-        .aha-card {
+        .wow-input:focus { outline: none; border-color: var(--yellow); }
+        .wow-card {
             background: var(--surface); border-radius: 10px;
             border-left: 3px solid var(--yellow); padding: 14px 18px;
             margin-bottom: 10px;
         }
-        .aha-card .aha-meta {
+        .wow-card .wow-meta {
             font-size: 11px; color: var(--text2); margin-bottom: 6px;
             text-transform: uppercase; letter-spacing: 0.4px;
         }
-        .aha-card .aha-text { font-size: 14px; color: var(--text); line-height: 1.6; }
-        .aha-card .aha-delete {
+        .wow-card .wow-text { font-size: 14px; color: var(--text); line-height: 1.6; }
+        .wow-card .wow-delete {
             float: right; background: none; border: none; color: var(--text2);
             cursor: pointer; font-size: 14px; padding: 0;
         }
-        .aha-card .aha-delete:hover { color: var(--red); }
+        .wow-card .wow-delete:hover { color: var(--red); }
 
         /* ── Voice button ── */
         #voice-panel {
@@ -797,7 +797,7 @@
         <button data-tab="progress">Progress</button>
         <button data-tab="exams">Exams</button>
         <button data-tab="history">History</button>
-        <button data-tab="aha">💡 Aha Notes</button>
+        <button data-tab="wow">💡 Wow Notes</button>
         <button data-tab="guide">Guide</button>
     </nav>
 
@@ -961,14 +961,14 @@
         </section>
 
         <!-- Guide Tab -->
-        <!-- Aha Notes Tab -->
-        <section id="tab-aha" class="tab">
+        <!-- Wow Notes Tab -->
+        <section id="tab-wow" class="tab">
             <div class="exam-toolbar" style="margin-bottom:20px">
-                <h2>💡 Aha Notes</h2>
+                <h2>💡 Wow Notes</h2>
                 <p style="font-size:13px;color:var(--text2);margin-top:4px">Things you discovered while discussing with your mentor. Your personal learning library.</p>
             </div>
-            <div id="aha-list" style="max-width:800px">
-                <div class="empty-state"><p>No aha notes yet.<br>After a chat, write what you learned and click "Save as Aha note".</p></div>
+            <div id="wow-list" style="max-width:800px">
+                <div class="empty-state"><p>No wow notes yet.<br>After a chat, write what you learned and click "Save as Wow note".</p></div>
             </div>
         </section>
 
@@ -1024,7 +1024,7 @@ document.querySelectorAll('nav button').forEach(btn => {
         if (btn.dataset.tab === 'progress') loadProgress();
         if (btn.dataset.tab === 'exams') loadExams();
         if (btn.dataset.tab === 'history') loadHistory();
-        if (btn.dataset.tab === 'aha') loadAha();
+        if (btn.dataset.tab === 'wow') loadWow();
         if (btn.dataset.tab === 'guide') loadGuide();
     });
 });
@@ -1364,10 +1364,10 @@ function renderResults(results) {
                         <button class="debate-send-btn" id="${cardId}-dsend" onclick="sendDebate('${cardId}')">Send</button>
                     </div>
                     <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-                        <button class="aha-save-btn" onclick="saveAha('${cardId}', '${esc(r.subject||'')}', '${esc(r.topic||'')}')">
-                            💡 Save as Aha note
+                        <button class="wow-save-btn" onclick="saveWow('${cardId}', '${esc(r.subject||'')}', '${esc(r.topic||'')}')">
+                            💡 Save as Wow note
                         </button>
-                        <input type="text" class="aha-input" id="${cardId}-aha"
+                        <input type="text" class="wow-input" id="${cardId}-wow"
                             placeholder="What did you just learn? Write it in your own words…">
                     </div>
                 </div>
@@ -1962,13 +1962,13 @@ async function verifyExamDates() {
     btn.innerHTML = '🔍 Verify with AI (Perplexity)';
 }
 
-// ─── Aha Notes ───────────────────────────────────────────────────
-async function saveAha(cardId, subject, topic) {
-    const input = document.getElementById(cardId + '-aha');
+// ─── Wow Notes ───────────────────────────────────────────────────
+async function saveWow(cardId, subject, topic) {
+    const input = document.getElementById(cardId + '-wow');
     const note = input ? input.value.trim() : '';
     if (!note) { alert('Write what you learned first, then save.'); return; }
     try {
-        const res = await fetch('/api/aha', {
+        const res = await fetch('/api/wow', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ note, subject, topic, source: 'debate' }),
@@ -1981,15 +1981,15 @@ async function saveAha(cardId, subject, topic) {
     } catch(e) { alert('Could not save note.'); }
 }
 
-async function loadAha() {
-    const container = document.getElementById('aha-list');
+async function loadWow() {
+    const container = document.getElementById('wow-list');
     if (!container) return;
     try {
-        const res = await fetch('/api/aha');
+        const res = await fetch('/api/wow');
         const data = await res.json();
         const notes = data.notes || [];
         if (!notes.length) {
-            container.innerHTML = '<div class="empty-state"><p>No aha notes yet.<br>After a chat, write what you learned and click "Save as Aha note".</p></div>';
+            container.innerHTML = '<div class="empty-state"><p>No wow notes yet.<br>After a chat, write what you learned and click "Save as Wow note".</p></div>';
             return;
         }
         container.innerHTML = notes.map(n => {
@@ -1999,9 +1999,9 @@ async function loadAha() {
             const sourceTag = n.source === 'auto'
                 ? `<span style="font-size:10px;background:rgba(99,102,241,0.12);color:var(--accent);padding:1px 7px;border-radius:10px;margin-left:6px">auto-captured</span>`
                 : `<span style="font-size:10px;background:rgba(34,197,94,0.12);color:var(--green);padding:1px 7px;border-radius:10px;margin-left:6px">your note</span>`;
-            return `<div class="aha-card">
-                <div class="aha-meta">${esc(meta)}${sourceTag}</div>
-                <div class="aha-text">${esc(n.note)}</div>
+            return `<div class="wow-card">
+                <div class="wow-meta">${esc(meta)}${sourceTag}</div>
+                <div class="wow-text">${esc(n.note)}</div>
             </div>`;
         }).join('');
         renderMathEl(container);

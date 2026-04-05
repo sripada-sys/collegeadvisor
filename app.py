@@ -526,7 +526,7 @@ def api_guide_html():
         return f"<p style='color:#f87171'>Error loading guide: {e}</p>", 500
 
 
-_AHA_EXTRACT_PROMPT = """\
+_WOW_EXTRACT_PROMPT = """\
 A student is discussing this {subject} problem with a mentor.
 
 Topic: {topic}
@@ -545,20 +545,20 @@ or a back-and-forth without resolution), reply with exactly: SKIP
 Reply with ONLY the insight sentence or SKIP. Nothing else."""
 
 
-def _auto_save_aha(subject, topic, mentor_reply, student_message):
+def _auto_save_wow(subject, topic, mentor_reply, student_message):
     """Background: extract and auto-save insight from a debate exchange."""
     try:
-        prompt = _AHA_EXTRACT_PROMPT.format(
+        prompt = _WOW_EXTRACT_PROMPT.format(
             subject=subject, topic=topic,
             mentor_reply=mentor_reply[:600],
             student_message=student_message[:400],
         )
         insight = router.call("explain", prompt).strip()
         if insight and insight.upper() != "SKIP" and len(insight) > 20:
-            db.save_aha_note(note=insight, subject=subject, topic=topic, source="auto")
-            logger.info("Auto-saved aha note: %s", insight[:80])
+            db.save_wow_note(note=insight, subject=subject, topic=topic, source="auto")
+            logger.info("Auto-saved wow note: %s", insight[:80])
     except Exception as e:
-        logger.debug("Auto-aha skipped: %s", e)
+        logger.debug("Auto-wow skipped: %s", e)
 
 
 DEBATE_PROMPT = """You are a Socratic {subject} mentor discussing a student's solution.
@@ -662,7 +662,7 @@ def api_debate():
         reply = reply.strip()
         # Auto-extract and save key insight in background — no latency impact
         threading.Thread(
-            target=_auto_save_aha,
+            target=_auto_save_wow,
             args=(subject, topic, reply, message or ""),
             daemon=True,
         ).start()
@@ -715,13 +715,13 @@ Remember: you have their full history. Use it. Be their mentor, not a Wikipedia 
 """
 
 
-@app.route("/api/aha", methods=["POST"])
-def api_save_aha():
+@app.route("/api/wow", methods=["POST"])
+def api_save_wow():
     data = request.get_json() or {}
     note = str(data.get("note", "")).strip()[:2000]
     if not note:
         return jsonify({"error": "Note is empty"}), 400
-    db.save_aha_note(
+    db.save_wow_note(
         note=note,
         subject=str(data.get("subject", ""))[:50],
         topic=str(data.get("topic", ""))[:100],
@@ -730,9 +730,9 @@ def api_save_aha():
     return jsonify({"ok": True})
 
 
-@app.route("/api/aha")
-def api_get_aha():
-    notes = db.get_aha_notes()
+@app.route("/api/wow")
+def api_get_wow():
+    notes = db.get_wow_notes()
     return jsonify({"notes": notes})
 
 
