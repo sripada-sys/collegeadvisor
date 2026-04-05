@@ -1368,7 +1368,8 @@ function renderResults(results) {
                             💡 Save as Wow note
                         </button>
                         <input type="text" class="wow-input" id="${cardId}-wow"
-                            placeholder="What did you just learn? Write it in your own words…">
+                            placeholder="What did you just learn? Write it in your own words…"
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();saveWow('${cardId}','${esc(r.subject||'')}','${esc(r.topic||'')}');}">
                     </div>
                 </div>
             </div>
