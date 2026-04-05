@@ -526,6 +526,41 @@ def api_guide_html():
         return f"<p style='color:#f87171'>Error loading guide: {e}</p>", 500
 
 
+_AHA_EXTRACT_PROMPT = """\
+A student is discussing this {subject} problem with a mentor.
+
+Topic: {topic}
+Mentor said: {mentor_reply}
+Student said: {student_message}
+
+If this exchange contains a clear, specific insight worth remembering \
+(a concept clarified, a common mistake identified, a formula confirmed, a \
+trap explained), write it as ONE concise sentence a student would write in \
+their own revision notes. Be concrete and specific — include the actual concept \
+or formula name.
+
+If there is no clear insight worth saving (e.g. just a greeting, vague praise, \
+or a back-and-forth without resolution), reply with exactly: SKIP
+
+Reply with ONLY the insight sentence or SKIP. Nothing else."""
+
+
+def _auto_save_aha(subject, topic, mentor_reply, student_message):
+    """Background: extract and auto-save insight from a debate exchange."""
+    try:
+        prompt = _AHA_EXTRACT_PROMPT.format(
+            subject=subject, topic=topic,
+            mentor_reply=mentor_reply[:600],
+            student_message=student_message[:400],
+        )
+        insight = router.call("explain", prompt).strip()
+        if insight and insight.upper() != "SKIP" and len(insight) > 20:
+            db.save_aha_note(note=insight, subject=subject, topic=topic, source="auto")
+            logger.info("Auto-saved aha note: %s", insight[:80])
+    except Exception as e:
+        logger.debug("Auto-aha skipped: %s", e)
+
+
 DEBATE_PROMPT = """You are a Socratic {subject} mentor discussing a student's solution.
 
 THE QUESTION: {question_text}
@@ -624,7 +659,14 @@ def api_debate():
 
     try:
         reply = router.call("explain", prompt)
-        return jsonify({"reply": reply.strip()})
+        reply = reply.strip()
+        # Auto-extract and save key insight in background — no latency impact
+        threading.Thread(
+            target=_auto_save_aha,
+            args=(subject, topic, reply, message or ""),
+            daemon=True,
+        ).start()
+        return jsonify({"reply": reply})
     except Exception as e:
         logger.error(f"Debate failed: {e}", exc_info=True)
         return jsonify({"error": "Could not get AI response. Check your internet and try again."}), 500

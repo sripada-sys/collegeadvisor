@@ -371,6 +371,19 @@ def get_voice_context():
             lines.append(f"  • {r['subject'].capitalize()}: avg {r['avg']}/5 ({r['cnt']} questions)")
         lines.append("")
 
+    # ── Recent aha notes (last 20) ────────────────────────────────────────
+    conn2 = get_db()
+    aha_rows = conn2.execute(
+        "SELECT note, subject, topic, source FROM aha_notes ORDER BY id DESC LIMIT 20"
+    ).fetchall()
+    conn2.close()
+    if aha_rows:
+        lines.append("STUDENT'S AHA NOTES (key insights they've captured):")
+        for r in aha_rows:
+            tag = "(student)" if r["source"] == "debate" and r["source"] != "auto" else "(auto-captured)"
+            lines.append(f"  • [{r['topic'] or r['subject'] or 'general'}] {r['note']} {tag}")
+        lines.append("")
+
     return "\n".join(lines)
 
 
