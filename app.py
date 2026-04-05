@@ -138,8 +138,11 @@ Use LaTeX for ALL: fractions, roots, integrals, Greek letters, vectors, units. N
 
 Carefully:
 1. Identify each problem number visible in both question and answer images
-2. For each problem, read the question and the student's solution
-3. Evaluate correctness, approach, and completeness
+2. For each problem, read the EXACT question — pay close attention to the order of numbers and symbols.
+   Worksheets (especially Kumon/NCERT) sometimes have answer blanks or labels before the expression.
+   Always extract the mathematical expression itself in the correct left-to-right order as it appears.
+   Example: if the photo shows "68 ÷ 2 = ___", the question is "68 ÷ 2", NOT "2 ÷ 68".
+3. Then read the student's solution and evaluate correctness, approach, and completeness
 
 Return a JSON array (no markdown fences, raw JSON only):
 [
@@ -670,6 +673,27 @@ Remember: you have their full history. Use it. Be their mentor, not a Wikipedia 
 """
 
 
+@app.route("/api/aha", methods=["POST"])
+def api_save_aha():
+    data = request.get_json() or {}
+    note = str(data.get("note", "")).strip()[:2000]
+    if not note:
+        return jsonify({"error": "Note is empty"}), 400
+    db.save_aha_note(
+        note=note,
+        subject=str(data.get("subject", ""))[:50],
+        topic=str(data.get("topic", ""))[:100],
+        source=str(data.get("source", "debate"))[:20],
+    )
+    return jsonify({"ok": True})
+
+
+@app.route("/api/aha")
+def api_get_aha():
+    notes = db.get_aha_notes()
+    return jsonify({"notes": notes})
+
+
 @app.route("/api/voice/context")
 def api_voice_context():
     """Return the full student dossier for the voice session system prompt."""
@@ -744,9 +768,15 @@ def ws_voice(ws):
 
     # Wait for setupComplete
     try:
-        setup_resp = json.loads(gws.recv())
+        raw_setup = gws.recv()
+        if not raw_setup:
+            ws.send(json.dumps({"type": "error", "message": "Gemini Live rejected the connection — check that the GEMINI_API_KEY has Live API access enabled in Google AI Studio"}))
+            gws.close()
+            return
+        setup_resp = json.loads(raw_setup)
         if "setupComplete" not in setup_resp:
-            ws.send(json.dumps({"type": "error", "message": "Gemini setup failed"}))
+            logger.warning("Gemini Live unexpected setup response: %s", raw_setup[:200])
+            ws.send(json.dumps({"type": "error", "message": f"Gemini setup unexpected response: {raw_setup[:100]}"}))
             gws.close()
             return
     except Exception as e:
@@ -755,7 +785,7 @@ def ws_voice(ws):
         return
 
     ws.send(json.dumps({"type": "ready"}))
-    logger.info("Voice session started (subject=%s exam=%s)", subject, exam)
+    logger.info("Voice session started")
 
     stop_event = threading.Event()
 

@@ -194,7 +194,7 @@
         <div class="upload-area" id="a-upload">
             <div class="icon">✍️</div>
             <div class="label">Take Photo or Choose</div>
-            <div class="hint">Point camera at your written work</div>
+            <div class="hint">Tap multiple times to add more pages</div>
             <div class="file-count" id="a-count"></div>
             <input type="file" accept="image/*" capture="environment" multiple
                    onchange="handleFiles(this, 'a')">
@@ -228,18 +228,19 @@ function selectSubject(el) {
 }
 
 function handleFiles(input, type) {
-    const files = Array.from(input.files);
+    const newFiles = Array.from(input.files);
     if (type === 'q') {
-        questionFiles = files;
-        document.getElementById('q-upload').classList.toggle('has-files', files.length > 0);
-        document.getElementById('q-count').textContent = `${files.length} photo${files.length > 1 ? 's' : ''} selected`;
-        showPreviews(files, 'q-preview');
+        questionFiles = questionFiles.concat(newFiles);
+        document.getElementById('q-upload').classList.toggle('has-files', questionFiles.length > 0);
+        document.getElementById('q-count').textContent = `${questionFiles.length} photo${questionFiles.length > 1 ? 's' : ''} — tap again to add more`;
+        showPreviews(questionFiles, 'q-preview');
     } else {
-        answerFiles = files;
-        document.getElementById('a-upload').classList.toggle('has-files', files.length > 0);
-        document.getElementById('a-count').textContent = `${files.length} photo${files.length > 1 ? 's' : ''} selected`;
-        showPreviews(files, 'a-preview');
+        answerFiles = answerFiles.concat(newFiles);
+        document.getElementById('a-upload').classList.toggle('has-files', answerFiles.length > 0);
+        document.getElementById('a-count').textContent = `${answerFiles.length} page${answerFiles.length > 1 ? 's' : ''} — tap again to add more`;
+        showPreviews(answerFiles, 'a-preview');
     }
+    input.value = ''; // reset so same file can be re-added or new capture allowed
 }
 
 function showPreviews(files, containerId) {

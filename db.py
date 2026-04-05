@@ -62,6 +62,16 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_eval_timestamp ON evaluations(timestamp);
         CREATE INDEX IF NOT EXISTS idx_eval_subject ON evaluations(subject);
         CREATE INDEX IF NOT EXISTS idx_eval_batch ON evaluations(batch_id);
+
+        CREATE TABLE IF NOT EXISTS aha_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            subject TEXT,
+            topic TEXT,
+            note TEXT NOT NULL,
+            source TEXT DEFAULT 'debate'
+        );
+        CREATE INDEX IF NOT EXISTS idx_aha_timestamp ON aha_notes(timestamp);
     """
     )
     conn.commit()
@@ -218,6 +228,25 @@ def get_history(limit=50):
                   correctness, is_complete, encouragement, batch_id
            FROM evaluations ORDER BY id DESC LIMIT ?""",
         (limit,),
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def save_aha_note(note, subject="", topic="", source="debate"):
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO aha_notes (timestamp, subject, topic, note, source) VALUES (?,?,?,?,?)",
+        (datetime.now().isoformat(), subject, topic, note, source),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_aha_notes(limit=100):
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM aha_notes ORDER BY id DESC LIMIT ?", (limit,)
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
