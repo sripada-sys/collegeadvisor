@@ -660,6 +660,12 @@ def api_debate():
     try:
         reply = router.call("explain", prompt)
         reply = reply.strip()
+        # Save debate exchange to DB for parent progress review
+        threading.Thread(
+            target=db.save_debate_log,
+            args=(subject, topic, question_text, message or "", reply),
+            daemon=True,
+        ).start()
         # Auto-extract and save key insight in background — no latency impact
         threading.Thread(
             target=_auto_save_wow,

@@ -72,6 +72,17 @@ def init_db():
             source TEXT DEFAULT 'debate'
         );
         CREATE INDEX IF NOT EXISTS idx_wow_timestamp ON wow_notes(timestamp);
+
+        CREATE TABLE IF NOT EXISTS debate_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            subject TEXT,
+            topic TEXT,
+            question_text TEXT,
+            student_message TEXT,
+            mentor_reply TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_debate_timestamp ON debate_logs(timestamp);
     """
     )
     conn.commit()
@@ -393,14 +404,31 @@ def get_voice_context():
     return "\n".join(lines)
 
 
+def save_debate_log(subject, topic, question_text, student_message, mentor_reply):
+    conn = get_db()
+    conn.execute(
+        """INSERT INTO debate_logs
+           (timestamp, subject, topic, question_text, student_message, mentor_reply)
+           VALUES (?,?,?,?,?,?)""",
+        (datetime.now().isoformat(), subject or "", topic or "",
+         question_text or "", student_message or "", mentor_reply or ""),
+    )
+    conn.commit()
+    conn.close()
+
+
 def export_for_backup():
     """Export entire DB as JSON for git backup."""
     conn = get_db()
     evaluations = conn.execute("SELECT * FROM evaluations ORDER BY id").fetchall()
     practice = conn.execute("SELECT * FROM practice_problems ORDER BY id").fetchall()
+    wow_notes = conn.execute("SELECT * FROM wow_notes ORDER BY id").fetchall()
+    debate_logs = conn.execute("SELECT * FROM debate_logs ORDER BY id").fetchall()
     conn.close()
     return {
         "exported_at": datetime.now().isoformat(),
         "evaluations": [dict(r) for r in evaluations],
         "practice_problems": [dict(r) for r in practice],
+        "wow_notes": [dict(r) for r in wow_notes],
+        "debate_logs": [dict(r) for r in debate_logs],
     }
