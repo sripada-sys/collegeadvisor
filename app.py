@@ -903,6 +903,8 @@ def ws_voice(ws):
 
 # ─── Auto-update & Backup ───
 
+_backup_lock = threading.Lock()  # prevents auto_update + daily backup running concurrently
+
 
 def auto_update():
     """Pull latest code from GitHub on startup.
@@ -936,8 +938,7 @@ def auto_update():
             cwd=BASE_DIR, capture_output=True, text=True, timeout=10,
         ).stdout.strip()
 
-        # Step 3: compare against last applied hash (not git HEAD — that
-        # advances with backup commits and would diverge from origin/main)
+        # Step 3: compare against last applied hash
         last_hash = ""
         try:
             last_hash = Path(HASH_FILE).read_text().strip()
@@ -957,39 +958,66 @@ def auto_update():
             logger.warning(f"Auto-update: checkout failed — {checkout.stderr.strip()}")
             return
 
-        # Step 5: install any new/updated packages silently
-        pip = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "-r",
-             os.path.join(BASE_DIR, "requirements.txt"), "-q", "--disable-pip-version-check"],
-            cwd=BASE_DIR, capture_output=True, text=True, timeout=120,
-        )
-        if pip.returncode != 0:
-            logger.warning(f"Auto-update: pip install warning — {pip.stderr.strip()[:200]}")
-        else:
-            logger.info("Auto-update: packages up to date")
+        # Step 5: install packages. On failure/timeout, REVERT code files so the
+        # app keeps running cleanly on old code. Next restart retries the full cycle.
+        def _revert_checkout():
+            subprocess.run(
+                ["git", "checkout", "HEAD", "--"] + CODE_FILES,
+                cwd=BASE_DIR, capture_output=True, timeout=30,
+            )
 
-        # Back up local DB before restarting so no evaluated work is lost
+        try:
+            pip = subprocess.run(
+                [sys.executable, "-m", "pip", "install", "-r",
+                 os.path.join(BASE_DIR, "requirements.txt"), "-q", "--disable-pip-version-check"],
+                cwd=BASE_DIR, capture_output=True, text=True, timeout=300,
+            )
+        except subprocess.TimeoutExpired:
+            logger.error("Auto-update: pip install timed out — reverting code, will retry next restart")
+            _revert_checkout()
+            return
+
+        if pip.returncode != 0:
+            logger.error(f"Auto-update: pip install failed — reverting code, will retry next restart\n{pip.stderr.strip()[:300]}")
+            _revert_checkout()
+            return
+
+        logger.info("Auto-update: packages up to date")
+
+        # Step 6: back up local DB before restarting so no evaluated work is lost
         logger.info("Auto-update: backing up local data before restart...")
         backup_to_git()
 
-        # Step 6: save hash AFTER backup, using the current origin/main tip.
-        # backup_to_git() may push a new commit, advancing origin/main.
-        # If we saved remote_hash BEFORE backup, the next restart would see
-        # a new origin/main tip (the backup commit) and re-trigger the update
-        # endlessly. Re-fetching and saving the post-backup tip breaks the loop.
-        subprocess.run(
+        # Step 7: re-fetch hash AFTER backup — backup may have pushed a new commit,
+        # advancing origin/main. Save that post-backup tip so next restart matches.
+        # If this fetch fails, skip saving hash entirely (safer to re-run update
+        # than to save a stale hash and miss a future update).
+        post_fetch = subprocess.run(
             ["git", "fetch", "origin", "main"],
             cwd=BASE_DIR, capture_output=True, text=True, timeout=30,
         )
-        post_hash = subprocess.run(
-            ["git", "rev-parse", "origin/main"],
-            cwd=BASE_DIR, capture_output=True, text=True, timeout=10,
-        ).stdout.strip()
-        os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
-        Path(HASH_FILE).write_text(post_hash or remote_hash)
+        if post_fetch.returncode == 0:
+            post_hash = subprocess.run(
+                ["git", "rev-parse", "origin/main"],
+                cwd=BASE_DIR, capture_output=True, text=True, timeout=10,
+            ).stdout.strip()
+        else:
+            post_hash = ""  # don't save — next restart will re-run update (safe)
+
+        if post_hash:
+            os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
+            try:
+                Path(HASH_FILE).write_text(post_hash)
+            except Exception as e:
+                # Hash write failed — log it but still restart. The update was
+                # applied successfully; next restart will re-apply (idempotent).
+                logger.warning(f"Auto-update: could not save hash file — {e}. Will re-apply on next restart.")
 
         logger.info(f"Auto-update: applied {remote_hash[:8]}, restarting...")
-        os.execv(sys.executable, [sys.executable] + sys.argv)
+        # Use absolute path: sys.argv[0] may be relative, causing FileNotFoundError
+        # after os.execv loses the original systemd WorkingDirectory context.
+        abs_app = os.path.join(BASE_DIR, "app.py")
+        os.execv(sys.executable, [sys.executable, abs_app] + sys.argv[1:])
 
     except Exception as e:
         logger.warning(f"Auto-update skipped: {e}")
@@ -997,6 +1025,11 @@ def auto_update():
 
 def backup_to_git():
     """Export progress data and push to GitHub."""
+    with _backup_lock:  # prevent concurrent runs (daily thread vs auto_update)
+        _do_backup()
+
+
+def _do_backup():
     data_dir = os.path.join(BASE_DIR, "data")
     os.makedirs(data_dir, exist_ok=True)
 
