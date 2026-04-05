@@ -962,13 +962,25 @@ def auto_update():
         else:
             logger.info("Auto-update: packages up to date")
 
-        # Step 6: save applied hash so we don't re-apply on next restart
-        os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
-        Path(HASH_FILE).write_text(remote_hash)
-
         # Back up local DB before restarting so no evaluated work is lost
         logger.info("Auto-update: backing up local data before restart...")
         backup_to_git()
+
+        # Step 6: save hash AFTER backup, using the current origin/main tip.
+        # backup_to_git() may push a new commit, advancing origin/main.
+        # If we saved remote_hash BEFORE backup, the next restart would see
+        # a new origin/main tip (the backup commit) and re-trigger the update
+        # endlessly. Re-fetching and saving the post-backup tip breaks the loop.
+        subprocess.run(
+            ["git", "fetch", "origin", "main"],
+            cwd=BASE_DIR, capture_output=True, text=True, timeout=30,
+        )
+        post_hash = subprocess.run(
+            ["git", "rev-parse", "origin/main"],
+            cwd=BASE_DIR, capture_output=True, text=True, timeout=10,
+        ).stdout.strip()
+        os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
+        Path(HASH_FILE).write_text(post_hash or remote_hash)
 
         logger.info(f"Auto-update: applied {remote_hash[:8]}, restarting...")
         os.execv(sys.executable, [sys.executable] + sys.argv)
