@@ -918,7 +918,7 @@ def auto_update():
     CODE_FILES = [
         "app.py", "db.py", "models.py", "setup.sh",
         "requirements.txt", "mathtutor.py", "generate_guide.py",
-        "templates/", "static/",
+        "templates/",
     ]
     HASH_FILE = os.path.join(BASE_DIR, "data", ".last_code_update")
 
@@ -955,7 +955,8 @@ def auto_update():
             cwd=BASE_DIR, capture_output=True, text=True, timeout=30,
         )
         if checkout.returncode != 0:
-            logger.warning(f"Auto-update: checkout failed — {checkout.stderr.strip()}")
+            logger.error(f"Auto-update: checkout failed — {checkout.stderr.strip()}")
+            logger.error("Auto-update: check CODE_FILES list — a path may not exist in the repo")
             return
 
         # Step 5: install packages. On failure/timeout, REVERT code files so the
