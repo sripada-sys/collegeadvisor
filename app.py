@@ -388,6 +388,9 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers):
 
     logger.info(f"Batch {batch_id}: evaluated {len(results)} problems")
 
+    # Back up immediately after every evaluation so logs + data are visible remotely
+    threading.Thread(target=backup_to_git, daemon=True).start()
+
 
 @app.route("/api/results/latest")
 def api_results_latest():
