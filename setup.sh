@@ -21,6 +21,17 @@ else
     echo "[2/4] .env already exists — skipping"
 fi
 
+# Configure git credentials so backup pushes work
+if [ -f .env ]; then
+    GITHUB_TOKEN=$(grep '^GITHUB_TOKEN=' .env | cut -d= -f2 | tr -d '"' | tr -d "'")
+    if [ -n "$GITHUB_TOKEN" ]; then
+        git remote set-url origin "https://${GITHUB_TOKEN}@github.com/sripada-sys/collegeadvisor.git"
+        echo "[2b] Git backup credentials configured"
+    else
+        echo "[2b] WARNING: GITHUB_TOKEN not set in .env — progress backups will not push to GitHub"
+    fi
+fi
+
 # Create data directory for backups
 mkdir -p data uploads
 echo "[3/4] Directories ready"

@@ -1,5 +1,6 @@
 # Secrets
 .env
+INSTALL.txt
 
 # Database (backed up via data/progress_backup.json)
 tutor.db
