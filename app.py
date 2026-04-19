@@ -338,18 +338,32 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers):
         if isinstance(results, dict):
             results = [results]
     except json.JSONDecodeError:
-        results = [
-            {
-                "problem_number": "?",
-                "question_summary": "Could not parse structured response",
-                "correctness": 0,
-                "what_went_right": "",
-                "where_it_broke": raw_response[:500],
-                "mistakes": [],
-                "hint_not_answer": "",
-                "encouragement": "",
-            }
-        ]
+        # First parse failed — retry once with an explicit JSON-only instruction
+        logger.warning(f"Batch {batch_id}: JSON parse failed, retrying with JSON-only prompt")
+        retry_prompt = (
+            "Your previous response could not be parsed as JSON. "
+            "Return ONLY a raw JSON array with no markdown, no backticks, no commentary. "
+            "Use the same structure as before.\n\n"
+            + EVALUATE_PROMPT.format(subject=subject, exam_context=EXAM_CONTEXTS.get(exam, EXAM_CONTEXTS["general"]))
+        )
+        try:
+            raw_response = router.call("evaluate", retry_prompt, images=all_images)
+            results = parse_ai_json(raw_response)
+            if isinstance(results, dict):
+                results = [results]
+        except (json.JSONDecodeError, Exception):
+            results = [
+                {
+                    "problem_number": "?",
+                    "question_summary": "Could not parse structured response",
+                    "correctness": 0,
+                    "what_went_right": "",
+                    "where_it_broke": raw_response[:500],
+                    "mistakes": [],
+                    "hint_not_answer": "",
+                    "encouragement": "",
+                }
+            ]
 
     for result in results:
         db.save_evaluation(
@@ -1053,6 +1067,13 @@ def _do_backup():
             cwd=BASE_DIR,
             capture_output=True,
             timeout=10,
+        )
+        # Pull --rebase first so our backup commit sits on top of any code
+        # updates or other backup commits that may have advanced origin/main.
+        # Without this, push is rejected with non-fast-forward error.
+        subprocess.run(
+            ["git", "pull", "--rebase"],
+            cwd=BASE_DIR, capture_output=True, timeout=30
         )
         subprocess.run(
             ["git", "push"], cwd=BASE_DIR, capture_output=True, timeout=30

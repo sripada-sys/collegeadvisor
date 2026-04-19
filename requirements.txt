@@ -8,5 +8,5 @@ google-genai>=1.0
 Pillow>=10.0
 
 # Optional — install if you have the API key
-# anthropic>=0.40      # For Claude (best for proofs & feedback)
-# openai>=1.50         # For GPT-4o (best handwriting reading) + Perplexity
+anthropic>=0.40      # For Claude (best for proofs & feedback)
+openai>=1.50         # For GPT-4o (best handwriting reading) + Perplexity
