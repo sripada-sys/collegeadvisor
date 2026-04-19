@@ -242,7 +242,9 @@ def get_history(limit=50):
     conn = get_db()
     rows = conn.execute(
         """SELECT id, timestamp, subject, exam, problem_number, topic, subtopic,
-                  correctness, is_complete, encouragement, batch_id
+                  correctness, is_complete, encouragement, batch_id,
+                  question_text, question_summary, what_went_right, where_it_broke,
+                  mistakes, missing_concept, correct_answer
            FROM evaluations ORDER BY id DESC LIMIT ?""",
         (limit,),
     ).fetchall()
