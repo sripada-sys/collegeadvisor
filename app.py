@@ -388,8 +388,25 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers):
 
     logger.info(f"Batch {batch_id}: evaluated {len(results)} problems")
 
-    # Back up immediately after every evaluation so logs + data are visible remotely
-    threading.Thread(target=backup_to_git, daemon=True).start()
+    # Debounced backup — waits 60s after the LAST evaluation before pushing.
+    # If another batch completes during the wait, the timer resets.
+    # This prevents 50 sequential evaluations from triggering 50 git pushes.
+    _schedule_debounced_backup()
+
+
+_backup_timer: threading.Timer | None = None
+_backup_timer_lock = threading.Lock()
+
+
+def _schedule_debounced_backup(delay: int = 60):
+    """Cancel any pending backup and schedule a new one delay seconds from now."""
+    global _backup_timer
+    with _backup_timer_lock:
+        if _backup_timer is not None:
+            _backup_timer.cancel()
+        _backup_timer = threading.Timer(delay, backup_to_git)
+        _backup_timer.daemon = True
+        _backup_timer.start()
 
 
 @app.route("/api/results/latest")
