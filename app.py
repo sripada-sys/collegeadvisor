@@ -16,6 +16,7 @@ Setup: cp .env.example .env && edit .env with your API keys
 
 import json
 import logging
+import logging.handlers
 import os
 import socket
 import subprocess
@@ -62,6 +63,15 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# Also write logs to a rotating file so we can include them in the git backup
+_LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "app.log")
+os.makedirs(os.path.dirname(_LOG_FILE), exist_ok=True)
+_file_handler = logging.handlers.RotatingFileHandler(
+    _LOG_FILE, maxBytes=256 * 1024, backupCount=1, encoding="utf-8"
+)
+_file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+logging.getLogger().addHandler(_file_handler)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
@@ -1051,6 +1061,14 @@ def _do_backup():
     try:
         export = db.export_for_backup()
         backup_path = os.path.join(data_dir, "progress_backup.json")
+
+        # Include last 200 log lines so we can diagnose issues remotely
+        try:
+            log_lines = Path(_LOG_FILE).read_text(encoding="utf-8").splitlines()
+            export["app_log_tail"] = log_lines[-200:]
+        except Exception:
+            export["app_log_tail"] = []
+
         with open(backup_path, "w") as f:
             json.dump(export, f, indent=2)
 
