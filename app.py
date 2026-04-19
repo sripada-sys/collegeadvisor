@@ -398,7 +398,7 @@ _backup_timer: threading.Timer | None = None
 _backup_timer_lock = threading.Lock()
 
 
-def _schedule_debounced_backup(delay: int = 60):
+def _schedule_debounced_backup(delay: int = 120):
     """Cancel any pending backup and schedule a new one delay seconds from now."""
     global _backup_timer
     with _backup_timer_lock:
