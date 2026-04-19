@@ -945,6 +945,19 @@
 
         <!-- History Tab -->
         <section id="tab-history" class="tab">
+            <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+                <select id="hist-filter-topic" onchange="applyHistoryFilters()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px">
+                    <option value="">All topics</option>
+                </select>
+                <select id="hist-filter-score" onchange="applyHistoryFilters()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px">
+                    <option value="">All scores</option>
+                    <option value="5">Perfect (5/5)</option>
+                    <option value="4">Good (4/5)</option>
+                    <option value="3">Almost (3/5)</option>
+                    <option value="low">Needs work (≤2/5)</option>
+                </select>
+                <span id="hist-count" style="font-size:12px;color:var(--text2);margin-left:4px"></span>
+            </div>
             <table class="history-table">
                 <thead>
                     <tr>
@@ -959,6 +972,14 @@
                 <tbody id="history-body"></tbody>
             </table>
         </section>
+
+        <!-- History Detail Modal -->
+        <div id="hist-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;overflow-y:auto;padding:24px" onclick="if(event.target===this)closeHistModal()">
+            <div style="max-width:720px;margin:0 auto;background:var(--surface);border-radius:16px;border:1px solid var(--border);padding:24px;position:relative">
+                <button onclick="closeHistModal()" style="position:absolute;top:16px;right:16px;background:var(--surface2);border:none;color:var(--text);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px">✕ Close</button>
+                <div id="hist-modal-body"></div>
+            </div>
+        </div>
 
         <!-- Guide Tab -->
         <!-- Wow Notes Tab -->
@@ -1673,17 +1694,104 @@ function renderProgress(data) {
 }
 
 // ─── History ───
+let _allHistoryRows = [];
+
 async function loadHistory() {
     try {
         const res = await fetch('/api/history');
         const data = await res.json();
-        renderHistory(data);
+        _allHistoryRows = data;
+        // Populate topic filter
+        const topics = [...new Set(data.map(r => r.topic).filter(Boolean))].sort();
+        const sel = document.getElementById('hist-filter-topic');
+        sel.innerHTML = '<option value="">All topics</option>' +
+            topics.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+        applyHistoryFilters();
     } catch(e) {
         console.error('History load error:', e);
     }
 }
 
-// ─── Guide ───
+function applyHistoryFilters() {
+    const topic = document.getElementById('hist-filter-topic').value;
+    const scoreVal = document.getElementById('hist-filter-score').value;
+    let rows = _allHistoryRows;
+    if (topic) rows = rows.filter(r => r.topic === topic);
+    if (scoreVal === 'low') rows = rows.filter(r => (r.correctness || 0) <= 2);
+    else if (scoreVal) rows = rows.filter(r => (r.correctness || 0) === parseInt(scoreVal));
+    document.getElementById('hist-count').textContent = `${rows.length} question${rows.length !== 1 ? 's' : ''}`;
+    renderHistory(rows);
+}
+
+function openHistModal(idx) {
+    const r = _allHistoryRows[idx];
+    if (!r) return;
+    const score = r.correctness || 0;
+    const dotCls = score >= 4 ? 'on-g' : score === 3 ? 'on-y' : 'on-r';
+    const dots = Array(5).fill(0).map((_, i) =>
+        `<div class="q-dot ${i < score ? dotCls : ''}" style="width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:3px;background:${i < score ? (score>=4?'var(--green)':score>=2?'var(--yellow)':'var(--red)'):'var(--border)'}"></div>`
+    ).join('');
+    let mistakesHtml = '';
+    try {
+        const m = typeof r.mistakes === 'string' ? JSON.parse(r.mistakes) : (r.mistakes || []);
+        if (m.length) mistakesHtml = m.map(x => `<span class="mistake-tag">${esc(x)}</span>`).join('');
+    } catch(e) {}
+    const questionBox = (r.question_text || r.question_summary) ? `
+        <div class="q-question-box"><div class="q-qlabel">Question</div>${esc(r.question_text || r.question_summary)}</div>` : '';
+    const goodSection = r.what_went_right ? `
+        <div class="q-feedback-section good"><div class="q-fb-title">What you got right</div><div class="q-fb-body">${esc(r.what_went_right)}</div></div>` : '';
+    const slippedSection = (r.where_it_broke && r.where_it_broke.toLowerCase() !== 'nowhere') ? `
+        <div class="q-feedback-section bad"><div class="q-fb-title">Where it slipped</div><div class="q-fb-body">${esc(r.where_it_broke)}${mistakesHtml ? `<div style="margin-top:8px">${mistakesHtml}</div>` : ''}</div></div>` : '';
+    const studySection = (r.missing_concept && r.missing_concept.toLowerCase() !== 'none') ? `
+        <div class="q-feedback-section study"><div class="q-fb-title">Brush up on</div><div class="q-fb-body">${esc(r.missing_concept)}</div></div>` : '';
+    const answerReveal = r.correct_answer ? `
+        <div class="answer-reveal" id="hm-ans" style="margin-top:14px">
+            <button class="answer-reveal-btn" onclick="toggleAnswer('hm-ans')">📖 See correct answer <span class="reveal-arrow">▼</span></button>
+            <div class="answer-reveal-body"><div class="answer-reveal-text">${esc(r.correct_answer)}</div></div>
+        </div>` : '';
+    document.getElementById('hist-modal-body').innerHTML = `
+        <div style="margin-bottom:16px">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:4px">${(r.timestamp||'').slice(0,10)} · ${esc(r.subject||'')} · ${esc(r.exam||'')}</div>
+            <div style="font-size:18px;font-weight:700">Q${esc(String(r.problem_number||'?'))} — ${esc(r.topic||r.question_summary||'')}</div>
+            <div style="margin-top:8px">${dots} <span style="font-size:13px;color:var(--text2);margin-left:6px">${score}/5</span></div>
+        </div>
+        ${questionBox}${goodSection}${slippedSection}${studySection}${answerReveal}
+        ${r.encouragement ? `<div class="q-encouragement" style="margin-top:14px">${esc(r.encouragement)}</div>` : ''}
+    `;
+    document.getElementById('hist-modal').style.display = 'block';
+    // Re-render math
+    if (window.renderMathInElement) {
+        renderMathInElement(document.getElementById('hist-modal-body'), {throwOnError:false});
+    }
+}
+
+function closeHistModal() {
+    document.getElementById('hist-modal').style.display = 'none';
+}
+
+function renderHistory(rows) {
+    const body = document.getElementById('history-body');
+    if (!rows || rows.length === 0) {
+        body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2)">No attempts yet</td></tr>';
+        return;
+    }
+    // Map filtered rows back to original indices for modal lookup
+    body.innerHTML = rows.map(r => {
+        const origIdx = _allHistoryRows.indexOf(r);
+        const score = r.correctness || 0;
+        const blocks = Array(5).fill(0).map((_, i) =>
+            `<div style="width:12px;height:12px;border-radius:2px;background:${i < score ? (score >= 4 ? 'var(--green)' : score >= 2 ? 'var(--yellow)' : 'var(--red)') : 'var(--border)'};display:inline-block;margin-right:2px;"></div>`
+        ).join('');
+        return `<tr onclick="openHistModal(${origIdx})" style="cursor:pointer" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+            <td>${(r.timestamp || '').slice(0, 10)}</td>
+            <td><span class="subject-badge ${esc(r.subject)}">${esc(r.subject)}</span></td>
+            <td>${esc(r.exam)}</td>
+            <td>Q${esc(r.problem_number || '?')}</td>
+            <td>${esc(r.topic || '')}</td>
+            <td>${blocks}</td>
+        </tr>`;
+    }).join('');
+}
 let guideLoaded = false;
 async function loadGuide() {
     if (guideLoaded) return;
@@ -1721,28 +1829,6 @@ function printGuide() {
         </style></head><body>${content}</body></html>`);
     w.document.close();
     w.print();
-}
-
-function renderHistory(rows) {
-    const body = document.getElementById('history-body');
-    if (!rows || rows.length === 0) {
-        body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2)">No attempts yet</td></tr>';
-        return;
-    }
-    body.innerHTML = rows.map(r => {
-        const score = r.correctness || 0;
-        const blocks = Array(5).fill(0).map((_, i) =>
-            `<div class="block ${i < score ? (score >= 4 ? 'filled' : score >= 2 ? 'mid' : 'low') : ''}" style="width:12px;height:12px;border-radius:2px;background:${i < score ? (score >= 4 ? 'var(--green)' : score >= 2 ? 'var(--yellow)' : 'var(--red)') : 'var(--border)'};display:inline-block;margin-right:2px;"></div>`
-        ).join('');
-        return `<tr>
-            <td>${(r.timestamp || '').slice(0, 10)}</td>
-            <td><span class="subject-badge ${esc(r.subject)}">${esc(r.subject)}</span></td>
-            <td>${esc(r.exam)}</td>
-            <td>Q${esc(r.problem_number || '?')}</td>
-            <td>${esc(r.topic || '')}</td>
-            <td>${blocks}</td>
-        </tr>`;
-    }).join('');
 }
 
 // ─── Canvas Scratch Pad ───
