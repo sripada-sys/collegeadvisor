@@ -961,12 +961,12 @@
             <table class="history-table">
                 <thead>
                     <tr>
-                        <th>Date</th>
+                        <th onclick="sortHistory('timestamp')" style="cursor:pointer;user-select:none">Date <span id="sort-ind-timestamp"></span></th>
                         <th>Subject</th>
                         <th>Exam</th>
                         <th>Problem</th>
-                        <th>Topic</th>
-                        <th>Score</th>
+                        <th onclick="sortHistory('topic')" style="cursor:pointer;user-select:none">Topic <span id="sort-ind-topic"></span></th>
+                        <th onclick="sortHistory('correctness')" style="cursor:pointer;user-select:none">Score <span id="sort-ind-correctness"></span></th>
                     </tr>
                 </thead>
                 <tbody id="history-body"></tbody>
@@ -1695,6 +1695,18 @@ function renderProgress(data) {
 
 // ─── History ───
 let _allHistoryRows = [];
+let _histSortKey = 'timestamp';
+let _histSortAsc = false; // newest first by default
+
+function sortHistory(key) {
+    if (_histSortKey === key) _histSortAsc = !_histSortAsc;
+    else { _histSortKey = key; _histSortAsc = key === 'topic'; }
+    ['timestamp','topic','correctness'].forEach(k => {
+        const el = document.getElementById('sort-ind-' + k);
+        if (el) el.textContent = k === _histSortKey ? (_histSortAsc ? ' ▲' : ' ▼') : '';
+    });
+    applyHistoryFilters();
+}
 
 async function loadHistory() {
     try {
@@ -1719,6 +1731,13 @@ function applyHistoryFilters() {
     if (topic) rows = rows.filter(r => r.topic === topic);
     if (scoreVal === 'low') rows = rows.filter(r => (r.correctness || 0) <= 2);
     else if (scoreVal) rows = rows.filter(r => (r.correctness || 0) === parseInt(scoreVal));
+    // Sort
+    rows = [...rows].sort((a, b) => {
+        let va = a[_histSortKey] || '', vb = b[_histSortKey] || '';
+        if (_histSortKey === 'correctness') { va = va || 0; vb = vb || 0; }
+        const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+        return _histSortAsc ? cmp : -cmp;
+    });
     document.getElementById('hist-count').textContent = `${rows.length} question${rows.length !== 1 ? 's' : ''}`;
     renderHistory(rows);
 }
