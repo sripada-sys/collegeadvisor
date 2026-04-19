@@ -32,6 +32,10 @@ if [ -f .env ]; then
     fi
 fi
 
+# Configure git identity so backup commits work without prompting
+git config user.email "mathmentor@local" 2>/dev/null || true
+git config user.name "MathMentor" 2>/dev/null || true
+
 # Create data directory for backups
 mkdir -p data uploads
 echo "[3/4] Directories ready"
