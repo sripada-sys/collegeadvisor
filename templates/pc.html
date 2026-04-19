@@ -1028,6 +1028,7 @@
 <script>
 // ─── State ───
 let lastBatchId = null;
+let _sessionResults = [];   // accumulates all batches since page load
 let trendChart = null;
 let canvasHistory = [];
 let resultDebateContexts = {};
@@ -1121,7 +1122,8 @@ function startPolling() {
                 const batchId = data.results[0].batch_id;
                 if (batchId !== lastBatchId) {
                     lastBatchId = batchId;
-                    renderResults(data.results);
+                    _sessionResults = _sessionResults.concat(data.results);
+                    renderResults(_sessionResults);
                 }
             }
         } catch (e) {
@@ -1228,9 +1230,9 @@ function renderHints(hints) {
 function renderResults(results) {
     const container = document.getElementById('results-container');
 
-    // Store question images and metadata for hint requests
+    // Store question images and metadata for hint requests (use the most recent question)
     if (results && results.length > 0) {
-        const r = results[0];
+        const r = results[results.length - 1];
         latestQuestionImages = typeof r.question_images === 'string' ? JSON.parse(r.question_images) : (r.question_images || []);
         latestSubject = r.subject || 'maths';
         latestExam = r.exam || 'general';
