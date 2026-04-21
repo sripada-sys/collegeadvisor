@@ -886,3 +886,33 @@
  * Running on http://127.0.0.1:5000
  * Running on http://192.168.0.31:5000
 2026-04-20 17:16:21,461 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-20 17:16:23,908 [INFO] Progress backed up to GitHub
+2026-04-20 20:54:15,458 [INFO] 127.0.0.1 - - [20/Apr/2026 20:54:15] "GET /pc HTTP/1.1" 200 -
+2026-04-20 20:54:18,075 [INFO] 127.0.0.1 - - [20/Apr/2026 20:54:18] "GET /api/progress HTTP/1.1" 200 -
+2026-04-20 20:54:18,600 [INFO] 127.0.0.1 - - [20/Apr/2026 20:54:18] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-20 20:54:21,597 [INFO] 127.0.0.1 - - [20/Apr/2026 20:54:21] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-20 20:54:21,785 [INFO] 127.0.0.1 - - [20/Apr/2026 20:54:21] "GET /api/history HTTP/1.1" 200 -
+2026-04-20 20:54:24,813 [INFO] 127.0.0.1 - - [20/Apr/2026 20:54:24] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-21 17:00:13,267 [INFO] Gemini: ready
+2026-04-21 17:00:13,834 [INFO] Claude: ready
+2026-04-21 17:00:14,389 [INFO] OpenAI: ready
+2026-04-21 17:00:14,441 [INFO] Perplexity: ready
+2026-04-21 17:00:14,442 [INFO] Running startup health check on all API keys...
+2026-04-21 17:00:14,442 [INFO] AFC is enabled with max remote calls: 10.
+2026-04-21 17:00:15,579 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2026-04-21 17:00:15,584 [INFO]   gemini: OK
+2026-04-21 17:00:16,054 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-04-21 17:00:16,055 [WARNING]   claude: NO CREDITS — disabling
+2026-04-21 17:00:18,411 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-21 17:00:18,435 [INFO]   openai: OK
+2026-04-21 17:00:19,960 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-21 17:00:19,962 [INFO]   perplexity: OK
+2026-04-21 17:00:19,962 [INFO] Available models: gemini, openai, perplexity
+2026-04-21 17:00:19,971 [INFO] ==================================================
+2026-04-21 17:00:19,971 [INFO]   MathMentor is running!
+2026-04-21 17:00:19,971 [INFO]   PC dashboard : http://localhost:5000/pc
+2026-04-21 17:00:19,971 [INFO]   Phone upload : http://192.168.0.31:5000/phone
+2026-04-21 17:00:19,971 [INFO]   Models       : gemini, openai, perplexity
+2026-04-21 17:00:19,971 [INFO] ==================================================
+2026-04-21 17:00:22,979 [INFO] Auto-update: packages up to date
+2026-04-21 17:00:22,979 [INFO] Auto-update: backing up local data before restart...
