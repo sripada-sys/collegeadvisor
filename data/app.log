@@ -945,3 +945,27 @@
  * Running on http://127.0.0.1:5000
  * Running on http://192.168.0.31:5000
 2026-04-21 17:00:34,420 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-21 17:00:36,481 [INFO] Progress backed up to GitHub
+2026-04-22 17:41:39,373 [INFO] Gemini: ready
+2026-04-22 17:41:40,029 [INFO] Claude: ready
+2026-04-22 17:41:40,601 [INFO] OpenAI: ready
+2026-04-22 17:41:40,653 [INFO] Perplexity: ready
+2026-04-22 17:41:40,654 [INFO] Running startup health check on all API keys...
+2026-04-22 17:41:40,654 [INFO] AFC is enabled with max remote calls: 10.
+2026-04-22 17:41:41,539 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2026-04-22 17:41:41,545 [INFO]   gemini: OK
+2026-04-22 17:41:41,934 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-04-22 17:41:41,935 [WARNING]   claude: NO CREDITS — disabling
+2026-04-22 17:41:44,300 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-22 17:41:44,313 [INFO]   openai: OK
+2026-04-22 17:41:45,803 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-22 17:41:45,808 [INFO]   perplexity: OK
+2026-04-22 17:41:45,808 [INFO] Available models: gemini, openai, perplexity
+2026-04-22 17:41:45,824 [INFO] ==================================================
+2026-04-22 17:41:45,824 [INFO]   MathMentor is running!
+2026-04-22 17:41:45,825 [INFO]   PC dashboard : http://localhost:5000/pc
+2026-04-22 17:41:45,825 [INFO]   Phone upload : http://192.168.0.31:5000/phone
+2026-04-22 17:41:45,825 [INFO]   Models       : gemini, openai, perplexity
+2026-04-22 17:41:45,825 [INFO] ==================================================
+2026-04-22 17:41:48,732 [INFO] Auto-update: packages up to date
+2026-04-22 17:41:48,732 [INFO] Auto-update: backing up local data before restart...
