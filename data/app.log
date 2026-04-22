@@ -969,3 +969,32 @@
 2026-04-22 17:41:45,825 [INFO] ==================================================
 2026-04-22 17:41:48,732 [INFO] Auto-update: packages up to date
 2026-04-22 17:41:48,732 [INFO] Auto-update: backing up local data before restart...
+2026-04-22 17:41:52,056 [INFO] Progress backed up to GitHub
+2026-04-22 17:41:52,717 [INFO] Auto-update: applied c4ba4b23, restarting...
+2026-04-22 17:41:54,885 [INFO] Gemini: ready
+2026-04-22 17:41:55,532 [INFO] Claude: ready
+2026-04-22 17:41:56,435 [INFO] OpenAI: ready
+2026-04-22 17:41:56,509 [INFO] Perplexity: ready
+2026-04-22 17:41:56,510 [INFO] Running startup health check on all API keys...
+2026-04-22 17:41:56,510 [INFO] AFC is enabled with max remote calls: 10.
+2026-04-22 17:41:57,680 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2026-04-22 17:41:57,683 [INFO]   gemini: OK
+2026-04-22 17:41:57,995 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-04-22 17:41:57,996 [WARNING]   claude: NO CREDITS — disabling
+2026-04-22 17:41:58,988 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-22 17:41:59,008 [INFO]   openai: OK
+2026-04-22 17:42:00,649 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-22 17:42:00,651 [INFO]   perplexity: OK
+2026-04-22 17:42:00,651 [INFO] Available models: gemini, openai, perplexity
+2026-04-22 17:42:00,660 [INFO] ==================================================
+2026-04-22 17:42:00,660 [INFO]   MathMentor is running!
+2026-04-22 17:42:00,660 [INFO]   PC dashboard : http://localhost:5000/pc
+2026-04-22 17:42:00,660 [INFO]   Phone upload : http://192.168.0.31:5000/phone
+2026-04-22 17:42:00,660 [INFO]   Models       : gemini, openai, perplexity
+2026-04-22 17:42:00,660 [INFO] ==================================================
+2026-04-22 17:42:00,295 [INFO] Auto-update: already up to date
+2026-04-22 17:42:00,299 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.31:5000
+2026-04-22 17:42:00,299 [INFO] [33mPress CTRL+C to quit[0m
