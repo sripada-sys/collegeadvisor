@@ -998,3 +998,27 @@
  * Running on http://127.0.0.1:5000
  * Running on http://192.168.0.31:5000
 2026-04-22 17:42:00,299 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-22 17:42:03,008 [INFO] Progress backed up to GitHub
+2026-04-22 22:29:00,492 [INFO] Gemini: ready
+2026-04-22 22:29:01,067 [INFO] Claude: ready
+2026-04-22 22:29:01,625 [INFO] OpenAI: ready
+2026-04-22 22:29:01,677 [INFO] Perplexity: ready
+2026-04-22 22:29:01,677 [INFO] Running startup health check on all API keys...
+2026-04-22 22:29:01,677 [INFO] AFC is enabled with max remote calls: 10.
+2026-04-22 22:29:02,932 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-04-22 22:29:02,935 [WARNING]   gemini: ERROR — 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again lat
+2026-04-22 22:29:04,110 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-04-22 22:29:04,111 [WARNING]   claude: NO CREDITS — disabling
+2026-04-22 22:29:09,890 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-22 22:29:09,903 [INFO]   openai: OK
+2026-04-22 22:29:11,220 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-22 22:29:11,223 [INFO]   perplexity: OK
+2026-04-22 22:29:11,224 [INFO] Available models: openai, perplexity
+2026-04-22 22:29:11,234 [INFO] ==================================================
+2026-04-22 22:29:11,234 [INFO]   MathMentor is running!
+2026-04-22 22:29:11,234 [INFO]   PC dashboard : http://localhost:5000/pc
+2026-04-22 22:29:11,234 [INFO]   Phone upload : http://192.168.0.31:5000/phone
+2026-04-22 22:29:11,234 [INFO]   Models       : openai, perplexity
+2026-04-22 22:29:11,234 [INFO] ==================================================
+2026-04-22 22:29:14,856 [INFO] Auto-update: packages up to date
+2026-04-22 22:29:14,856 [INFO] Auto-update: backing up local data before restart...
