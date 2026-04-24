@@ -1157,3 +1157,27 @@
  * Running on http://127.0.0.1:5000
  * Running on http://192.168.0.31:5000
 2026-04-24 16:11:09,158 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-24 16:11:11,550 [INFO] Progress backed up to GitHub
+2026-04-24 19:16:28,889 [INFO] Gemini: ready
+2026-04-24 19:16:29,555 [INFO] Claude: ready
+2026-04-24 19:16:30,116 [INFO] OpenAI: ready
+2026-04-24 19:16:30,168 [INFO] Perplexity: ready
+2026-04-24 19:16:30,168 [INFO] Running startup health check on all API keys...
+2026-04-24 19:16:30,168 [INFO] AFC is enabled with max remote calls: 10.
+2026-04-24 19:16:30,872 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-04-24 19:16:30,875 [WARNING]   gemini: ERROR — 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again lat
+2026-04-24 19:16:31,443 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-04-24 19:16:31,445 [WARNING]   claude: NO CREDITS — disabling
+2026-04-24 19:16:34,005 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 19:16:34,042 [INFO]   openai: OK
+2026-04-24 19:16:35,869 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 19:16:35,872 [INFO]   perplexity: OK
+2026-04-24 19:16:35,877 [INFO] Available models: openai, perplexity
+2026-04-24 19:16:35,894 [INFO] ==================================================
+2026-04-24 19:16:35,894 [INFO]   MathMentor is running!
+2026-04-24 19:16:35,894 [INFO]   PC dashboard : http://localhost:5000/pc
+2026-04-24 19:16:35,894 [INFO]   Phone upload : http://192.168.0.31:5000/phone
+2026-04-24 19:16:35,894 [INFO]   Models       : openai, perplexity
+2026-04-24 19:16:35,894 [INFO] ==================================================
+2026-04-24 19:16:38,757 [INFO] Auto-update: packages up to date
+2026-04-24 19:16:38,757 [INFO] Auto-update: backing up local data before restart...
