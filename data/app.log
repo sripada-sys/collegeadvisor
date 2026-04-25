@@ -2040,3 +2040,139 @@
 2026-04-25 21:37:37,418 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:37] "GET /api/results/latest HTTP/1.1" 200 -
 2026-04-25 21:37:40,605 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:40] "GET /api/results/latest HTTP/1.1" 200 -
 2026-04-25 21:37:43,601 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:43] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:37:46,607 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:46] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:37:48,758 [INFO] Progress backed up to GitHub
+2026-04-25 21:37:49,608 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:49] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:37:50,805 [INFO] Task 'explain' → perplexity
+2026-04-25 21:37:52,608 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:52] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:37:53,690 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-25 21:37:53,694 [INFO] Task 'explain' → perplexity
+2026-04-25 21:37:53,695 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:53] "POST /api/debate HTTP/1.1" 200 -
+2026-04-25 21:37:55,533 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-25 21:37:55,541 [INFO] Auto-saved wow note: Multiplying -2 by -4x using the distributive property gives +8x, since negative 
+2026-04-25 21:37:55,606 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:55] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:37:58,665 [INFO] 127.0.0.1 - - [25/Apr/2026 21:37:58] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:01,662 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:01] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:04,719 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:04] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:07,733 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:07] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:11,069 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:11] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:14,236 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:14] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:17,242 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:17] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:20,370 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:20] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:23,556 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:23] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:26,553 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:26] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:29,556 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:29] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:32,557 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:32] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:35,557 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:35] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:38,589 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:38] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:41,557 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:41] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:44,558 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:44] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:47,678 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:47] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:50,182 [INFO] Task 'explain' → perplexity
+2026-04-25 21:38:50,683 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:50] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:52,780 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-25 21:38:52,784 [INFO] Task 'explain' → perplexity
+2026-04-25 21:38:52,785 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:52] "POST /api/debate HTTP/1.1" 200 -
+2026-04-25 21:38:53,683 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:53] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:54,620 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-25 21:38:54,638 [INFO] Auto-saved wow note: **Distributing -2 over (-4x + ...) starts with (-2) × (-4x) = 8x.**[1][2][3][5]
+2026-04-25 21:38:56,684 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:56] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:38:59,692 [INFO] 127.0.0.1 - - [25/Apr/2026 21:38:59] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:02,681 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:02] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:05,686 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:05] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:08,687 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:08] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:11,697 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:11] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:14,733 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:14] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:17,739 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:17] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:20,742 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:20] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:23,742 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:23] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:26,743 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:26] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:29,744 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:29] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:32,792 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:32] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:35,793 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:35] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:38,793 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:38] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:41,793 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:41] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:45,044 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:45] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:48,078 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:48] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:51,079 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:51] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:54,235 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:54] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:39:57,228 [INFO] 127.0.0.1 - - [25/Apr/2026 21:39:57] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:00,230 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:00] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:03,231 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:03] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:06,229 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:06] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:06,487 [INFO] Task 'practice' → openai
+2026-04-25 21:40:09,232 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:09] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:09,608 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-25 21:40:09,624 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:09] "POST /api/practice HTTP/1.1" 200 -
+2026-04-25 21:40:12,232 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:12] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:15,231 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:15] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:18,234 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:18] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:21,229 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:21] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:24,234 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:24] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:27,234 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:27] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:30,235 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:30] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:33,236 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:33] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:36,232 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:36] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:39,235 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:39] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:42,236 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:42] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:45,237 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:45] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:48,236 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:48] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:51,238 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:51] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:54,238 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:54] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:40:57,238 [INFO] 127.0.0.1 - - [25/Apr/2026 21:40:57] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:00,413 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:00] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:03,592 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:03] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:06,591 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:06] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:09,592 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:09] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:12,618 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:12] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:15,626 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:15] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:17,642 [INFO] Task 'evaluate' → openai
+2026-04-25 21:41:17,643 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:17] "POST /api/upload HTTP/1.1" 200 -
+2026-04-25 21:41:18,658 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:18] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:19,102 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-25 21:41:19,104 [WARNING] Batch 77c3a123f0c1: JSON parse failed, retrying with JSON-only prompt
+2026-04-25 21:41:19,104 [INFO] Task 'evaluate' → openai
+2026-04-25 21:41:21,866 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:21] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:24,863 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:24] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:27,603 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-25 21:41:27,631 [INFO] Batch 77c3a123f0c1: evaluated 2 problems
+2026-04-25 21:41:28,012 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:28] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:31,052 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:31] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:34,053 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:34] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:37,047 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:37] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:40,054 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:40] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:43,054 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:43] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:46,137 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:46] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:49,134 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:49] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:52,153 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:52] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:55,138 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:55] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:41:58,141 [INFO] 127.0.0.1 - - [25/Apr/2026 21:41:58] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:01,138 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:01] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:04,144 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:04] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:07,138 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:07] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:10,138 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:10] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:13,145 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:13] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:16,146 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:16] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:19,145 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:19] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:22,146 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:22] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:25,154 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:25] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:28,144 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:28] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:31,147 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:31] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:34,157 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:34] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:37,161 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:37] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:40,164 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:40] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:43,165 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:43] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:46,163 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:46] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:49,163 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:49] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:52,163 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:52] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:55,160 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:55] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:42:58,163 [INFO] 127.0.0.1 - - [25/Apr/2026 21:42:58] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:01,159 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:01] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:04,160 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:04] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:07,164 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:07] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:10,164 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:10] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:13,167 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:13] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:16,164 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:16] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:19,161 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:19] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:22,169 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:22] "GET /api/results/latest HTTP/1.1" 200 -
+2026-04-25 21:43:25,162 [INFO] 127.0.0.1 - - [25/Apr/2026 21:43:25] "GET /api/results/latest HTTP/1.1" 200 -
