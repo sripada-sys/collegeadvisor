@@ -1402,3 +1402,27 @@
  * Running on http://127.0.0.1:5000
  * Running on http://192.168.0.31:5000
 2026-04-27 19:29:27,035 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-27 19:29:30,670 [INFO] Progress backed up to GitHub
+2026-04-28 19:31:31,500 [INFO] Gemini: ready
+2026-04-28 19:31:32,131 [INFO] Claude: ready
+2026-04-28 19:31:32,765 [INFO] OpenAI: ready
+2026-04-28 19:31:32,822 [INFO] Perplexity: ready
+2026-04-28 19:31:32,822 [INFO] Running startup health check on all API keys...
+2026-04-28 19:31:32,822 [INFO] AFC is enabled with max remote calls: 10.
+2026-04-28 19:31:33,002 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
+2026-04-28 19:31:33,006 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.
+2026-04-28 19:31:33,526 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-04-28 19:31:33,526 [WARNING]   claude: NO CREDITS — disabling
+2026-04-28 19:31:36,151 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-28 19:31:36,164 [INFO]   openai: OK
+2026-04-28 19:31:37,669 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-28 19:31:37,670 [INFO]   perplexity: OK
+2026-04-28 19:31:37,673 [INFO] Available models: openai, perplexity
+2026-04-28 19:31:37,687 [INFO] ==================================================
+2026-04-28 19:31:37,687 [INFO]   MathMentor is running!
+2026-04-28 19:31:37,687 [INFO]   PC dashboard : http://localhost:5000/pc
+2026-04-28 19:31:37,687 [INFO]   Phone upload : http://192.168.0.31:5000/phone
+2026-04-28 19:31:37,687 [INFO]   Models       : openai, perplexity
+2026-04-28 19:31:37,687 [INFO] ==================================================
+2026-04-28 19:31:40,581 [INFO] Auto-update: packages up to date
+2026-04-28 19:31:40,582 [INFO] Auto-update: backing up local data before restart...
