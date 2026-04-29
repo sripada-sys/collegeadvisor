@@ -1479,3 +1479,32 @@
 2026-04-29 17:34:35,639 [INFO] ==================================================
 2026-04-29 17:34:38,688 [INFO] Auto-update: packages up to date
 2026-04-29 17:34:38,688 [INFO] Auto-update: backing up local data before restart...
+2026-04-29 17:34:41,824 [INFO] Progress backed up to GitHub
+2026-04-29 17:34:42,631 [INFO] Auto-update: applied 0bd0f3ad, restarting...
+2026-04-29 17:34:45,398 [INFO] Gemini: ready
+2026-04-29 17:34:46,230 [INFO] Claude: ready
+2026-04-29 17:34:46,851 [INFO] OpenAI: ready
+2026-04-29 17:34:46,914 [INFO] Perplexity: ready
+2026-04-29 17:34:46,914 [INFO] Running startup health check on all API keys...
+2026-04-29 17:34:46,914 [INFO] AFC is enabled with max remote calls: 10.
+2026-04-29 17:34:47,052 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
+2026-04-29 17:34:47,053 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.
+2026-04-29 17:34:47,428 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-04-29 17:34:47,429 [WARNING]   claude: NO CREDITS — disabling
+2026-04-29 17:34:49,693 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 17:34:49,708 [INFO]   openai: OK
+2026-04-29 17:34:50,682 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 17:34:50,683 [INFO]   perplexity: OK
+2026-04-29 17:34:50,686 [INFO] Available models: openai, perplexity
+2026-04-29 17:34:50,699 [INFO] ==================================================
+2026-04-29 17:34:50,699 [INFO]   MathMentor is running!
+2026-04-29 17:34:50,699 [INFO]   PC dashboard : http://localhost:5000/pc
+2026-04-29 17:34:50,699 [INFO]   Phone upload : http://192.168.0.31:5000/phone
+2026-04-29 17:34:50,699 [INFO]   Models       : openai, perplexity
+2026-04-29 17:34:50,699 [INFO] ==================================================
+2026-04-29 17:34:51,417 [INFO] Auto-update: already up to date
+2026-04-29 17:34:51,420 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.31:5000
+2026-04-29 17:34:51,421 [INFO] [33mPress CTRL+C to quit[0m
