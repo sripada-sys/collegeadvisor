@@ -1455,162 +1455,56 @@
  * Running on http://127.0.0.1:5000
  * Running on http://192.168.0.31:5000
 2026-04-28 19:31:52,053 [INFO] [33mPress CTRL+C to quit[0m
-2026-04-28 19:31:55,731 [INFO] Progress backed up to GitHub
-2026-04-29 17:34:29,962 [INFO] Gemini: ready
-2026-04-29 17:34:30,531 [INFO] Claude: ready
-2026-04-29 17:34:31,079 [INFO] OpenAI: ready
-2026-04-29 17:34:31,131 [INFO] Perplexity: ready
-2026-04-29 17:34:31,131 [INFO] Running startup health check on all API keys...
-2026-04-29 17:34:31,131 [INFO] AFC is enabled with max remote calls: 10.
-2026-04-29 17:34:31,269 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
-2026-04-29 17:34:31,272 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.
-2026-04-29 17:34:31,689 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
-2026-04-29 17:34:31,692 [WARNING]   claude: NO CREDITS — disabling
-2026-04-29 17:34:34,170 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-04-29 17:34:34,194 [INFO]   openai: OK
-2026-04-29 17:34:35,624 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
-2026-04-29 17:34:35,628 [INFO]   perplexity: OK
-2026-04-29 17:34:35,629 [INFO] Available models: openai, perplexity
-2026-04-29 17:34:35,639 [INFO] ==================================================
-2026-04-29 17:34:35,639 [INFO]   MathMentor is running!
-2026-04-29 17:34:35,639 [INFO]   PC dashboard : http://localhost:5000/pc
-2026-04-29 17:34:35,639 [INFO]   Phone upload : http://192.168.0.31:5000/phone
-2026-04-29 17:34:35,639 [INFO]   Models       : openai, perplexity
-2026-04-29 17:34:35,639 [INFO] ==================================================
-2026-04-29 17:34:38,688 [INFO] Auto-update: packages up to date
-2026-04-29 17:34:38,688 [INFO] Auto-update: backing up local data before restart...
-2026-04-29 17:34:41,824 [INFO] Progress backed up to GitHub
-2026-04-29 17:34:42,631 [INFO] Auto-update: applied 0bd0f3ad, restarting...
-2026-04-29 17:34:45,398 [INFO] Gemini: ready
-2026-04-29 17:34:46,230 [INFO] Claude: ready
-2026-04-29 17:34:46,851 [INFO] OpenAI: ready
-2026-04-29 17:34:46,914 [INFO] Perplexity: ready
-2026-04-29 17:34:46,914 [INFO] Running startup health check on all API keys...
-2026-04-29 17:34:46,914 [INFO] AFC is enabled with max remote calls: 10.
-2026-04-29 17:34:47,052 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
-2026-04-29 17:34:47,053 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.
-2026-04-29 17:34:47,428 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
-2026-04-29 17:34:47,429 [WARNING]   claude: NO CREDITS — disabling
-2026-04-29 17:34:49,693 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-04-29 17:34:49,708 [INFO]   openai: OK
-2026-04-29 17:34:50,682 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
-2026-04-29 17:34:50,683 [INFO]   perplexity: OK
-2026-04-29 17:34:50,686 [INFO] Available models: openai, perplexity
-2026-04-29 17:34:50,699 [INFO] ==================================================
-2026-04-29 17:34:50,699 [INFO]   MathMentor is running!
-2026-04-29 17:34:50,699 [INFO]   PC dashboard : http://localhost:5000/pc
-2026-04-29 17:34:50,699 [INFO]   Phone upload : http://192.168.0.31:5000/phone
-2026-04-29 17:34:50,699 [INFO]   Models       : openai, perplexity
-2026-04-29 17:34:50,699 [INFO] ==================================================
-2026-04-29 17:34:51,417 [INFO] Auto-update: already up to date
-2026-04-29 17:34:51,420 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://192.168.0.31:5000
-2026-04-29 17:34:51,421 [INFO] [33mPress CTRL+C to quit[0m
-2026-04-29 17:34:53,946 [INFO] Progress backed up to GitHub
-2026-04-29 19:17:12,332 [INFO] Gemini: ready
-2026-04-29 19:17:12,908 [INFO] Claude: ready
-2026-04-29 19:17:13,477 [INFO] OpenAI: ready
-2026-04-29 19:17:13,529 [INFO] Perplexity: ready
-2026-04-29 19:17:13,529 [INFO] Running startup health check on all API keys...
-2026-04-29 19:17:13,529 [INFO] AFC is enabled with max remote calls: 10.
-2026-04-29 19:17:13,681 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
-2026-04-29 19:17:13,684 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.
-2026-04-29 19:17:14,088 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
-2026-04-29 19:17:14,090 [WARNING]   claude: NO CREDITS — disabling
-2026-04-29 19:17:16,644 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-04-29 19:17:16,657 [INFO]   openai: OK
-2026-04-29 19:17:18,025 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
-2026-04-29 19:17:18,029 [INFO]   perplexity: OK
-2026-04-29 19:17:18,030 [INFO] Available models: openai, perplexity
-2026-04-29 19:17:18,040 [INFO] ==================================================
-2026-04-29 19:17:18,040 [INFO]   MathMentor is running!
-2026-04-29 19:17:18,040 [INFO]   PC dashboard : http://localhost:5000/pc
-2026-04-29 19:17:18,040 [INFO]   Phone upload : http://192.168.0.31:5000/phone
-2026-04-29 19:17:18,040 [INFO]   Models       : openai, perplexity
-2026-04-29 19:17:18,040 [INFO] ==================================================
-2026-04-29 19:17:20,938 [INFO] Auto-update: packages up to date
-2026-04-29 19:17:20,939 [INFO] Auto-update: backing up local data before restart...
-2026-04-29 19:17:24,573 [INFO] Progress backed up to GitHub
-2026-04-29 19:17:25,612 [INFO] Auto-update: applied cad0a5aa, restarting...
-2026-04-29 19:17:27,108 [INFO] Gemini: ready
-2026-04-29 19:17:27,563 [INFO] Claude: ready
-2026-04-29 19:17:27,985 [INFO] OpenAI: ready
-2026-04-29 19:17:28,037 [INFO] Perplexity: ready
-2026-04-29 19:17:28,037 [INFO] Running startup health check on all API keys...
-2026-04-29 19:17:28,037 [INFO] AFC is enabled with max remote calls: 10.
-2026-04-29 19:17:28,185 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
-2026-04-29 19:17:28,188 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.
-2026-04-29 19:17:28,560 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
-2026-04-29 19:17:28,562 [WARNING]   claude: NO CREDITS — disabling
-2026-04-29 19:17:31,019 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-04-29 19:17:31,032 [INFO]   openai: OK
-2026-04-29 19:17:33,781 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
-2026-04-29 19:17:33,784 [INFO]   perplexity: OK
-2026-04-29 19:17:33,794 [INFO] Available models: openai, perplexity
-2026-04-29 19:17:33,813 [INFO] ==================================================
-2026-04-29 19:17:33,813 [INFO]   MathMentor is running!
-2026-04-29 19:17:33,813 [INFO]   PC dashboard : http://localhost:5000/pc
-2026-04-29 19:17:33,813 [INFO]   Phone upload : http://192.168.0.31:5000/phone
-2026-04-29 19:17:33,814 [INFO]   Models       : openai, perplexity
-2026-04-29 19:17:33,814 [INFO] ==================================================
-2026-04-29 19:17:34,611 [INFO] Auto-update: already up to date
-2026-04-29 19:17:34,614 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://192.168.0.31:5000
-2026-04-29 19:17:34,614 [INFO] [33mPress CTRL+C to quit[0m
-2026-04-29 19:17:37,346 [INFO] Progress backed up to GitHub
-2026-04-30 19:33:49,422 [INFO] Gemini: ready
-2026-04-30 19:33:50,071 [INFO] Claude: ready
-2026-04-30 19:33:50,627 [INFO] OpenAI: ready
-2026-04-30 19:33:50,679 [INFO] Perplexity: ready
-2026-04-30 19:33:50,680 [INFO] Running startup health check on all API keys...
-2026-04-30 19:33:50,680 [INFO] AFC is enabled with max remote calls: 10.
-2026-04-30 19:33:50,886 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
-2026-04-30 19:33:50,890 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.
-2026-04-30 19:33:51,343 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
-2026-04-30 19:33:51,346 [WARNING]   claude: NO CREDITS — disabling
-2026-04-30 19:33:53,947 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-04-30 19:33:53,959 [INFO]   openai: OK
-2026-04-30 19:34:00,582 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
-2026-04-30 19:34:00,584 [INFO]   perplexity: OK
-2026-04-30 19:34:00,595 [INFO] Available models: openai, perplexity
-2026-04-30 19:34:00,614 [INFO] ==================================================
-2026-04-30 19:34:00,614 [INFO]   MathMentor is running!
-2026-04-30 19:34:00,614 [INFO]   PC dashboard : http://localhost:5000/pc
-2026-04-30 19:34:00,614 [INFO]   Phone upload : http://192.168.0.31:5000/phone
-2026-04-30 19:34:00,614 [INFO]   Models       : openai, perplexity
-2026-04-30 19:34:00,614 [INFO] ==================================================
-2026-04-30 19:34:03,392 [INFO] Auto-update: packages up to date
-2026-04-30 19:34:03,392 [INFO] Auto-update: backing up local data before restart...
-2026-04-30 19:34:06,836 [INFO] Progress backed up to GitHub
-2026-04-30 19:34:07,660 [INFO] Auto-update: applied ba7aa615, restarting...
-2026-04-30 19:34:09,218 [INFO] Gemini: ready
-2026-04-30 19:34:09,673 [INFO] Claude: ready
-2026-04-30 19:34:10,093 [INFO] OpenAI: ready
-2026-04-30 19:34:10,145 [INFO] Perplexity: ready
-2026-04-30 19:34:10,145 [INFO] Running startup health check on all API keys...
-2026-04-30 19:34:10,145 [INFO] AFC is enabled with max remote calls: 10.
-2026-04-30 19:34:10,312 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
-2026-04-30 19:34:10,314 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.
-2026-04-30 19:34:10,720 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
-2026-04-30 19:34:10,723 [WARNING]   claude: NO CREDITS — disabling
-2026-04-30 19:34:12,170 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-04-30 19:34:12,183 [INFO]   openai: OK
-2026-04-30 19:34:13,705 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
-2026-04-30 19:34:13,708 [INFO]   perplexity: OK
-2026-04-30 19:34:13,710 [INFO] Available models: openai, perplexity
-2026-04-30 19:34:13,719 [INFO] ==================================================
-2026-04-30 19:34:13,719 [INFO]   MathMentor is running!
-2026-04-30 19:34:13,719 [INFO]   PC dashboard : http://localhost:5000/pc
-2026-04-30 19:34:13,720 [INFO]   Phone upload : http://192.168.0.31:5000/phone
-2026-04-30 19:34:13,720 [INFO]   Models       : openai, perplexity
-2026-04-30 19:34:13,720 [INFO] ==================================================
-2026-04-30 19:34:14,550 [INFO] Auto-update: already up to date
-2026-04-30 19:34:14,553 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://192.168.0.31:5000
-2026-04-30 19:34:14,553 [INFO] [33mPress CTRL+C to quit[0m
+2026-05-01 11:14:09,952 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API
+2026-05-01 11:14:10,454 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:14:11,356 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:14:33,234 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API
+2026-05-01 11:14:33,595 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:14:34,023 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:14:51,687 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API
+2026-05-01 11:14:52,068 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:14:52,452 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:14:54,654 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:15:39,825 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API
+2026-05-01 11:15:40,469 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:15:41,529 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:15:43,497 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:15:43,642 [WARNING] Google auth failed: Invalid token
+2026-05-01 11:16:15,447 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API
+2026-05-01 11:16:15,930 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:16:16,345 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:16:19,004 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:16:19,137 [WARNING] Google auth failed: Invalid token
+2026-05-01 11:17:23,236 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:17:23,983 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:17:26,149 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:17:26,373 [WARNING] Google auth failed: Invalid token
+2026-05-01 11:17:26,804 [WARNING] gemini ran out of credits mid-session! Falling back...
+2026-05-01 11:17:35,791 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:17:36,471 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:17:38,405 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:17:38,656 [WARNING] Google auth failed: Invalid token
+2026-05-01 11:17:39,140 [WARNING] gemini ran out of credits mid-session! Falling back...
+2026-05-01 11:18:20,544 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:18:21,095 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:18:23,196 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:18:23,469 [WARNING] Google auth failed: Invalid token
+2026-05-01 11:18:24,083 [WARNING] gemini ran out of credits mid-session! Falling back...
+2026-05-01 11:18:47,366 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:18:48,815 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:18:51,942 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:18:52,222 [WARNING] Google auth failed: Invalid token
+2026-05-01 11:18:52,682 [WARNING] Backup skipped: git not found
+2026-05-01 11:18:52,755 [WARNING] gemini ran out of credits mid-session! Falling back...
+2026-05-01 11:25:56,644 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:25:57,853 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:26:00,007 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:26:00,276 [WARNING] Google auth failed: Invalid token
+2026-05-01 11:26:00,795 [WARNING] Backup skipped: git not found
+2026-05-01 11:26:00,870 [WARNING] gemini ran out of credits mid-session! Falling back...
+2026-05-01 11:26:16,176 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 11:26:16,684 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 11:26:18,571 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 11:26:18,829 [WARNING] Google auth failed: Invalid token
+2026-05-01 11:26:19,269 [WARNING] Backup skipped: git not found
+2026-05-01 11:26:19,338 [WARNING] gemini ran out of credits mid-session! Falling back...
