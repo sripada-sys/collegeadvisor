@@ -23,7 +23,7 @@ import subprocess
 import threading
 import uuid
 import webbrowser
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from flask import (
@@ -34,28 +34,19 @@ from flask import (
     request,
     send_from_directory,
 )
-from flask_sock import Sock
 from werkzeug.utils import secure_filename
 
 import db
 from models import ModelRouter
+from config import PORT, SECRET_KEY
 
 # ─── Config ───
 
-PORT = int(os.environ.get("PORT", 5000))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# Load .env file
-env_path = os.path.join(BASE_DIR, ".env")
-if os.path.exists(env_path):
-    with open(env_path) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                key, val = line.split("=", 1)
-                os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
+# .env loaded by config.py
 
 # ─── Init ───
 
@@ -75,10 +66,16 @@ logging.getLogger().addHandler(_file_handler)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
-sock = Sock(app)
+app.secret_key = SECRET_KEY
+app.permanent_session_lifetime = timedelta(days=30)
 
 db.init_db()
+db.run_migrations()
 router = ModelRouter()
+
+# Register auth routes (login, callback, verify-phone, logout, subscribe)
+from auth import register_auth_routes, require_auth
+register_auth_routes(app)
 
 
 # ─── Helpers ───
@@ -124,150 +121,17 @@ def parse_ai_json(text):
         return json.loads(repaired)
 
 
-# ─── Prompts ───
-
-MATH_JSON_NOTE = """MATH NOTATION IN JSON: Write ALL math using LaTeX \u2014 $...$ for inline, $$...$$ for display.
-CRITICAL: Since your output is JSON, every LaTeX backslash MUST be doubled.
-Write \\\\frac not \\frac, \\\\int not \\int, \\\\sqrt not \\sqrt, \\\\, not \\,, \\\\pi not \\pi.
-Example inline: $\\\\frac{{1}}{{2}}$  or  $x^2 - \\\\sqrt{{b^2 - 4ac}}$
-Example display: $$\\\\int_0^\\\\pi \\\\sin x \\\\, dx = 2$$
-"""
-
-EVALUATE_PROMPT = """You are an expert mentor evaluating a student's work.
-
-SUBJECT: {subject}
-EXAM: {exam_context}
-
-You are given photo(s) of questions from a textbook/paper, and photo(s) of the student's handwritten answers.
-
-MATH NOTATION: Write ALL mathematical expressions using LaTeX delimiters.
-- Inline math: $expression$ (e.g. $x^2 + 3x - 4 = 0$, $F = ma$)
-- Display math (own line): $$expression$$
-- Chemistry: use \\ce{{...}} for chemical formulas (e.g. \\ce{{H2SO4}}, \\ce{{2H2 + O2 -> 2H2O}}, \\ce{{Fe^{{2+}}}})
-Use LaTeX for ALL: fractions, roots, integrals, Greek letters, vectors, units. Never plain text like "x^2" or "H2O".
-
-Carefully:
-1. Identify each problem number visible in both question and answer images
-2. For each problem, read the EXACT question — pay close attention to the order of numbers and symbols.
-   Worksheets (especially Kumon/NCERT) sometimes have answer blanks or labels before the expression.
-   Always extract the mathematical expression itself in the correct left-to-right order as it appears.
-   Example: if the photo shows "68 ÷ 2 = ___", the question is "68 ÷ 2", NOT "2 ÷ 68".
-3. Then read the student's solution and evaluate correctness, approach, and completeness
-
-Return a JSON array (no markdown fences, raw JSON only):
-[
-  {{
-    "problem_number": "the problem number as written",
-    "question_summary": "1-line description of the question",
-    "question_text": "complete question statement verbatim, exactly as written in the photo — use LaTeX for all math",
-    "correct_answer": "complete step-by-step correct solution with all key steps and final answer — use LaTeX for all math",
-    "subject": "{subject}",
-    "topic": "main topic (e.g. quadratics, thermodynamics, organic reactions)",
-    "subtopic": "specific subtopic",
-    "correctness": <0-5 where 0=completely wrong, 3=right idea but errors, 5=perfect>,
-    "is_complete": <true if solution reaches a final answer>,
-    "source": "detected source if visible in the photo (e.g. book name, NCERT, HC Verma, Irodov, Cengage, DC Pandey, JEE Main 2024, coaching institute name from header/footer/watermark). null if not identifiable",
-    "what_went_right": "specific thing done well",
-    "where_it_broke": "exact step where reasoning went wrong, or 'nowhere' if correct — use LaTeX for any math",
-    "mistakes": ["list of specific mistakes"],
-    "missing_concept": "key concept to learn, or 'none' if correct",
-    "hint_not_answer": "a hint to fix it WITHOUT giving the answer",
-    "next_practice": "what to practice next",
-    "encouragement": "one honest, specific sentence — not generic praise"
-  }}
-]
-
-Be HONEST — wrong is wrong. But be SPECIFIC about what's right too.
-"Good attempt" is useless. "Your free body diagram correctly identified all three forces" is useful.
-If only some problems are visible, evaluate those."""
-
-EXAM_CONTEXTS = {
-    "jee_main": "JEE Main — MCQ, speed matters, check optimal method",
-    "jee_advanced": "JEE Advanced — multi-concept, check all layers identified",
-    "isi": "ISI B.Stat/B.Math — written proofs, evaluate rigor and logical flow",
-    "cmi": "CMI BSc — proof-based, evaluate argument clarity and completeness",
-    "bitsat": "BITSAT — speed and tricks, check shortcut usage",
-    "board": "CBSE Board — step marking matters, check all steps shown, units, format",
-    "general": "General preparation — evaluate correctness, approach, clarity",
-}
-
-PRACTICE_PROMPT = """Generate ONE {difficulty} {subject} problem for {exam} preparation.
-Topic: {topic}
-
-MATH: Write all math using LaTeX — $...$ for inline math, $$...$$ for display equations.
-For chemistry use \\ce{{...}} notation (e.g. \\ce{{H2SO4}}, \\ce{{A -> B + C}}, \\ce{{Fe^{{2+}}}}).
-
-Requirements:
-- Solvable by a Class 11-12 student
-- {exam_specific}
-- Clear problem statement
-- Include 3 progressive hints (vague → specific)
-- Do NOT include the full solution
-
-Return raw JSON (no markdown fences):
-{{
-  "problem": "the full problem statement with LaTeX math",
-  "topic": "topic",
-  "subtopic": "subtopic",
-  "difficulty": "{difficulty}",
-  "hints": ["vague hint", "more specific", "nearly gives it away"],
-  "exam": "{exam}",
-  "subject": "{subject}"
-}}"""
-
-PRACTICE_EXAM_REQS = {
-    "jee_main": "MCQ with 4 options. Distractors based on common mistakes.",
-    "jee_advanced": "MCQ, numerical, or multi-part. Require 2+ concepts.",
-    "isi": 'Proof-based. "Show that..." or "Prove that..." format.',
-    "cmi": 'Proof-based or "Find all..." style.',
-    "bitsat": "MCQ solvable in 2-3 minutes with the right trick.",
-    "board": "Long-answer format. Include marks allocation (e.g. [4 marks]).",
-    "general": "Any format.",
-}
-
-EXPLAIN_PROMPT = """Explain this concept clearly for a Class 11-12 student preparing for {exam}.
-Subject: {subject}
-Topic: {topic}
-
-Give:
-1. Core concept in simple terms
-2. Key formulas/principles (if any)
-3. One worked example
-4. Common mistakes students make
-5. How this connects to other topics
-
-Keep it concise but thorough. Use analogies if helpful."""
-
-HINT_PROMPT = """You are an expert {subject} mentor. A student is stuck on a problem and needs hints — NOT the answer.
-
-EXAM: {exam_context}
-
-MATH: Write all math using LaTeX — $...$ for inline math, $$...$$ for display equations.
-For chemistry use \\ce{{...}} notation (e.g. \\ce{{H2SO4}}, \\ce{{Fe^{{2+}}}}).
-
-Look at the question photo(s) carefully. For each problem visible:
-
-1. Identify the topic and what concept is being tested
-2. Give 3 PROGRESSIVE hints:
-   - Hint 1: A gentle nudge — what area/concept to think about (vague)
-   - Hint 2: A more specific direction — what formula, theorem, or technique applies
-   - Hint 3: Nearly gives it away — the key step or substitution, but still not the full answer
-
-Do NOT solve the problem. Do NOT give the final answer.
-
-Return raw JSON (no markdown fences):
-[
-  {{
-    "problem_number": "the problem number as written",
-    "question_summary": "1-line description",
-    "topic": "main topic",
-    "source": "book/exam name if visible, else null",
-    "hint_1": "vague nudge",
-    "hint_2": "more specific direction",
-    "hint_3": "nearly gives it away but not the answer"
-  }}
-]"""
-
+from prompts import (
+    EXTRACT_PROMPT,
+    EVALUATE_PROMPT,
+    EXAM_CONTEXTS,
+    HINT_PROMPT,
+    PRACTICE_PROMPT,
+    PRACTICE_EXAM_REQS,
+    EXPLAIN_PROMPT,
+    DEBATE_PROMPT,
+    WOW_EXTRACT_PROMPT,
+)
 
 # ─── Routes ───
 
@@ -297,6 +161,7 @@ def api_status():
 
 
 @app.route("/api/upload", methods=["POST"])
+@require_auth
 def api_upload():
     subject = request.form.get("subject", "maths")
     exam = request.form.get("exam", "general")
@@ -312,13 +177,19 @@ def api_upload():
     a_paths = [save_upload(f) for f in answer_files if f.filename]
 
     batch_id = uuid.uuid4().hex[:12]
+    student_id = request.student["id"]
+
+    # Track batch status
+    db.set_batch_status(batch_id, student_id, "processing")
 
     # Process in background so phone gets immediate response
     def evaluate_async():
         try:
-            _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers)
+            _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, student_id)
+            db.set_batch_status(batch_id, student_id, "done")
         except Exception as e:
             logger.error(f"Evaluation failed: {e}", exc_info=True)
+            db.set_batch_status(batch_id, student_id, "failed", str(e)[:500])
 
     threading.Thread(target=evaluate_async, daemon=True).start()
 
@@ -333,15 +204,28 @@ def api_upload():
     )
 
 
-def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers):
+def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, student_id=None):
     exam_context = EXAM_CONTEXTS.get(exam, EXAM_CONTEXTS["general"])
-    prompt = EVALUATE_PROMPT.format(subject=subject, exam_context=exam_context)
-
-    if problem_numbers:
-        prompt += f"\n\nThe student says they answered these problem numbers: {problem_numbers}"
 
     all_images = q_paths + a_paths
-    raw_response = router.call("evaluate", prompt, images=all_images)
+
+    # Step 1: Extract handwritten content using vision model (GPT-4o preferred)
+    extract_prompt = EXTRACT_PROMPT.format(subject=subject)
+    if problem_numbers:
+        extract_prompt += f"\n\nThe student says they answered these problem numbers: {problem_numbers}"
+
+    logger.info(f"Batch {batch_id}: extracting handwritten content...")
+    extracted_text = router.call("extract", extract_prompt, images=all_images)
+    logger.info(f"Batch {batch_id}: extraction complete ({len(extracted_text)} chars)")
+
+    # Step 2: Evaluate the extracted text using reasoning model (Gemini preferred)
+    eval_prompt = EVALUATE_PROMPT.format(
+        subject=subject, exam_context=exam_context
+    ).replace("__EXTRACTED_TEXT__", extracted_text)
+    if problem_numbers:
+        eval_prompt += f"\n\nThe student says they answered these problem numbers: {problem_numbers}"
+
+    raw_response = router.call("evaluate", eval_prompt)
 
     try:
         results = parse_ai_json(raw_response)
@@ -354,10 +238,13 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers):
             "Your previous response could not be parsed as JSON. "
             "Return ONLY a raw JSON array with no markdown, no backticks, no commentary. "
             "Use the same structure as before.\n\n"
-            + EVALUATE_PROMPT.format(subject=subject, exam_context=EXAM_CONTEXTS.get(exam, EXAM_CONTEXTS["general"]))
+            + EVALUATE_PROMPT.format(
+                subject=subject,
+                exam_context=EXAM_CONTEXTS.get(exam, EXAM_CONTEXTS["general"]),
+            ).replace("__EXTRACTED_TEXT__", extracted_text)
         )
         try:
-            raw_response = router.call("evaluate", retry_prompt, images=all_images)
+            raw_response = router.call("evaluate", retry_prompt)
             results = parse_ai_json(raw_response)
             if isinstance(results, dict):
                 results = [results]
@@ -410,12 +297,14 @@ def _schedule_debounced_backup(delay: int = 120):
 
 
 @app.route("/api/results/latest")
+@require_auth
 def api_results_latest():
     batch = db.get_latest_batch()
     return jsonify({"results": batch or [], "timestamp": datetime.now().isoformat()})
 
 
 @app.route("/api/results/<batch_id>")
+@require_auth
 def api_results_batch(batch_id):
     # Sanitize batch_id — only allow hex characters
     if not all(c in "0123456789abcdef" for c in batch_id):
@@ -425,6 +314,7 @@ def api_results_batch(batch_id):
 
 
 @app.route("/api/practice", methods=["POST"])
+@require_auth
 def api_practice():
     data = request.get_json() or {}
     subject = data.get("subject", "maths")
@@ -479,6 +369,7 @@ def api_practice():
 
 
 @app.route("/api/explain", methods=["POST"])
+@require_auth
 def api_explain():
     data = request.get_json() or {}
     subject = data.get("subject", "maths")
@@ -494,11 +385,13 @@ def api_explain():
 
 
 @app.route("/api/progress")
+@require_auth
 def api_progress():
     return jsonify(db.get_progress())
 
 
 @app.route("/api/history")
+@require_auth
 def api_history():
     limit = request.args.get("limit", 50, type=int)
     return jsonify(db.get_history(min(limit, 200)))
@@ -513,6 +406,7 @@ def serve_upload(filename):
 
 
 @app.route("/api/hint", methods=["POST"])
+@require_auth
 def api_hint():
     """Get progressive hints for a question (no answer needed)."""
     subject = request.form.get("subject", "maths")
@@ -534,7 +428,7 @@ def api_hint():
         prompt += f"\n\nFocus on these problem numbers: {problem_numbers}"
 
     try:
-        raw_response = router.call("evaluate", prompt, images=q_paths)
+        raw_response = router.call("extract", prompt, images=q_paths)
         hints = parse_ai_json(raw_response)
         if isinstance(hints, dict):
             hints = [hints]
@@ -570,29 +464,10 @@ def api_guide_html():
         return f"<p style='color:#f87171'>Error loading guide: {e}</p>", 500
 
 
-_WOW_EXTRACT_PROMPT = """\
-A student is discussing this {subject} problem with a mentor.
-
-Topic: {topic}
-Mentor said: {mentor_reply}
-Student said: {student_message}
-
-If this exchange contains a clear, specific insight worth remembering \
-(a concept clarified, a common mistake identified, a formula confirmed, a \
-trap explained), write it as ONE concise sentence a student would write in \
-their own revision notes. Be concrete and specific — include the actual concept \
-or formula name.
-
-If there is no clear insight worth saving (e.g. just a greeting, vague praise, \
-or a back-and-forth without resolution), reply with exactly: SKIP
-
-Reply with ONLY the insight sentence or SKIP. Nothing else."""
-
-
 def _auto_save_wow(subject, topic, mentor_reply, student_message):
     """Background: extract and auto-save insight from a debate exchange."""
     try:
-        prompt = _WOW_EXTRACT_PROMPT.format(
+        prompt = WOW_EXTRACT_PROMPT.format(
             subject=subject, topic=topic,
             mentor_reply=mentor_reply[:600],
             student_message=student_message[:400],
@@ -605,28 +480,8 @@ def _auto_save_wow(subject, topic, mentor_reply, student_message):
         logger.debug("Auto-wow skipped: %s", e)
 
 
-DEBATE_PROMPT = """You are a Socratic {subject} mentor discussing a student's solution.
-
-THE QUESTION: {question_text}
-Subject: {subject} | Exam: {exam} | Topic: {topic}
-
-Your previous evaluation:
-- Score: {correctness}/5
-- What went right: {what_went_right}
-- Where it broke: {where_it_broke}
-- Missing concept: {missing_concept}
-{history_text}Student message: {student_message}
-
-Rules:
-1. If student message is empty (opening move): Mention ONE specific, observable thing from the evaluation. Ask ONE probing question about their approach.
-2. If the student makes a MATHEMATICALLY VALID point you missed: Explicitly say "You're right, I missed that" — don't hedge.
-3. If the student is wrong: Guide with a question. Do NOT state the answer or lecture.
-4. Max 3 sentences + 1 question. Sharp and direct.
-5. No empty praise ("Great point!", "Good try"). Be a real mentor.
-6. Plain text only. No JSON, no markdown, no bullet lists."""
-
-
 @app.route("/api/hint/by-filename", methods=["POST"])
+@require_auth
 def api_hint_by_filename():
     """Get hints using image filenames already on the server — no re-upload needed."""
     data = request.get_json() or {}
@@ -653,7 +508,7 @@ def api_hint_by_filename():
     prompt = HINT_PROMPT.format(subject=subject, exam_context=exam_context)
 
     try:
-        raw_response = router.call("evaluate", prompt, images=q_paths)
+        raw_response = router.call("extract", prompt, images=q_paths)
         hints = parse_ai_json(raw_response)
         if isinstance(hints, dict):
             hints = [hints]
@@ -664,6 +519,7 @@ def api_hint_by_filename():
 
 
 @app.route("/api/debate", methods=["POST"])
+@require_auth
 def api_debate():
     """Socratic one-on-one debate about a student's solution."""
     data = request.get_json() or {}
@@ -722,50 +578,8 @@ def api_debate():
         return jsonify({"error": "Could not get AI response. Check your internet and try again."}), 500
 
 
-# ─── Voice (Gemini Live relay) ───
-
-_GEMINI_LIVE_URL = (
-    "wss://generativelanguage.googleapis.com/ws/"
-    "google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent"
-)
-
-_VOICE_SYSTEM_PROMPT = """\
-You are a warm, personal math mentor for a Class 12 student (CBSE, preparing for JEE 2027).
-You know this student deeply — their history, weak spots, and where they are right now.
-Here is everything you know about them:
-
-{dossier}
-
-YOUR STYLE:
-- Talk like you're sitting right next to them — casual, warm, zero jargon unless they ask.
-- Keep each response SHORT (2-3 sentences) then ask ONE question to keep them engaged.
-- Never lecture. Guide them to the answer with questions.
-- When stating formulas, speak them in plain English — never read LaTeX syntax aloud.
-  (e.g. say "integral of u dv equals u v minus integral of v du" not "\\int u dv")
-- Use their first name occasionally if they introduce themselves.
-- Stay positive even when they're struggling. Celebrate small wins.
-
-WHAT YOU CAN DO (respond to ANY of these naturally):
-- Review specific formulas they keep missing
-- Quiz them on weak topics (ask them to state the formula, then check)
-- Explain why a concept works from first principles
-- Discuss today's session — any question number they ask about
-- Run a 15-minute formula drill (say "let's do 5 formulas, I'll say the name, you recall it")
-- Answer general doubts about Maths, Physics, Chemistry for JEE/Board level
-- Give exam strategy tips specific to JEE
-- Be a study buddy — if they're stressed, acknowledge it first
-
-IF THEY ASK TO REVIEW WEAK AREAS / DO A FORMULA DRILL:
-  Pick the top 3-5 gaps from their dossier above. Run the drill: state the topic name,
-  ask them to recall the formula verbally, then confirm or gently correct.
-  Keep the energy up. Move at their pace. After each correct recall say something like
-  "yes, nailed it" or "exactly right".
-
-Remember: you have their full history. Use it. Be their mentor, not a Wikipedia page.
-"""
-
-
 @app.route("/api/wow", methods=["POST"])
+@require_auth
 def api_save_wow():
     data = request.get_json() or {}
     note = str(data.get("note", "")).strip()[:2000]
@@ -781,168 +595,10 @@ def api_save_wow():
 
 
 @app.route("/api/wow")
+@require_auth
 def api_get_wow():
     notes = db.get_wow_notes()
     return jsonify({"notes": notes})
-
-
-@app.route("/api/voice/context")
-def api_voice_context():
-    """Return the full student dossier for the voice session system prompt."""
-    try:
-        dossier = db.get_voice_context()
-        return jsonify({"dossier": dossier})
-    except Exception as e:
-        logger.error("voice/context failed: %s", e)
-        return jsonify({"dossier": "No history available yet."})
-
-
-@sock.route("/ws/voice")
-def ws_voice(ws):
-    """Browser <-> Gemini Live bidirectional audio relay.
-
-    Protocol (JSON text frames both directions):
-      Browser → Server:
-        First frame:  {"context": {"subject": ..., "exam": ..., "questions_text": ...}}
-        Audio frames: {"type": "audio", "data": "<base64 PCM16 16kHz>"}
-        Stop:         {"type": "stop"}
-      Server → Browser:
-        {"type": "ready"}
-        {"type": "audio", "data": "<base64 PCM16 24kHz>", "mime": "audio/pcm;rate=24000"}
-        {"type": "turn_done"}
-        {"type": "error", "message": "..."}
-    """
-    import websocket as _ws_client  # websocket-client package
-
-    api_key = os.environ.get("GEMINI_API_KEY", "")
-    if not api_key:
-        ws.send(json.dumps({"type": "error", "message": "No Gemini API key configured"}))
-        return
-
-    # ── Receive setup context from browser ──
-    try:
-        first_raw = ws.receive(timeout=10)
-        if first_raw is None:
-            return
-        ctx = json.loads(first_raw).get("context", {})
-    except Exception as e:
-        ws.send(json.dumps({"type": "error", "message": f"Setup failed: {e}"}))
-        return
-
-    dossier = str(ctx.get("dossier", "No history yet."))[:4000]
-    system_prompt = _VOICE_SYSTEM_PROMPT.format(dossier=dossier)
-
-    # ── Connect to Gemini Live ──
-    gemini_url = f"{_GEMINI_LIVE_URL}?key={api_key}"
-    try:
-        gws = _ws_client.create_connection(gemini_url, timeout=15)
-    except Exception as e:
-        ws.send(json.dumps({"type": "error", "message": f"Gemini connect failed: {e}"}))
-        return
-
-    # Send setup
-    gws.send(json.dumps({
-        "setup": {
-            "model": "models/gemini-2.5-flash-native-audio-preview-12-2025",
-            "generation_config": {
-                "response_modalities": ["AUDIO"],
-                "speech_config": {
-                    "voice_config": {
-                        "prebuilt_voice_config": {"voice_name": "Puck"}
-                    }
-                },
-            },
-            "system_instruction": {
-                "parts": [{"text": system_prompt}]
-            },
-        }
-    }))
-
-    # Wait for setupComplete
-    try:
-        raw_setup = gws.recv()
-        if not raw_setup:
-            ws.send(json.dumps({"type": "error", "message": "Gemini Live rejected the connection — check that the GEMINI_API_KEY has Live API access enabled in Google AI Studio"}))
-            gws.close()
-            return
-        setup_resp = json.loads(raw_setup)
-        if "setupComplete" not in setup_resp:
-            logger.warning("Gemini Live unexpected setup response: %s", raw_setup[:200])
-            ws.send(json.dumps({"type": "error", "message": f"Gemini setup unexpected response: {raw_setup[:100]}"}))
-            gws.close()
-            return
-    except Exception as e:
-        ws.send(json.dumps({"type": "error", "message": f"Gemini setup error: {e}"}))
-        gws.close()
-        return
-
-    ws.send(json.dumps({"type": "ready"}))
-    logger.info("Voice session started")
-
-    stop_event = threading.Event()
-
-    def gemini_to_browser():
-        """Relay Gemini audio replies → browser."""
-        while not stop_event.is_set():
-            try:
-                raw = gws.recv()
-            except Exception:
-                break
-            try:
-                msg = json.loads(raw)
-            except Exception:
-                continue
-
-            sc = msg.get("serverContent", {})
-            for part in sc.get("modelTurn", {}).get("parts", []):
-                inline = part.get("inlineData", {})
-                if inline.get("data"):
-                    try:
-                        ws.send(json.dumps({
-                            "type": "audio",
-                            "data": inline["data"],
-                            "mime": inline.get("mimeType", "audio/pcm;rate=24000"),
-                        }))
-                    except Exception:
-                        stop_event.set()
-                        return
-            if sc.get("turnComplete"):
-                try:
-                    ws.send(json.dumps({"type": "turn_done"}))
-                except Exception:
-                    stop_event.set()
-                    return
-
-    relay = threading.Thread(target=gemini_to_browser, daemon=True)
-    relay.start()
-
-    # ── Main loop: browser audio → Gemini ──
-    try:
-        while not stop_event.is_set():
-            raw = ws.receive()
-            if raw is None:
-                break
-            msg = json.loads(raw)
-            if msg.get("type") == "audio":
-                gws.send(json.dumps({
-                    "realtimeInput": {
-                        "mediaChunks": [{
-                            "mimeType": "audio/pcm;rate=16000",
-                            "data": msg["data"],
-                        }]
-                    }
-                }))
-            elif msg.get("type") == "stop":
-                break
-    except Exception as e:
-        logger.info("Voice session ended: %s", e)
-    finally:
-        stop_event.set()
-        try:
-            gws.close()
-        except Exception:
-            pass
-        logger.info("Voice session closed")
 
 
 # ─── Auto-update & Backup ───

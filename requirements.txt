@@ -2,8 +2,6 @@
 
 # Core (always needed)
 flask>=3.0
-flask-sock>=0.7
-websocket-client>=1.7
 google-genai>=1.0
 Pillow>=10.0
 

@@ -434,3 +434,162 @@ def export_for_backup():
         "wow_notes": [dict(r) for r in wow_notes],
         "debate_logs": [dict(r) for r in debate_logs],
     }
+
+
+# ─── Multi-Tenant (GradesGenie) ───
+
+
+def run_migrations():
+    """Run schema migrations for multi-tenant support. Safe to call multiple times."""
+    conn = get_db()
+
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS students (
+            id TEXT PRIMARY KEY,
+            google_id TEXT UNIQUE,
+            email TEXT UNIQUE,
+            name TEXT,
+            avatar_url TEXT,
+            phone TEXT UNIQUE,
+            grade TEXT,
+            target_exams TEXT,
+            plan TEXT DEFAULT 'free_trial',
+            trial_start TEXT,
+            paid_until TEXT,
+            signup_ip TEXT,
+            created_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_students_google ON students(google_id);
+        CREATE INDEX IF NOT EXISTS idx_students_phone ON students(phone);
+
+        CREATE TABLE IF NOT EXISTS batch_status (
+            batch_id TEXT PRIMARY KEY,
+            student_id TEXT,
+            status TEXT DEFAULT 'processing',
+            error_message TEXT,
+            created_at TEXT,
+            updated_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_batch_student ON batch_status(student_id);
+
+        CREATE TABLE IF NOT EXISTS events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id TEXT,
+            event TEXT,
+            metadata TEXT,
+            created_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_events_student ON events(student_id);
+    """)
+    conn.commit()
+
+    # Add student_id to existing tables (ALTER TABLE is no-op if column exists)
+    for table in ["evaluations", "practice_problems", "wow_notes", "debate_logs"]:
+        try:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN student_id TEXT")
+            conn.commit()
+        except Exception:
+            pass  # Column already exists
+
+    conn.close()
+
+
+def create_student(google_id, email, name, avatar_url, phone, signup_ip=""):
+    """Create a new student account. Returns student_id."""
+    import uuid
+    student_id = uuid.uuid4().hex[:16]
+    conn = get_db()
+    conn.execute(
+        """INSERT INTO students (id, google_id, email, name, avatar_url, phone,
+           plan, trial_start, signup_ip, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, 'free_trial', ?, ?, ?)""",
+        (student_id, google_id, email, name, avatar_url, phone,
+         datetime.now().isoformat(), signup_ip, datetime.now().isoformat()),
+    )
+    conn.commit()
+    conn.close()
+    return student_id
+
+
+def get_student(student_id):
+    """Get student by ID."""
+    conn = get_db()
+    row = conn.execute("SELECT * FROM students WHERE id = ?", (student_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_student_by_google_id(google_id):
+    """Get student by Google OAuth ID."""
+    conn = get_db()
+    row = conn.execute("SELECT * FROM students WHERE google_id = ?", (google_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_student_by_phone(phone):
+    """Get student by phone number."""
+    conn = get_db()
+    row = conn.execute("SELECT * FROM students WHERE phone = ?", (phone,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def update_student_plan(student_id, plan, paid_until=None):
+    """Update a student's plan status."""
+    conn = get_db()
+    if paid_until:
+        conn.execute("UPDATE students SET plan = ?, paid_until = ? WHERE id = ?",
+                     (plan, paid_until, student_id))
+    else:
+        conn.execute("UPDATE students SET plan = ? WHERE id = ?", (plan, student_id))
+    conn.commit()
+    conn.close()
+
+
+def count_recent_signups_from_ip(ip, days=7):
+    """Count signups from an IP in the last N days."""
+    from datetime import timedelta
+    conn = get_db()
+    cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+    row = conn.execute(
+        "SELECT COUNT(*) as c FROM students WHERE signup_ip = ? AND created_at > ?",
+        (ip, cutoff)
+    ).fetchone()
+    conn.close()
+    return row["c"] if row else 0
+
+
+def set_batch_status(batch_id, student_id, status, error_message=None):
+    """Create or update batch processing status."""
+    conn = get_db()
+    conn.execute(
+        """INSERT INTO batch_status (batch_id, student_id, status, error_message, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON CONFLICT(batch_id) DO UPDATE SET status=?, error_message=?, updated_at=?""",
+        (batch_id, student_id, status, error_message,
+         datetime.now().isoformat(), datetime.now().isoformat(),
+         status, error_message, datetime.now().isoformat()),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_batch_status(batch_id):
+    """Get status of a batch."""
+    conn = get_db()
+    row = conn.execute("SELECT * FROM batch_status WHERE batch_id = ?", (batch_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def log_event(student_id, event, metadata=None):
+    """Log a lightweight analytics event."""
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO events (student_id, event, metadata, created_at) VALUES (?, ?, ?, ?)",
+        (student_id, event, json.dumps(metadata) if metadata else None,
+         datetime.now().isoformat()),
+    )
+    conn.commit()
+    conn.close()

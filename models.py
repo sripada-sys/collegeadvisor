@@ -22,10 +22,12 @@ MODELS = {
 
 # Best model per task — left is preferred, right is fallback
 TASK_PREFERENCES = {
-    "evaluate": ["claude", "openai", "gemini"],
-    "practice": ["claude", "openai", "gemini"],
-    "explain": ["claude", "perplexity", "openai", "gemini"],
-    "read_image": ["openai", "gemini", "claude"],
+    "extract": ["openai", "gemini"],       # Vision/OCR — GPT-4o best at handwriting
+    "evaluate": ["gemini", "openai"],      # Grading extracted text — Gemini cheapest
+    "practice": ["gemini", "openai"],
+    "explain": ["gemini", "perplexity", "openai"],
+    "debate": ["gemini", "openai"],
+    "read_image": ["openai", "gemini"],
 }
 
 MIME_MAP = {
