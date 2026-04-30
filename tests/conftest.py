@@ -59,21 +59,20 @@ def app_client(monkeypatch, tmp_path):
         with patch("app.auto_update"):
             with patch("app.schedule_daily_backup"):
                 with patch("app.backup_to_git"):
-                    with patch("app.webbrowser.open"):
-                        import importlib
-                        import db
-                        db.init_db()
-                        db.run_migrations()
+                    import importlib
+                    import db
+                    db.init_db()
+                    db.run_migrations()
 
-                        import app as app_module
-                        app_module.router = mock_router
-                        app_module.app.config["TESTING"] = True
-                        app_module.app.config["SECRET_KEY"] = "test-secret"
+                    import app as app_module
+                    app_module.router = mock_router
+                    app_module.app.config["TESTING"] = True
+                    app_module.app.config["SECRET_KEY"] = "test-secret"
 
-                        client = app_module.app.test_client()
-                        client._mock_router = mock_router
-                        client._app_module = app_module
-                        yield client
+                    client = app_module.app.test_client()
+                    client._mock_router = mock_router
+                    client._app_module = app_module
+                    yield client
 
 
 @pytest.fixture

@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-MathMentor — AI mentor for JEE, ISI, CMI, Board exams.
+GradesGenie — AI tutor for JEE, ISI, CMI, Board exams.
 Subjects: Maths, Physics, Chemistry.
 
 Architecture:
-  Linux PC = server + main dashboard (feedback, progress, QR code)
-  Phone    = camera (uploads question + answer photos)
-  iPad     = optional Canvas scratch pad
-
-All on same WiFi. No install — just a browser.
+  Cloud VPS (Vultr) running Flask on port 5050
+  Phone = camera (uploads question + answer photos)
+  PC    = dashboard (feedback, progress, debate)
 
 Run:   python3 app.py
 Setup: cp .env.example .env && edit .env with your API keys
@@ -22,7 +20,6 @@ import socket
 import subprocess
 import threading
 import uuid
-import webbrowser
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -146,8 +143,7 @@ def index():
 
 @app.route("/pc")
 def pc_dashboard():
-    ip = get_local_ip()
-    return render_template("pc.html", ip=ip, port=PORT, model_status=router.status())
+    return render_template("pc.html", ip=request.host, port=PORT, model_status=router.status())
 
 
 @app.route("/phone")
@@ -157,7 +153,7 @@ def phone_page():
 
 @app.route("/api/status")
 def api_status():
-    return jsonify({"models": router.status(), "ip": get_local_ip(), "port": PORT})
+    return jsonify({"models": router.status(), "ip": request.host, "port": PORT})
 
 
 @app.route("/api/upload", methods=["POST"])
@@ -1101,22 +1097,16 @@ def api_verify_exams():
 # ─── Main ───
 
 if __name__ == "__main__":
-    ip = get_local_ip()
-    url = f"http://{ip}:{PORT}"
     models = ", ".join(router.available.keys())
 
     logger.info("=" * 50)
-    logger.info("  MathMentor is running!")
-    logger.info(f"  PC dashboard : http://localhost:{PORT}/pc")
-    logger.info(f"  Phone upload : {url}/phone")
-    logger.info(f"  Models       : {models}")
+    logger.info("  GradesGenie is running!")
+    logger.info(f"  URL    : http://0.0.0.0:{PORT}")
+    logger.info(f"  Models : {models}")
     logger.info("=" * 50)
 
     auto_update()
     schedule_daily_backup()
-    # Back up on every startup (blocking — ensures data is safe before serving)
     threading.Thread(target=backup_to_git, daemon=False).start()
-
-    webbrowser.open(f"http://localhost:{PORT}/pc")
 
     app.run(host="0.0.0.0", port=PORT, debug=False, threaded=True)

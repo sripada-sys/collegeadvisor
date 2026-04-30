@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MathMentor — Dashboard</title>
+    <title>GradesGenie — Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
@@ -787,7 +787,7 @@
 </head>
 <body>
     <header>
-        <h1>Math<span>Mentor</span></h1>
+        <h1>Grades<span>Genie</span></h1>
         <div class="models-badge" id="model-badges"></div>
     </header>
 
@@ -811,8 +811,8 @@
                 <div id="qr-code"></div>
                 <div class="qr-info">
                     <h2>Scan with phone to upload</h2>
-                    <div class="url" id="phone-url">http://{{ ip }}:{{ port }}/phone</div>
-                    <p>Open this URL on any phone on the same WiFi — snap questions &amp; answers</p>
+                    <div class="url" id="phone-url">{{ ip }}/phone</div>
+                    <p>Open this URL on your phone — snap questions &amp; answers</p>
                 </div>
             </div>
 
@@ -1095,7 +1095,7 @@ renderModelBadges();
 
 // ─── QR Code ───
 new QRCode(document.getElementById('qr-code'), {
-    text: 'http://{{ ip }}:{{ port }}/phone',
+    text: window.location.origin + '/phone',
     width: 120, height: 120,
     colorDark: '#6366f1', colorLight: '#ffffff',
 });
