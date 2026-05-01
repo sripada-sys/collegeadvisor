@@ -14,7 +14,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 MODELS = {
-    "gemini": "gemini-2.0-flash",
+    "gemini": "gemini-2.5-flash",
     "claude": "claude-sonnet-4-20250514",
     "openai": "gpt-4o",
     "perplexity": "sonar",

@@ -33,7 +33,7 @@ except ImportError:
     sys.exit(1)
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tutor.db")
-MODEL = "gemini-2.0-flash"
+MODEL = "gemini-2.5-flash"
 
 
 def get_client():
