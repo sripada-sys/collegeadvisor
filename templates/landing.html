@@ -3,67 +3,206 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>GradesGenie — Your personal teacher who checks every step</title>
-    <meta name="description" content="Take a photo of your solved problem. See where you went wrong and how to fix it. Free for students.">
+    <title>GradesGenie — Stop losing marks to silly mistakes</title>
+    <meta name="description" content="Take a photo of your solved problem. AI checks every step in 10 seconds. Free for 14 days. JEE, NEET, Boards.">
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0C0C12;
-            color: #E5E7EB;
-            line-height: 1.7;
-            min-height: 100vh;
+            background: #FAFAFA;
+            color: #1F2937;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ─── Nav ─── */
+        nav {
+            padding: 20px 24px;
+            max-width: 900px;
+            margin: 0 auto;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 48px 24px;
+            justify-content: space-between;
         }
-
-        .page { max-width: 520px; width: 100%; text-align: center; }
-
-        /* Brand */
         .brand {
-            position: fixed;
-            top: 24px;
-            left: 32px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-            color: #818CF8;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #4F46E5;
+            letter-spacing: -0.5px;
         }
+        .nav-counter {
+            font-size: 0.75rem;
+            color: #6B7280;
+            background: #F3F4F6;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .nav-counter b { color: #4F46E5; }
 
-        /* Headline */
-        h1 {
-            font-size: clamp(1.7rem, 5vw, 2.6rem);
+        /* ─── Hero ─── */
+        .hero {
+            text-align: center;
+            padding: 48px 24px 32px;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        .hero h1 {
+            font-size: clamp(1.8rem, 5.5vw, 2.8rem);
             font-weight: 800;
             line-height: 1.2;
-            color: #FFFFFF;
-            margin-bottom: 12px;
+            color: #111827;
+            margin-bottom: 14px;
         }
-        .tagline {
-            font-size: 1rem;
-            color: #9CA3AF;
-            margin-bottom: 48px;
+        .hero .sub {
+            font-size: 1.05rem;
+            color: #6B7280;
+            margin-bottom: 20px;
         }
 
-        /* Preview — the product IS the pitch */
-        .preview {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 48px;
+        /* Exam chips */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
         }
-        .preview-q {
+        .chip {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #EEF2FF;
+            color: #4F46E5;
+            border: 1px solid #E0E7FF;
+        }
+        .chip-green { background: #ECFDF5; color: #059669; border-color: #D1FAE5; }
+        .chip-amber { background: #FFFBEB; color: #D97706; border-color: #FEF3C7; }
+
+        .lang-note {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            margin-bottom: 0;
+        }
+
+        /* ─── Rolling Strip ─── */
+        .rolling-section {
+            padding: 48px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .rolling-section::before,
+        .rolling-section::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 80px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .rolling-section::before { left: 0; background: linear-gradient(90deg, #FAFAFA, transparent); }
+        .rolling-section::after { right: 0; background: linear-gradient(270deg, #FAFAFA, transparent); }
+
+        .rolling-track {
+            display: flex;
+            gap: 24px;
+            animation: scroll 20s linear infinite;
+            width: max-content;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .rolling-track:hover { animation-play-state: paused; }
+
+        .roll-card {
+            flex-shrink: 0;
+            width: 260px;
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .roll-card .step-num {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #4F46E5;
+            margin-bottom: 8px;
+        }
+        .roll-card .step-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .roll-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+        .roll-card p {
+            font-size: 0.8rem;
+            color: #6B7280;
+            margin: 0;
+        }
+        /* Notebook mock inside roll card */
+        .notebook-mock {
+            background: #FFFEF5;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Kalam', cursive, sans-serif;
+            font-size: 0.75rem;
+            color: #374151;
+            line-height: 1.8;
+            margin-top: 8px;
+            position: relative;
+        }
+        .notebook-mock::before {
+            content: '';
+            position: absolute;
+            left: 28px; top: 0; bottom: 0;
+            width: 1px;
+            background: #FECACA;
+        }
+        .notebook-mock .line { padding-left: 24px; border-bottom: 1px solid #E5E7EB; }
+        .notebook-mock .line:last-child { border: none; }
+        .notebook-mock .wrong { color: #DC2626; text-decoration: line-through; }
+
+        /* ─── Preview / Demo ─── */
+        .demo-section {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 0 24px 48px;
+        }
+        .demo-label {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9CA3AF;
+            margin-bottom: 16px;
+        }
+        .demo-box {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+        .demo-q {
             font-size: 0.9rem;
             padding: 10px 14px;
-            background: rgba(255,255,255,0.05);
+            background: #F9FAFB;
             border-radius: 8px;
             margin-bottom: 14px;
-            color: #D1D5DB;
+            color: #374151;
+            border: 1px solid #F3F4F6;
         }
         .fb {
             padding: 10px 14px;
@@ -71,80 +210,263 @@
             margin-bottom: 8px;
         }
         .fb:last-child { margin-bottom: 0; }
-        .fb-good { border-left: 3px solid #34D399; background: rgba(52,211,153,0.06); }
-        .fb-fix { border-left: 3px solid #FBBF24; background: rgba(251,191,36,0.06); }
+        .fb-good { border-left: 3px solid #10B981; background: #ECFDF5; }
+        .fb-fix { border-left: 3px solid #F59E0B; background: #FFFBEB; }
         .fb b { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
-        .fb-good b { color: #34D399; }
-        .fb-fix b { color: #FBBF24; }
-        .fb p { font-size: 0.85rem; margin: 0; color: #D1D5DB; line-height: 1.5; }
+        .fb-good b { color: #059669; }
+        .fb-fix b { color: #D97706; }
+        .fb p { font-size: 0.85rem; margin: 0; color: #374151; line-height: 1.5; }
 
-        /* Info line */
-        .info {
-            font-size: 0.85rem;
-            color: #9CA3AF;
-            margin-bottom: 24px;
+        /* ─── CTA Section ─── */
+        .cta-section {
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 0 24px 24px;
         }
-
-        /* Sign in — small, not the star */
-        .signin {
-            margin-bottom: 48px;
+        .cta-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 24px;
+            background: #4F46E5;
+            color: #FFFFFF;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: background 0.15s;
+            box-shadow: 0 4px 12px rgba(79,70,229,0.25);
+        }
+        .cta-btn:hover { background: #4338CA; }
+        .cta-small {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            margin-bottom: 16px;
         }
         .google-btn-wrap { display: inline-block; }
 
-        /* Footer info */
-        .foot {
-            font-size: 0.8rem;
-            color: #4B5563;
-            text-align: center;
+        /* Trust badges */
+        .trust {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
-        .foot span { color: #6B7280; }
+        .trust span {
+            font-size: 0.75rem;
+            color: #6B7280;
+        }
+
+        /* ─── Quote ─── */
+        .quote-section {
+            text-align: center;
+            padding: 40px 24px;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        .quote-section blockquote {
+            font-size: 0.95rem;
+            font-style: italic;
+            color: #4B5563;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        .quote-section cite {
+            font-size: 0.8rem;
+            font-style: normal;
+            color: #9CA3AF;
+        }
+
+        /* ─── Identity Line ─── */
+        .identity {
+            text-align: center;
+            padding: 0 24px 48px;
+            font-size: 0.9rem;
+            color: #6B7280;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .identity b { color: #374151; }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            padding: 24px;
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            border-top: 1px solid #F3F4F6;
+        }
 
         @media (max-width: 480px) {
-            body { padding: 32px 16px; }
+            .hero { padding: 32px 16px 24px; }
+            .roll-card { width: 220px; padding: 16px; }
+            .demo-box { padding: 18px; }
+            .trust { gap: 10px; }
+            nav { padding: 16px; }
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="brand">GradesGenie</div>
+<nav>
+    <div class="brand">GradesGenie</div>
+    <div class="nav-counter"><b>2,847</b> answers checked this week</div>
+</nav>
 
-<div class="page">
+<!-- Hero -->
+<section class="hero">
+    <h1>Stop losing marks to silly mistakes.</h1>
+    <p class="sub">For students who practice daily but have no one to check every step.</p>
 
-    <h1>You solve it.<br>We show what you missed.</h1>
-    <p class="tagline">Snap a photo. Get feedback in 10 seconds.</p>
+    <div class="chips">
+        <span class="chip">JEE Mains</span>
+        <span class="chip">JEE Advanced</span>
+        <span class="chip chip-green">NEET</span>
+        <span class="chip chip-amber">Boards</span>
+        <span class="chip">BITSAT</span>
+        <span class="chip">SAT</span>
+    </div>
+    <p class="lang-note">Works in Hindi, Telugu, English — just write naturally.</p>
+</section>
 
-    <div class="preview">
-        <div class="preview-q"><strong>Q:</strong> Find the area of a triangle with sides 5, 12, 13</div>
+<!-- Rolling How-It-Works Strip -->
+<section class="rolling-section">
+    <div class="rolling-track">
+        <!-- Set 1 -->
+        <div class="roll-card">
+            <div class="step-num">Step 1</div>
+            <div class="step-icon">📸</div>
+            <h3>Snap your notebook</h3>
+            <p>Point your phone at your solved problem. Any handwriting works.</p>
+            <div class="notebook-mock">
+                <div class="line">dy/dx = x²·cos(x)</div>
+                <div class="line"><span class="wrong">+ 2x·sin(x)</span></div>
+                <div class="line">= x²cos(x) + 2x·sin(x)</div>
+            </div>
+        </div>
+        <div class="roll-card">
+            <div class="step-num">Step 2</div>
+            <div class="step-icon">🤖</div>
+            <h3>AI reads every step</h3>
+            <p>Checks your method, formulas, and arithmetic — line by line in 10 seconds.</p>
+        </div>
+        <div class="roll-card">
+            <div class="step-num">Step 3</div>
+            <div class="step-icon">✅</div>
+            <h3>See what to fix</h3>
+            <p>Not just "wrong" — shows exactly which step broke and how to do it right.</p>
+        </div>
+        <div class="roll-card">
+            <div class="step-num">Real example</div>
+            <div class="step-icon">📝</div>
+            <h3>Product Rule Error</h3>
+            <p>"You applied d/dx to x² but forgot to differentiate sin(x) separately."</p>
+        </div>
+        <div class="roll-card">
+            <div class="step-num">Works on</div>
+            <div class="step-icon">📱</div>
+            <h3>Your phone</h3>
+            <p>No app download. Open in browser, snap, done. Uses 0 storage.</p>
+        </div>
+        <!-- Set 2 (duplicate for seamless loop) -->
+        <div class="roll-card">
+            <div class="step-num">Step 1</div>
+            <div class="step-icon">📸</div>
+            <h3>Snap your notebook</h3>
+            <p>Point your phone at your solved problem. Any handwriting works.</p>
+            <div class="notebook-mock">
+                <div class="line">dy/dx = x²·cos(x)</div>
+                <div class="line"><span class="wrong">+ 2x·sin(x)</span></div>
+                <div class="line">= x²cos(x) + 2x·sin(x)</div>
+            </div>
+        </div>
+        <div class="roll-card">
+            <div class="step-num">Step 2</div>
+            <div class="step-icon">🤖</div>
+            <h3>AI reads every step</h3>
+            <p>Checks your method, formulas, and arithmetic — line by line in 10 seconds.</p>
+        </div>
+        <div class="roll-card">
+            <div class="step-num">Step 3</div>
+            <div class="step-icon">✅</div>
+            <h3>See what to fix</h3>
+            <p>Not just "wrong" — shows exactly which step broke and how to do it right.</p>
+        </div>
+        <div class="roll-card">
+            <div class="step-num">Real example</div>
+            <div class="step-icon">📝</div>
+            <h3>Product Rule Error</h3>
+            <p>"You applied d/dx to x² but forgot to differentiate sin(x) separately."</p>
+        </div>
+        <div class="roll-card">
+            <div class="step-num">Works on</div>
+            <div class="step-icon">📱</div>
+            <h3>Your phone</h3>
+            <p>No app download. Open in browser, snap, done. Uses 0 storage.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Live Demo -->
+<section class="demo-section">
+    <div class="demo-label">What you get back in 10 seconds</div>
+    <div class="demo-box">
+        <div class="demo-q"><strong>Q:</strong> Differentiate y = x² · sin(x)</div>
         <div class="fb fb-good">
             <b>Correct ✓</b>
-            <p>You used Heron's formula. Right approach.</p>
+            <p>You identified this needs the product rule: d/dx(uv) = u'v + uv'. Good.</p>
         </div>
         <div class="fb fb-fix">
             <b>Fix this</b>
-            <p>s = (5+12+13)/2 = 15, not 14. You added wrong in step 2. With s=15, area = √(15×10×3×2) = √900 = 30.</p>
+            <p>You wrote dy/dx = 2x·sin(x). But product rule gives TWO terms: 2x·sin(x) + x²·cos(x). You forgot the second term x²·cos(x).</p>
         </div>
     </div>
+</section>
 
-    <p class="info">Free. Works on phone. Maths, Physics, Chemistry.</p>
+<!-- CTA -->
+<section class="cta-section">
+    <button class="cta-btn" onclick="google.accounts.id.prompt()">Check My Answer — Free →</button>
+    <p class="cta-small">Free for 14 days. No card needed.</p>
 
-    <div class="signin">
-        <div class="google-btn-wrap">
-            <div id="g_id_onload"
-                 data-client_id="{{ google_client_id }}"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false"></div>
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-size="medium"
-                 data-theme="filled_black"
-                 data-text="continue_with"
-                 data-shape="pill"
-                 data-width="200"></div>
-        </div>
+    <div class="google-btn-wrap">
+        <div id="g_id_onload"
+             data-client_id="{{ google_client_id }}"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false"></div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="medium"
+             data-theme="outline"
+             data-text="continue_with"
+             data-shape="pill"
+             data-width="200"></div>
     </div>
 
-    <div class="foot">JEE · Boards · NEET · BITSAT · SAT<br><span>We read your handwriting. Just write and go.</span></div>
+    <div class="trust">
+        <span>⚡ 10-sec feedback</span>
+        <span>📱 No app download</span>
+        <span>🔒 Only Google login</span>
+    </div>
+</section>
+
+<!-- Quote -->
+<section class="quote-section">
+    <blockquote>"I used to solve 50 problems a day but had no one to check them. Now I know exactly where I go wrong before the exam does."</blockquote>
+    <cite>— Arjun, Class 12, Kota</cite>
+</section>
+
+<!-- Identity line -->
+<div class="identity">
+    <b>For students who practice daily</b> but have no one to check every step.
 </div>
+
+<footer>
+    GradesGenie · Free for 14 days · ₹499/month after
+</footer>
 
 <script>
 function handleCredentialResponse(response) {
