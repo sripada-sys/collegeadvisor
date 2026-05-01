@@ -430,7 +430,7 @@ class TestEvaluationPipeline:
 
         batch = db_module.get_batch("test_batch_003")
         assert len(batch) == 1
-        assert batch[0]["correctness"] == 0
+        assert batch[0]["correctness"] == -1
 
 
 class TestParseAiJson:

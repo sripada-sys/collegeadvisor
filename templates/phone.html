@@ -185,11 +185,11 @@
 
     <!-- Question Photos -->
     <div class="section">
-        <div class="section-title">Question Page</div>
+        <div class="section-title">Question Page <span style="color:var(--text2);font-size:11px;text-transform:none;letter-spacing:0">(optional — skip if question is on same page as answer)</span></div>
         <div class="upload-area" id="q-upload">
             <div class="icon">📸</div>
             <div class="label">Take Photo or Choose</div>
-            <div class="hint">Keep the question flat, well-lit, fully in frame</div>
+            <div class="hint">Only needed if question is on a separate page</div>
             <div class="file-count" id="q-count"></div>
             <input type="file" accept="image/*" capture="environment" multiple
                    onchange="handleFiles(this, 'q')">
@@ -199,11 +199,11 @@
 
     <!-- Answer Photos -->
     <div class="section">
-        <div class="section-title">Your Answers</div>
+        <div class="section-title">Your Work <span style="color:var(--accent);font-size:11px;text-transform:none;letter-spacing:0">(required)</span></div>
         <div class="upload-area" id="a-upload">
             <div class="icon">✍️</div>
             <div class="label">Take Photo or Choose</div>
-            <div class="hint">Tap multiple times to add more pages</div>
+            <div class="hint">Include both question and your solution if on same page</div>
             <div class="file-count" id="a-count"></div>
             <input type="file" accept="image/*" capture="environment" multiple
                    onchange="handleFiles(this, 'a')">
@@ -238,20 +238,55 @@ function selectSubject(el) {
     selectedSubject = el.dataset.subject;
 }
 
-function handleFiles(input, type) {
-    const newFiles = Array.from(input.files);
+// ─── Image Compression ───
+function compressImage(file, maxDim = 1600, quality = 0.82) {
+    return new Promise((resolve) => {
+        // Skip small files (< 500KB)
+        if (file.size < 500000) { resolve(file); return; }
+
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            let w = img.width, h = img.height;
+            if (w <= maxDim && h <= maxDim) { resolve(file); return; }
+
+            // Scale down
+            const ratio = Math.min(maxDim / w, maxDim / h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+
+            canvas.toBlob((blob) => {
+                resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+            }, 'image/jpeg', quality);
+        };
+        img.onerror = () => { resolve(file); }; // fallback to original
+        img.src = url;
+    });
+}
+
+async function handleFiles(input, type) {
+    const rawFiles = Array.from(input.files);
+    // Compress all files
+    const compressed = await Promise.all(rawFiles.map(f => compressImage(f)));
+
     if (type === 'q') {
-        questionFiles = questionFiles.concat(newFiles);
+        questionFiles = questionFiles.concat(compressed);
         document.getElementById('q-upload').classList.toggle('has-files', questionFiles.length > 0);
         document.getElementById('q-count').textContent = `${questionFiles.length} photo${questionFiles.length > 1 ? 's' : ''} — tap again to add more`;
         showPreviews(questionFiles, 'q-preview');
     } else {
-        answerFiles = answerFiles.concat(newFiles);
+        answerFiles = answerFiles.concat(compressed);
         document.getElementById('a-upload').classList.toggle('has-files', answerFiles.length > 0);
         document.getElementById('a-count').textContent = `${answerFiles.length} page${answerFiles.length > 1 ? 's' : ''} — tap again to add more`;
         showPreviews(answerFiles, 'a-preview');
     }
-    input.value = ''; // reset so same file can be re-added or new capture allowed
+    input.value = '';
 }
 
 function showPreviews(files, containerId) {
@@ -265,15 +300,15 @@ function showPreviews(files, containerId) {
 }
 
 async function submitWork() {
-    if (questionFiles.length === 0 && answerFiles.length === 0) {
-        showStatus('Upload at least one photo', 'error');
+    if (answerFiles.length === 0 && questionFiles.length === 0) {
+        showStatus('Upload at least one photo of your work', 'error');
         return;
     }
 
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;
     btn.textContent = 'Uploading...';
-    showStatus('Uploading photos...', 'processing');
+    showStatus('Compressing & uploading...', 'processing');
 
     const fd = new FormData();
     fd.append('subject', selectedSubject);
@@ -285,11 +320,24 @@ async function submitWork() {
 
     try {
         const res = await fetch('/api/upload', { method: 'POST', body: fd });
-        const data = await res.json();
 
+        if (res.status === 401) {
+            // Session expired — show reconnect message
+            showStatus('Session expired. Scan the QR code on your PC again.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Check My Work';
+            // Show a prominent reconnect prompt
+            setTimeout(() => {
+                if (confirm('Your session expired. Redirect to reconnect?')) {
+                    window.location.href = '/phone';
+                }
+            }, 500);
+            return;
+        }
+
+        const data = await res.json();
         if (res.ok) {
-            showStatus('✓ Uploaded! Check the PC screen for results.', 'success');
-            // Reset form
+            showStatus('✓ Uploaded! Check the PC screen — results in ~10 sec.', 'success');
             questionFiles = [];
             answerFiles = [];
             document.getElementById('q-upload').classList.remove('has-files');
@@ -297,13 +345,12 @@ async function submitWork() {
             document.getElementById('q-preview').innerHTML = '';
             document.getElementById('a-preview').innerHTML = '';
             document.getElementById('problem-numbers').value = '';
-            // Reset file inputs
             document.querySelectorAll('input[type="file"]').forEach(i => i.value = '');
         } else {
             showStatus(data.error || 'Upload failed. Try again.', 'error');
         }
     } catch(e) {
-        showStatus('Network error. Check your internet connection.', 'error');
+        showStatus('Network error. Check your connection and try again.', 'error');
     }
 
     btn.disabled = false;

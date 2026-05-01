@@ -302,7 +302,7 @@ def api_upload():
     student_id = request.student["id"]
 
     # Track batch status
-    db.set_batch_status(batch_id, student_id, "processing")
+    db.set_batch_status(batch_id, student_id, "uploading")
     db.log_event(student_id, "upload", {"subject": subject, "exam": exam, "questions": len(q_paths), "answers": len(a_paths), "batch_id": batch_id})
 
     # Process in background so phone gets immediate response
@@ -335,13 +335,15 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, 
     # Step 1: Extract handwritten content using vision model (GPT-4o preferred)
     extract_prompt = EXTRACT_PROMPT.format(subject=subject)
     if problem_numbers:
-        extract_prompt += f"\n\nThe student says they answered these problem numbers: {problem_numbers}"
+        extract_prompt += f"\n\nIMPORTANT: The student says they answered problem numbers: {problem_numbers}. Use these EXACT numbers as the problem identifiers in your transcription (e.g. '=== Problem {problem_numbers.split(',')[0].strip()} ===')."
 
+    db.set_batch_status(batch_id, student_id, "extracting")
     logger.info(f"Batch {batch_id}: extracting handwritten content...")
     extracted_text = router.call("extract", extract_prompt, images=all_images)
     logger.info(f"Batch {batch_id}: extraction complete ({len(extracted_text)} chars)")
 
     # Step 2: Evaluate the extracted text using reasoning model (Gemini preferred)
+    db.set_batch_status(batch_id, student_id, "evaluating")
     eval_prompt = EVALUATE_PROMPT.format(
         subject=subject, exam_context=exam_context
     ).replace("__EXTRACTED_TEXT__", extracted_text)
@@ -359,8 +361,12 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, 
         logger.warning(f"Batch {batch_id}: JSON parse failed, retrying with JSON-only prompt")
         retry_prompt = (
             "Your previous response could not be parsed as JSON. "
-            "Return ONLY a raw JSON array with no markdown, no backticks, no commentary. "
-            "Use the same structure as before.\n\n"
+            "Return ONLY a valid JSON array. Rules:\n"
+            "- No markdown fences (no ```)\n"
+            "- No text before or after the JSON\n"
+            "- Escape backslashes in LaTeX as double-backslash (e.g. \\\\frac, \\\\theta)\n"
+            "- Use \\n for newlines inside strings\n"
+            "- Ensure all strings are properly quoted\n\n"
             + EVALUATE_PROMPT.format(
                 subject=subject,
                 exam_context=EXAM_CONTEXTS.get(exam, EXAM_CONTEXTS["general"]),
@@ -375,13 +381,15 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, 
             results = [
                 {
                     "problem_number": "?",
-                    "question_summary": "Could not parse structured response",
-                    "correctness": 0,
+                    "question_summary": "AI response couldn't be processed",
+                    "question_text": "",
+                    "correctness": -1,
                     "what_went_right": "",
-                    "where_it_broke": raw_response[:500],
+                    "where_it_broke": "",
                     "mistakes": [],
                     "hint_not_answer": "",
                     "encouragement": "",
+                    "ai_error": True,
                 }
             ]
 
@@ -420,11 +428,62 @@ def _schedule_debounced_backup(delay: int = 120):
         _backup_timer.start()
 
 
+@app.route("/api/batch-status/<batch_id>")
+@require_auth
+def api_batch_status(batch_id):
+    if not all(c in "0123456789abcdef" for c in batch_id):
+        return jsonify({"error": "Invalid batch ID"}), 400
+    status = db.get_batch_status(batch_id)
+    if not status:
+        return jsonify({"status": "unknown"})
+    return jsonify({"status": status["status"], "error": status.get("error_message")})
+
+
+@app.route("/api/retry/<batch_id>", methods=["POST"])
+@require_auth
+def api_retry_batch(batch_id):
+    if not all(c in "0123456789abcdef" for c in batch_id):
+        return jsonify({"error": "Invalid batch ID"}), 400
+    student_id = request.student["id"]
+    # Get the original batch metadata to re-run evaluation
+    batch = db.get_batch(batch_id, student_id=student_id)
+    if not batch:
+        return jsonify({"error": "Batch not found"}), 404
+    # Re-run evaluation using stored images
+    first = batch[0] if batch else {}
+    subject = first.get("subject", "maths")
+    exam = first.get("exam", "general")
+    q_images = first.get("question_images", "[]")
+    a_images = first.get("answer_images", "[]")
+    q_paths = json.loads(q_images) if isinstance(q_images, str) else (q_images or [])
+    a_paths = json.loads(a_images) if isinstance(a_images, str) else (a_images or [])
+    problem_numbers = first.get("problem_numbers", "")
+
+    db.set_batch_status(batch_id, student_id, "extracting")
+
+    def retry_async():
+        try:
+            _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, student_id)
+            db.set_batch_status(batch_id, student_id, "done")
+        except Exception as e:
+            logger.error(f"Retry failed: {e}", exc_info=True)
+            db.set_batch_status(batch_id, student_id, "failed", str(e)[:500])
+
+    threading.Thread(target=retry_async, daemon=True).start()
+    return jsonify({"ok": True})
+
+
 @app.route("/api/results/latest")
 @require_auth
 def api_results_latest():
     batch = db.get_latest_batch(student_id=request.student["id"])
-    return jsonify({"results": batch or [], "timestamp": datetime.now().isoformat()})
+    # Also include active batch info for processing indicator
+    active = db.get_active_batch(student_id=request.student["id"])
+    return jsonify({
+        "results": batch or [],
+        "timestamp": datetime.now().isoformat(),
+        "active_batch": active,
+    })
 
 
 @app.route("/api/results/<batch_id>")

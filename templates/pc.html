@@ -741,6 +741,16 @@
                     <p>Upload question &amp; answer photos from your phone.<br>Results will appear here automatically.</p>
                 </div>
             </div>
+
+            <!-- Processing indicator (hidden by default) -->
+            <div id="processing-indicator" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;margin-bottom:16px">
+                <div style="margin-bottom:12px">
+                    <div class="processing-spinner" style="display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top:3px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite"></div>
+                </div>
+                <div id="processing-stage" style="font-size:15px;font-weight:600;color:var(--accent)">Uploading...</div>
+                <div id="processing-detail" style="font-size:13px;color:var(--text2);margin-top:6px">This usually takes 10-15 seconds</div>
+            </div>
+            <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
         </section>
 
         <!-- Practice Tab -->
@@ -943,16 +953,50 @@ document.getElementById('phone-url').textContent = window.location.host + '/phon
 
 // ─── Polling for Results ───
 let pollInterval = null;
+let _activeBatchId = null;
+let _processingShown = false;
+
+const STAGE_LABELS = {
+    uploading: '📤 Receiving photos...',
+    extracting: '🔍 Reading your handwriting...',
+    evaluating: '🧠 Checking your work...',
+    done: '✓ Done!',
+    failed: '❌ Something went wrong'
+};
+
+function showProcessing(stage) {
+    const ind = document.getElementById('processing-indicator');
+    ind.style.display = 'block';
+    document.getElementById('processing-stage').textContent = STAGE_LABELS[stage] || stage;
+    _processingShown = true;
+}
+
+function hideProcessing() {
+    document.getElementById('processing-indicator').style.display = 'none';
+    _processingShown = false;
+    _activeBatchId = null;
+}
 
 function startPolling() {
     pollInterval = setInterval(async () => {
         try {
             const res = await fetch('/api/results/latest');
             const data = await res.json();
+
+            // Show processing indicator if there's an active batch
+            if (data.active_batch) {
+                _activeBatchId = data.active_batch.batch_id;
+                showProcessing(data.active_batch.status);
+            } else if (_processingShown && !data.active_batch) {
+                // Batch finished — hide processing
+                hideProcessing();
+            }
+
             if (data.results && data.results.length > 0) {
                 const batchId = data.results[0].batch_id;
                 if (batchId !== lastBatchId) {
                     lastBatchId = batchId;
+                    hideProcessing();
                     _sessionResults = _sessionResults.concat(data.results);
                     renderResults(_sessionResults);
                 }
@@ -1105,20 +1149,33 @@ function renderResults(results) {
     // ── Build one collapsible row per question ─────────────────────────────
     const rowsHtml = results.map((r, idx) => {
         const score    = r.correctness || 0;
+        const isAiError = r.ai_error || score === -1;
+        const displayScore = isAiError ? 0 : score;
         const cardId   = `rcard-${idx}`;
 
-        const rowClass = score >= 4 ? 'nailed-it' : score === 3 ? 'almost-there' : 'needs-attention';
-        const pillText = score >= 4 ? 'Nailed it' : score === 3 ? 'Almost there' : 'Needs work';
-        const pillCls  = score >= 4 ? 'nailed' : score === 3 ? 'almost' : 'struggling';
-        const dotCls   = score >= 4 ? 'on-g'   : score === 3 ? 'on-y'   : 'on-r';
+        const rowClass = isAiError ? 'needs-attention ai-error' : displayScore >= 4 ? 'nailed-it' : displayScore === 3 ? 'almost-there' : 'needs-attention';
+        const pillText = isAiError ? '⚠ AI Error' : displayScore >= 4 ? 'Nailed it' : displayScore === 3 ? 'Almost there' : 'Needs work';
+        const pillCls  = isAiError ? 'struggling' : displayScore >= 4 ? 'nailed' : displayScore === 3 ? 'almost' : 'struggling';
+        const dotCls   = displayScore >= 4 ? 'on-g'   : displayScore === 3 ? 'on-y'   : 'on-r';
 
-        const dots = Array(5).fill(0).map((_, i) =>
-            `<div class="q-dot ${i < score ? dotCls : ''}"></div>`
+        const dots = isAiError ? '<span style="color:var(--text2);font-size:12px">—</span>' : Array(5).fill(0).map((_, i) =>
+            `<div class="q-dot ${i < displayScore ? dotCls : ''}"></div>`
         ).join('');
 
         const topic    = esc(r.topic || r.question_summary || '');
         const subtopic = r.subtopic ? `<span class="q-subtopic">· ${esc(r.subtopic)}</span>` : '';
         const src      = r.source   ? ` <span class="source-badge">${esc(r.source)}</span>` : '';
+
+        // ── AI Error banner ────────────────────────────────────────────────
+        const aiErrorBanner = isAiError ? `
+            <div style="background:#FFF3CD;border:1px solid #FFECB5;border-radius:8px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+                <span style="font-size:20px">⚠️</span>
+                <div style="flex:1">
+                    <div style="font-weight:600;color:#664D03;font-size:13px">AI couldn't process this one</div>
+                    <div style="color:#997404;font-size:12px;margin-top:2px">This might be a handwriting issue or temporary glitch</div>
+                </div>
+                <button onclick="retryEvaluation('${r.batch_id}','${cardId}')" style="background:var(--accent);color:white;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Retry</button>
+            </div>` : '';
 
         // ── Detail content ─────────────────────────────────────────────────
         let mistakesHtml = '';
@@ -1157,6 +1214,8 @@ function renderResults(results) {
                 <div class="q-fb-body">${esc(r.missing_concept)}</div>
             </div>` : '';
 
+        // Collapse next_practice + encouragement behind "Show more" for wrong answers
+        const hasCollapsible = (displayScore <= 2 && !isAiError) && (r.next_practice || r.encouragement);
         const nextSection = r.next_practice ? `
             <div class="q-feedback-section next">
                 <div class="q-fb-title">Try next</div>
@@ -1166,12 +1225,16 @@ function renderResults(results) {
         const encouragement = r.encouragement ? `
             <div class="q-encouragement">${esc(r.encouragement)}</div>` : '';
 
+        // Wrap next+encouragement in collapsible for low scores
+        const collapsibleStart = hasCollapsible ? `<div class="feedback-more" style="display:none" id="${cardId}-more">` : '';
+        const collapsibleEnd = hasCollapsible ? `</div><button class="show-more-btn" onclick="document.getElementById('${cardId}-more').style.display='block';this.style.display='none';" style="background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;padding:4px 0;margin-top:6px">Show more ▼</button>` : '';
+
         const answerReveal = r.correct_answer ? `
-            <div class="answer-reveal ${score < 3 ? 'open' : ''}" id="${cardId}-ans" style="margin-top:14px">
+            <div class="answer-reveal ${displayScore < 3 ? 'open' : ''}" id="${cardId}-ans" style="margin-top:14px">
                 <button class="answer-reveal-btn" onclick="toggleAnswer('${cardId}-ans')">
-                    📖 See correct answer <span class="reveal-arrow">${score < 3 ? '▲' : '▼'}</span>
+                    📖 See correct answer <span class="reveal-arrow">${displayScore < 3 ? '▲' : '▼'}</span>
                 </button>
-                <div class="answer-reveal-body" ${score < 3 ? 'style="display:block"' : ''}>
+                <div class="answer-reveal-body" ${displayScore < 3 ? 'style="display:block"' : ''}>
                     <div class="answer-reveal-text">${esc(r.correct_answer)}</div>
                 </div>
             </div>` : '';
@@ -1180,11 +1243,23 @@ function renderResults(results) {
         resultDebateContexts[cardId] = {
             subject: r.subject || 'maths', exam: r.exam || 'general',
             question_text: r.question_text || r.question_summary || '',
-            topic: r.topic || '', correctness: score,
+            topic: r.topic || '', correctness: displayScore,
             what_went_right: r.what_went_right || '',
             where_it_broke: r.where_it_broke || '',
             missing_concept: r.missing_concept || '',
         };
+
+        // Debate button — prominent for low scores
+        const debateStyle = displayScore <= 2 && !isAiError
+            ? 'background:#DC3545;color:white;font-weight:600;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer'
+            : '';
+        const debateText = displayScore <= 2 && !isAiError
+            ? '🗣 Think this is wrong? Discuss'
+            : '🗣 Discuss with mentor';
+
+        // "Try harder" button for perfect scores
+        const harderBtn = displayScore === 5 ? `
+            <button class="harder-btn" onclick="tryHarder('${esc(r.topic||r.question_summary||'')}','${esc(r.subject||'maths')}')" style="background:var(--surface);border:1px solid var(--accent);color:var(--accent);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">⚡ Try a harder one</button>` : '';
 
         return `
         <div class="q-row ${rowClass}" id="${cardId}">
@@ -1196,17 +1271,18 @@ function renderResults(results) {
                 <span class="q-chevron">▼</span>
             </div>
             <div class="q-detail">
+                ${aiErrorBanner}
                 ${questionBox}
                 ${goodSection}
                 ${slippedSection}
                 ${studySection}
-                ${nextSection}
-                ${encouragement}
+                ${collapsibleStart}${nextSection}${encouragement}${collapsibleEnd}
                 ${answerReveal}
-                <div class="card-actions" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px">
-                    <button class="debate-btn" id="${cardId}-dbtn" onclick="openDebate('${cardId}')">
-                        🗣 Discuss with mentor
+                <div class="card-actions" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="debate-btn" id="${cardId}-dbtn" onclick="openDebate('${cardId}')" ${debateStyle ? `style="${debateStyle}"` : ''}>
+                        ${debateText}
                     </button>
+                    ${harderBtn}
                 </div>
                 <div class="debate-section" id="${cardId}-debate" style="display:none">
                     <div class="debate-header">Chat — Q${esc(String(r.problem_number || idx + 1))}</div>
@@ -1284,6 +1360,37 @@ function setHTMLAndRenderMath(el, html) {
 // ─── Answer Reveal ───
 function toggleAnswer(id) {
     document.getElementById(id).classList.toggle('open');
+}
+
+// ─── Retry Evaluation (AI error) ───
+async function retryEvaluation(batchId, cardId) {
+    const banner = document.querySelector(`#${cardId} [style*="FFF3CD"]`);
+    if (banner) banner.innerHTML = '<div style="text-align:center;padding:8px;color:var(--accent);font-weight:600">Retrying...</div>';
+    try {
+        const res = await fetch(`/api/retry/${batchId}`, { method: 'POST' });
+        if (res.ok) {
+            if (banner) banner.innerHTML = '<div style="text-align:center;padding:8px;color:#198754;font-weight:600">✓ Retrying — results will update shortly</div>';
+            // The polling will pick up the new results
+        } else {
+            if (banner) banner.innerHTML = '<div style="text-align:center;padding:8px;color:#DC3545">Retry failed. Try uploading again from your phone.</div>';
+        }
+    } catch(e) {
+        if (banner) banner.innerHTML = '<div style="text-align:center;padding:8px;color:#DC3545">Network error</div>';
+    }
+}
+
+// ─── Try Harder Variant ───
+async function tryHarder(topic, subject) {
+    // Navigate to practice tab with the topic pre-filled
+    switchTab('practice');
+    const topicInput = document.getElementById('practice-topic') || document.querySelector('.practice-input');
+    if (topicInput) {
+        topicInput.value = topic;
+        topicInput.focus();
+    }
+    // If there's a generate button, click it
+    const genBtn = document.getElementById('generate-practice');
+    if (genBtn) genBtn.click();
 }
 
 // ─── Debate ───

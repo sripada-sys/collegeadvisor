@@ -616,6 +616,21 @@ def get_batch_status(batch_id):
     return dict(row) if row else None
 
 
+def get_active_batch(student_id):
+    """Get the most recent in-progress batch for a student (if any)."""
+    conn = get_db()
+    row = conn.execute(
+        """SELECT batch_id, status FROM batch_status
+           WHERE student_id = ? AND status NOT IN ('done', 'failed')
+           ORDER BY updated_at DESC LIMIT 1""",
+        (student_id,),
+    ).fetchone()
+    conn.close()
+    if row:
+        return {"batch_id": row["batch_id"], "status": row["status"]}
+    return None
+
+
 def log_event(student_id, event, metadata=None):
     """Log a lightweight analytics event."""
     conn = get_db()
