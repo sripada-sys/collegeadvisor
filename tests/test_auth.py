@@ -23,10 +23,10 @@ class TestRequireAuth:
         assert "Not logged in" in data["error"]
 
     def test_unauthenticated_page_redirects_to_login(self, app_client):
-        # /pc requires auth now — but actually /pc doesn't have @require_auth
-        # Only /api/* routes have it. Test with /api/history
-        resp = app_client.get("/api/history")
-        assert resp.status_code == 401
+        # /pc requires auth — should redirect to /login
+        resp = app_client.get("/pc")
+        assert resp.status_code == 302
+        assert "/login" in resp.headers["Location"]
 
     def test_authenticated_passes(self, authed_client):
         resp = authed_client.get("/api/progress")

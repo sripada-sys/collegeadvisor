@@ -20,13 +20,18 @@ class TestPublicRoutes:
         assert resp.status_code == 302
         assert "/pc" in resp.headers["Location"]
 
-    def test_pc_dashboard(self, app_client):
+    def test_pc_dashboard_requires_auth(self, app_client):
         resp = app_client.get("/pc")
+        assert resp.status_code == 302  # redirect to /login
+
+    def test_pc_dashboard_authed(self, authed_client):
+        resp = authed_client.get("/pc")
         assert resp.status_code == 200
 
-    def test_phone_page(self, app_client):
+    def test_phone_page_unpaired(self, app_client):
         resp = app_client.get("/phone")
         assert resp.status_code == 200
+        assert b"Not Connected" in resp.data or b"QR code" in resp.data
 
     def test_api_status(self, app_client):
         resp = app_client.get("/api/status")
@@ -286,7 +291,7 @@ class TestWowRoutes:
         assert resp.status_code == 401
 
     def test_get_wow_success(self, authed_client, db_module):
-        db_module.save_wow_note("Test note", "maths", "algebra")
+        db_module.save_wow_note("Test note", "maths", "algebra", student_id=authed_client._student_id)
         resp = authed_client.get("/api/wow")
         assert resp.status_code == 200
         data = resp.get_json()
@@ -308,6 +313,7 @@ class TestProgressRoute:
         db_module.save_evaluation(
             batch_id="pg1", subject="maths", exam="general",
             result={"problem_number": "1", "correctness": 4, "topic": "algebra"},
+            student_id=authed_client._student_id,
         )
         resp = authed_client.get("/api/progress")
         assert resp.status_code == 200
@@ -325,6 +331,7 @@ class TestHistoryRoute:
             db_module.save_evaluation(
                 batch_id=f"h{i}", subject="maths", exam="general",
                 result={"problem_number": str(i), "correctness": 3},
+                student_id=authed_client._student_id,
             )
         resp = authed_client.get("/api/history?limit=3")
         assert resp.status_code == 200
