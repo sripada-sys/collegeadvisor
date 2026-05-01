@@ -11,77 +11,49 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0A0A0F;
+            background: #0C0C12;
             color: #E5E7EB;
             line-height: 1.7;
             min-height: 100vh;
-        }
-
-        /* ─── Split Layout ─── */
-        .split {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Left Panel — Info */
-        .left {
-            flex: 1;
             display: flex;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding: 64px 48px;
-            background: linear-gradient(135deg, rgba(129,140,248,0.08) 0%, rgba(167,139,250,0.04) 50%, transparent 100%);
-            border-right: 1px solid rgba(255,255,255,0.05);
-            position: relative;
-            overflow: hidden;
-        }
-        .left::before {
-            content: '';
-            position: absolute;
-            top: -100px;
-            left: -100px;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(129,140,248,0.1) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .left .brand {
-            font-size: 1.3rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #818CF8, #A78BFA);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 48px;
-        }
-        .left h1 {
-            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-            font-weight: 800;
-            line-height: 1.25;
-            color: #FFFFFF;
-            margin-bottom: 16px;
-        }
-        .left h1 em {
-            font-style: normal;
-            background: linear-gradient(135deg, #818CF8, #C084FC);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .left .tagline {
-            font-size: 1.05rem;
-            color: #9CA3AF;
-            margin-bottom: 40px;
-            max-width: 400px;
+            padding: 48px 24px;
         }
 
-        /* Preview card on left */
-        .preview-box {
+        .page { max-width: 520px; width: 100%; }
+
+        /* Brand */
+        .brand {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #818CF8;
+            margin-bottom: 40px;
+        }
+
+        /* Headline */
+        h1 {
+            font-size: clamp(1.7rem, 5vw, 2.6rem);
+            font-weight: 800;
+            line-height: 1.2;
+            color: #FFFFFF;
+            margin-bottom: 12px;
+        }
+        .tagline {
+            font-size: 1rem;
+            color: #9CA3AF;
+            margin-bottom: 48px;
+        }
+
+        /* Preview — the product IS the pitch */
+        .preview {
             background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 14px;
             padding: 24px;
-            max-width: 440px;
+            margin-bottom: 48px;
         }
         .preview-q {
             font-size: 0.9rem;
@@ -97,132 +69,78 @@
             margin-bottom: 8px;
         }
         .fb:last-child { margin-bottom: 0; }
-        .fb-good {
-            border-left: 3px solid #34D399;
-            background: rgba(52,211,153,0.08);
-        }
-        .fb-fix {
-            border-left: 3px solid #FBBF24;
-            background: rgba(251,191,36,0.08);
-        }
-        .fb b {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: block;
-            margin-bottom: 2px;
-        }
+        .fb-good { border-left: 3px solid #34D399; background: rgba(52,211,153,0.06); }
+        .fb-fix { border-left: 3px solid #FBBF24; background: rgba(251,191,36,0.06); }
+        .fb b { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
         .fb-good b { color: #34D399; }
         .fb-fix b { color: #FBBF24; }
-        .fb p { font-size: 0.85rem; margin: 0; color: #D1D5DB; }
+        .fb p { font-size: 0.85rem; margin: 0; color: #D1D5DB; line-height: 1.5; }
 
-        /* Right Panel — Sign In */
-        .right {
-            flex: 1;
+        /* Sign in — not the focus, just the door */
+        .signin {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 64px 48px;
-            max-width: 480px;
+            gap: 16px;
+            margin-bottom: 48px;
         }
-        .right .widget {
-            width: 100%;
-            max-width: 320px;
-            text-align: center;
-        }
-        .right h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #FFFFFF;
-            margin-bottom: 8px;
-        }
-        .right .sub {
-            font-size: 0.9rem;
-            color: #6B7280;
-            margin-bottom: 32px;
-        }
-        .google-btn-wrap { display: inline-block; }
-        .right .note {
-            margin-top: 16px;
-            font-size: 12px;
-            color: #4B5563;
-        }
-        .right .subjects {
-            margin-top: 40px;
-            padding-top: 24px;
-            border-top: 1px solid rgba(255,255,255,0.05);
+        .google-btn-wrap { flex-shrink: 0; }
+        .signin-text {
             font-size: 0.8rem;
             color: #6B7280;
+            line-height: 1.4;
         }
 
-        /* ─── Mobile: Stack ─── */
-        @media (max-width: 768px) {
-            .split { flex-direction: column; }
-            .left {
-                padding: 48px 24px 40px;
-                border-right: none;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
-            }
-            .left .brand { margin-bottom: 32px; }
-            .right {
-                max-width: 100%;
-                padding: 48px 24px;
-            }
+        /* Footer info */
+        .foot {
+            font-size: 0.8rem;
+            color: #4B5563;
+        }
+        .foot span { color: #6B7280; }
+
+        @media (max-width: 480px) {
+            body { padding: 32px 16px; }
+            .signin { flex-direction: column; align-items: flex-start; gap: 10px; }
         }
     </style>
 </head>
 <body>
 
-<div class="split">
-    <!-- Left: Info + Preview -->
-    <div class="left">
-        <div class="brand">GradesGenie</div>
-        <h1>You solve it.<br>We check <em>every step.</em></h1>
-        <p class="tagline">Take a photo of your answer. See exactly where it went wrong — and how to fix it.</p>
+<div class="page">
+    <div class="brand">GRADESGENIE</div>
 
-        <div class="preview-box">
-            <div class="preview-q">
-                <strong>Q:</strong> Find the area of a triangle with sides 5, 12, 13
-            </div>
-            <div class="fb fb-good">
-                <b>Correct ✓</b>
-                <p>You picked Heron's formula — right choice for this problem.</p>
-            </div>
-            <div class="fb fb-fix">
-                <b>Fix this</b>
-                <p>s = (5+12+13)/2 = 15, not 14. You added wrong in step 2. With s=15, area = √(15×10×3×2) = √900 = 30.</p>
-            </div>
+    <h1>You solve it. We check every step.</h1>
+    <p class="tagline">Photo → AI reads your handwriting → shows exactly where it went wrong.</p>
+
+    <div class="preview">
+        <div class="preview-q"><strong>Q:</strong> Find the area of a triangle with sides 5, 12, 13</div>
+        <div class="fb fb-good">
+            <b>Correct ✓</b>
+            <p>You used Heron's formula. Right approach.</p>
+        </div>
+        <div class="fb fb-fix">
+            <b>Fix this</b>
+            <p>s = (5+12+13)/2 = 15, not 14. You added wrong in step 2. With s=15, area = √(15×10×3×2) = √900 = 30.</p>
         </div>
     </div>
 
-    <!-- Right: Sign In Widget -->
-    <div class="right">
-        <div class="widget">
-            <h2>Start for free</h2>
-            <p class="sub">No card. No payment. Just sign in.</p>
-
-            <div class="google-btn-wrap">
-                <div id="g_id_onload"
-                     data-client_id="{{ google_client_id }}"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false"></div>
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-size="large"
-                     data-theme="filled_black"
-                     data-text="continue_with"
-                     data-shape="pill"
-                     data-width="280"></div>
-            </div>
-            <p class="note">Sign in with Google. Takes 2 seconds.</p>
-
-            <div class="subjects">
-                Maths · Physics · Chemistry<br>
-                JEE · Boards · NEET
-            </div>
+    <div class="signin">
+        <div class="google-btn-wrap">
+            <div id="g_id_onload"
+                 data-client_id="{{ google_client_id }}"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false"></div>
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-size="large"
+                 data-theme="filled_black"
+                 data-text="continue_with"
+                 data-shape="pill"
+                 data-width="220"></div>
         </div>
+        <div class="signin-text">Free. Works on phone.<br>Maths, Physics, Chemistry.</div>
     </div>
+
+    <div class="foot">JEE · Boards · NEET · <span>Bad handwriting is fine</span></div>
 </div>
 
 <script>
