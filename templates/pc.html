@@ -1167,11 +1167,11 @@ function renderResults(results) {
             <div class="q-encouragement">${esc(r.encouragement)}</div>` : '';
 
         const answerReveal = r.correct_answer ? `
-            <div class="answer-reveal" id="${cardId}-ans" style="margin-top:14px">
+            <div class="answer-reveal ${score < 3 ? 'open' : ''}" id="${cardId}-ans" style="margin-top:14px">
                 <button class="answer-reveal-btn" onclick="toggleAnswer('${cardId}-ans')">
-                    📖 See correct answer <span class="reveal-arrow">▼</span>
+                    📖 See correct answer <span class="reveal-arrow">${score < 3 ? '▲' : '▼'}</span>
                 </button>
-                <div class="answer-reveal-body">
+                <div class="answer-reveal-body" ${score < 3 ? 'style="display:block"' : ''}>
                     <div class="answer-reveal-text">${esc(r.correct_answer)}</div>
                 </div>
             </div>` : '';

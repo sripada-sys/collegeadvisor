@@ -93,6 +93,15 @@ Return a JSON array (no markdown fences, raw JSON only):
 
 Be HONEST — wrong is wrong. But be SPECIFIC about what's right too.
 "Good attempt" is useless. "Your free body diagram correctly identified all three forces" is useful.
+"The student attempted to simplify" is useless. Say exactly what they got right.
+
+CRITICAL RULES for each field:
+- "what_went_right": Name the SPECIFIC skill/step done correctly. If nothing, say what they almost got right.
+- "where_it_broke": Quote the student's EXACT wrong step, then explain what the correct step should be. Example: "Step 2: wrote $\\sin\\theta + \\cos\\theta = 1$, but this identity is $\\sin^2\\theta + \\cos^2\\theta = 1$ — the squares matter."
+- "correct_answer": Show the COMPLETE solution step-by-step, not just the final answer. A student should be able to learn from reading this.
+- "missing_concept": Be precise — not "trigonometric identities" but "the difference between $\\sin\\theta + \\cos\\theta$ (no simplification) and $\\sin^2\\theta + \\cos^2\\theta = 1$ (Pythagorean identity)"
+- "encouragement": Reference the student's SPECIFIC work, not generic praise. "You remembered that trig identities can simplify — now focus on which ones have clean results" is better than "Keep trying!"
+
 If only some problems are visible, evaluate those."""
 
 
