@@ -434,32 +434,6 @@ def api_hint():
         return jsonify({"error": "Failed to generate hints. Try again."}), 500
 
 
-@app.route("/api/guide/pdf")
-def api_guide_pdf():
-    """Download the college guide PDF."""
-    pdf_path = os.path.join(BASE_DIR, "output", "college_guide_2027.pdf")
-    if not os.path.exists(pdf_path):
-        return jsonify({"error": "Guide PDF not found. Run generate_guide.py first."}), 404
-    return send_from_directory(
-        os.path.join(BASE_DIR, "output"), "college_guide_2027.pdf",
-        as_attachment=True, download_name="College_Guide_JEE_2027.pdf"
-    )
-
-
-@app.route("/api/guide/html")
-def api_guide_html():
-    """Return the guide HTML body content for in-app reading."""
-    # Reads from pre-built static file — no Python imports, no weasyprint dependency.
-    guide_file = os.path.join(BASE_DIR, "data", "guide_content.html")
-    try:
-        return Path(guide_file).read_text(encoding="utf-8")
-    except FileNotFoundError:
-        return "<p style='color:#f87171'>Guide file not found. Run: python3 generate_guide.py</p>", 404
-    except Exception as e:
-        logger.error(f"Guide HTML load failed: {e}", exc_info=True)
-        return f"<p style='color:#f87171'>Error loading guide: {e}</p>", 500
-
-
 def _auto_save_wow(subject, topic, mentor_reply, student_message):
     """Background: extract and auto-save insight from a debate exchange."""
     try:

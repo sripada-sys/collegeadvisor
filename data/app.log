@@ -1520,3 +1520,24 @@
 2026-05-01 11:52:35,817 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API
 2026-05-01 11:52:36,241 [WARNING]   claude: NO CREDITS — disabling
 2026-05-01 11:52:37,019 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 12:09:04,012 [INFO] Gemini: ready
+2026-05-01 12:09:04,226 [INFO] Claude: ready
+2026-05-01 12:09:04,452 [INFO] OpenAI: ready
+2026-05-01 12:09:04,464 [INFO] Perplexity: ready
+2026-05-01 12:09:04,464 [INFO] Running startup health check on all API keys...
+2026-05-01 12:09:04,464 [INFO] AFC is enabled with max remote calls: 10.
+2026-05-01 12:09:05,317 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-05-01 12:09:05,319 [WARNING]   gemini: ERROR — 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again lat
+2026-05-01 12:09:05,745 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-05-01 12:09:05,747 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 12:09:09,190 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 12:09:09,198 [INFO]   openai: OK
+2026-05-01 12:09:10,739 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 12:09:10,740 [INFO]   perplexity: OK
+2026-05-01 12:09:10,745 [INFO] Available models: openai, perplexity
+2026-05-01 12:09:18,540 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 12:09:19,192 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 12:09:23,070 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 12:09:23,262 [WARNING] Google auth failed: Invalid token
+2026-05-01 12:09:23,848 [WARNING] Backup skipped: git not found
+2026-05-01 12:09:23,916 [WARNING] gemini ran out of credits mid-session! Falling back...

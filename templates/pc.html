@@ -236,29 +236,6 @@
         }
         .wow-card .wow-delete:hover { color: var(--red); }
 
-        /* ── Voice button ── */
-        #voice-panel {
-            position: fixed; bottom: 28px; right: 28px; z-index: 1000;
-            display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
-        }
-        #voice-indicator {
-            font-size: 12px; color: var(--text2); font-style: italic; text-align: right;
-            min-height: 18px;
-        }
-        .voice-btn {
-            padding: 12px 22px; border-radius: 30px; border: none; cursor: pointer;
-            font-size: 14px; font-weight: 600; transition: background 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-        }
-        .voice-btn.voice-idle      { background: var(--accent); color: #fff; }
-        .voice-btn.voice-listening { background: var(--red); color: #fff; animation: vpulse 1.4s infinite; }
-        .voice-btn.voice-speaking  { background: var(--green); color: #fff; }
-        .voice-btn:disabled        { opacity: 0.6; cursor: default; animation: none; }
-        @keyframes vpulse {
-            0%,100% { box-shadow: 0 4px 14px rgba(239,68,68,0.4); }
-            50%      { box-shadow: 0 4px 22px rgba(239,68,68,0.75), 0 0 0 7px rgba(239,68,68,0.12); }
-        }
-
         /* Keep old classes used by answer-reveal, debate, etc. */
         .result-card {
             background: var(--surface); border-radius: 12px;
@@ -451,19 +428,6 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
         }
 
-        .alert-banner {
-            background: rgba(239,68,68,0.1); border: 1px solid var(--red);
-            border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;
-        }
-        .alert-banner h3 { color: var(--red); font-size: 14px; margin-bottom: 8px; }
-        .alert-banner .alert-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 0; font-size: 13px;
-        }
-        .alert-banner .alert-item .model-name { font-weight: 600; }
-        .alert-banner a {
-            color: var(--accent); text-decoration: underline; font-size: 13px;
-        }
         .model-detail {
             display: flex; align-items: center; gap: 6px; font-size: 12px;
             color: var(--text2); padding: 4px 8px;
@@ -486,14 +450,6 @@
         }
         .exam-toolbar h2 { font-size: 18px; }
         .exam-toolbar .actions { display: flex; gap: 8px; align-items: center; }
-        .verify-btn {
-            padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
-            background: var(--surface); color: var(--text); font-size: 13px;
-            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
-        }
-        .verify-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .verify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .verify-btn.loading { color: var(--yellow); border-color: var(--yellow); }
 
         .exam-warning {
             background: rgba(234,179,8,0.1); border: 1px solid var(--yellow);
@@ -643,30 +599,6 @@
         }
         .print-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-        /* Guide Tab */
-        #guide-content h1 { font-size: 20px; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
-        #guide-content h2 { font-size: 16px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 28px; }
-        #guide-content h3 { font-size: 14px; color: var(--text); margin-top: 18px; }
-        #guide-content table { width: 100%; border-collapse: collapse; margin: 10px 0 15px; font-size: 13px; }
-        #guide-content th { background: var(--accent); color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; font-size: 12px; }
-        #guide-content td { padding: 6px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
-        #guide-content tr:nth-child(even) td { background: rgba(99,102,241,0.04); }
-        #guide-content .verified { background: rgba(34,197,94,0.1); border-left: 4px solid var(--green); padding: 10px 14px; margin: 12px 0; border-radius: 6px; color: var(--text); }
-        #guide-content .caution { background: rgba(234,179,8,0.1); border-left: 4px solid var(--yellow); padding: 10px 14px; margin: 12px 0; border-radius: 6px; color: var(--text); }
-        #guide-content .critical { background: rgba(239,68,68,0.1); border-left: 4px solid var(--red); padding: 10px 14px; margin: 12px 0; border-radius: 6px; color: var(--text); }
-        #guide-content .action { background: rgba(99,102,241,0.1); border-left: 4px solid var(--accent); padding: 10px 14px; margin: 12px 0; border-radius: 6px; color: var(--text); }
-        #guide-content .cover-page { text-align: center; padding: 20px 0 30px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-        #guide-content .cover-page h1 { font-size: 24px; border: none; }
-        #guide-content .cover-page .subtitle { font-size: 16px; color: var(--text2); }
-        #guide-content .cover-page .profile { text-align: left; background: var(--bg); padding: 16px 20px; border-radius: 10px; max-width: 420px; margin: 16px auto; color: var(--text); }
-        #guide-content .tag-verified, #guide-content .tag-approx, #guide-content .tag-unverified {
-            font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; color: #fff;
-        }
-        #guide-content .tag-verified { background: var(--green); }
-        #guide-content .tag-approx { background: var(--yellow); }
-        #guide-content .tag-unverified { background: var(--red); }
-        #guide-content p, #guide-content li, #guide-content ul, #guide-content ol { color: var(--text); }
-
         /* ── Question extracted from photo ── */
         .question-extracted {
             background: var(--bg); border-radius: 8px; padding: 12px 16px;
@@ -798,12 +730,10 @@
         <button data-tab="exams">Exams</button>
         <button data-tab="history">History</button>
         <button data-tab="wow">💡 Wow Notes</button>
-        <button data-tab="guide">Guide</button>
     </nav>
 
     <main>
-        <!-- API Health Alerts -->
-        <div class="alert-banner" id="api-alerts" style="display:none"></div>
+
 
         <!-- Dashboard Tab -->
         <section id="tab-dashboard" class="tab active">
@@ -900,10 +830,8 @@
         <!-- Exams Tab -->
         <section id="tab-exams" class="tab">
             <div class="exam-warning">
-                <strong>⚠ IMPORTANT:</strong> Dates below are best estimates based on previous years' patterns.
-                Official 2027 notifications may not be released yet. <strong>ALWAYS check the official website</strong>
-                before any deadline. Use "Verify with AI" to cross-check, but don't blindly rely on it.
-                Click "Official Site" on each card to confirm yourself.
+                <strong>📅 Your exam cycle: JEE 2027</strong> — You're targeting Jan/Apr 2027 JEE Main, May 2027 JEE Advanced, and related exams.
+                Dates below are based on previous years' patterns. <strong>Always confirm on the official website</strong> before any deadline.
             </div>
 
             <div class="exam-toolbar">
@@ -913,9 +841,6 @@
                     <button class="view-toggle" id="btn-view-cards" onclick="setExamView('cards')">🃏 Cards</button>
                     <button class="print-btn" onclick="window.print()">🖨 Print / PDF</button>
                     <span id="verify-status" style="font-size:12px;color:var(--text2)"></span>
-                    <button class="verify-btn" id="btn-verify" onclick="verifyExamDates()">
-                        🔍 Verify with AI (Perplexity)
-                    </button>
                 </div>
             </div>
 
@@ -983,18 +908,6 @@
             </div>
         </section>
 
-        <section id="tab-guide" class="tab">
-            <div class="exam-toolbar">
-                <h2>College Admission Guide — JEE 2027</h2>
-                <div class="actions">
-                    <a href="/api/guide/pdf" class="print-btn" style="text-decoration:none" download>📥 Download PDF</a>
-                    <button class="print-btn" onclick="printGuide()">🖨 Print</button>
-                </div>
-            </div>
-            <div id="guide-content" style="background:var(--surface);border-radius:12px;padding:30px 36px;border:1px solid var(--border);line-height:1.7;font-size:14px;max-width:900px">
-                <div class="empty-state"><p>Loading guide...</p></div>
-            </div>
-        </section>
     </main>
 
     <!-- Canvas Scratch Pad (modal) -->
@@ -1037,7 +950,6 @@ document.querySelectorAll('nav button').forEach(btn => {
         if (btn.dataset.tab === 'exams') loadExams();
         if (btn.dataset.tab === 'history') loadHistory();
         if (btn.dataset.tab === 'wow') loadWow();
-        if (btn.dataset.tab === 'guide') loadGuide();
     });
 });
 
@@ -1071,25 +983,6 @@ function renderModelBadges() {
             <span class="dot ${cls}"></span>${m}${taskTags}
         </div>`;
     }).join('');
-
-    // Alert banner for dead keys
-    const dead = all.filter(m => health[m] && health[m].status !== 'ok' && health[m].status);
-    const alertEl = document.getElementById('api-alerts');
-    if (dead.length > 0) {
-        alertEl.style.display = 'block';
-        alertEl.innerHTML = `<h3>⚠️ API Keys Need Attention</h3>` +
-            dead.map(m => {
-                const h = health[m];
-                const url = BILLING_URLS[m];
-                const status = h.status === 'no_credits' ? 'No credits' : 'Error';
-                return `<div class="alert-item">
-                    <span><span class="model-name">${m}</span> — ${status}</span>
-                    ${url ? `<a href="${esc(url)}" target="_blank">Refill credits →</a>` : ''}
-                </div>`;
-            }).join('');
-    } else {
-        alertEl.style.display = 'none';
-    }
 }
 renderModelBadges();
 
@@ -1793,44 +1686,6 @@ function renderHistory(rows) {
         </tr>`;
     }).join('');
 }
-let guideLoaded = false;
-async function loadGuide() {
-    if (guideLoaded) return;
-    try {
-        const res = await fetch('/api/guide/html');
-        const html = await res.text();
-        const el = document.getElementById('guide-content');
-        el.innerHTML = html;
-        // Remove cover page and page-break styles for in-app reading
-        el.querySelectorAll('.cover-page').forEach(c => c.style.pageBreakAfter = 'unset');
-        guideLoaded = true;
-    } catch(e) {
-        document.getElementById('guide-content').innerHTML = '<p>Failed to load guide. Download the PDF instead.</p>';
-    }
-}
-
-function printGuide() {
-    const content = document.getElementById('guide-content').innerHTML;
-    const w = window.open('', '_blank');
-    w.document.write(`<!DOCTYPE html><html><head><title>College Guide — JEE 2027</title>
-        <style>
-            body { font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; font-size: 11pt; line-height: 1.55; color: #1a1a1a; padding: 20px; }
-            h1 { font-size: 22pt; color: #1a237e; border-bottom: 3px solid #1a237e; padding-bottom: 8px; }
-            h2 { font-size: 15pt; color: #283593; border-bottom: 1.5px solid #c5cae9; padding-bottom: 5px; margin-top: 25px; }
-            h3 { font-size: 12pt; color: #3949ab; margin-top: 18px; }
-            table { width: 100%; border-collapse: collapse; margin: 10px 0 15px 0; font-size: 9.5pt; }
-            th { background: #1a237e; color: white; padding: 7px 8px; text-align: left; font-weight: 600; }
-            td { padding: 6px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
-            tr:nth-child(even) td { background: #f5f5f5; }
-            .verified { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 8px 12px; margin: 10px 0; }
-            .caution { background: #fff3e0; border-left: 4px solid #ff9800; padding: 8px 12px; margin: 10px 0; }
-            .critical { background: #fce4ec; border-left: 4px solid #e53935; padding: 8px 12px; margin: 10px 0; }
-            .action { background: #e3f2fd; border-left: 4px solid #1565c0; padding: 8px 12px; margin: 10px 0; }
-            @media print { @page { margin: 1.5cm; } }
-        </style></head><body>${content}</body></html>`);
-    w.document.close();
-    w.print();
-}
 
 // ─── Canvas Scratch Pad ───
 let isDrawing = false;
@@ -2019,37 +1874,6 @@ function renderExams(exams, today) {
     }).join('');
 }
 
-async function verifyExamDates() {
-    const btn = document.getElementById('btn-verify');
-    const status = document.getElementById('verify-status');
-    btn.disabled = true;
-    btn.classList.add('loading');
-    btn.innerHTML = '⏳ Searching web...';
-    status.textContent = '';
-
-    try {
-        const res = await fetch('/api/exams/verify', { method: 'POST' });
-        const data = await res.json();
-
-        if (res.ok) {
-            status.textContent = `Last verified: ${new Date().toLocaleTimeString()}`;
-            status.style.color = 'var(--green)';
-            // Reload exams with updated verification status
-            loadExams();
-        } else {
-            status.textContent = data.error || 'Verification failed';
-            status.style.color = 'var(--red)';
-        }
-    } catch(e) {
-        status.textContent = 'Network error';
-        status.style.color = 'var(--red)';
-    }
-
-    btn.disabled = false;
-    btn.classList.remove('loading');
-    btn.innerHTML = '🔍 Verify with AI (Perplexity)';
-}
-
 // ─── Wow Notes ───────────────────────────────────────────────────
 async function saveWow(cardId, subject, topic) {
     const input = document.getElementById(cardId + '-wow');
@@ -2097,154 +1921,7 @@ async function loadWow() {
         container.innerHTML = '<div class="empty-state"><p>Could not load notes.</p></div>';
     }
 }
-
-// ─── Voice mode (Gemini Live) ──────────────────────────────────────
-let _voiceWs     = null;
-let _voiceMicCtx = null;   // AudioContext for mic capture @ 16 kHz
-let _voicePlayCtx = null;  // AudioContext for playback @ 24 kHz
-let _voiceStream = null;
-let _voiceProc   = null;
-let _voiceActive = false;
-let _voicePlayT  = 0;      // next scheduled play time
-
-function toggleVoice() {
-    _voiceActive ? _stopVoice() : _startVoice();
-}
-
-async function _startVoice() {
-    const btn = document.getElementById('voice-btn');
-    btn.textContent = '⏳ Connecting…';
-    btn.disabled = true;
-
-    // Request mic
-    try {
-        _voiceStream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 16000 }
-        });
-    } catch(e) {
-        _setVoiceStatus('idle');
-        btn.disabled = false;
-        alert('Microphone access is needed. Please allow the mic and try again.');
-        return;
-    }
-
-    // Fetch full student dossier from server (DB history + today's session)
-    let dossier = 'No history yet.';
-    try {
-        btn.textContent = '⏳ Loading your history…';
-        const resp = await fetch('/api/voice/context');
-        const ctxData = await resp.json();
-        dossier = ctxData.dossier || dossier;
-    } catch(e) {
-        // non-fatal — Gemini will still work, just without history
-    }
-
-    // Connect to Flask relay
-    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    _voiceWs = new WebSocket(`${proto}//${location.host}/ws/voice`);
-
-    _voiceWs.onopen = () => {
-        _voiceWs.send(JSON.stringify({ context: { dossier } }));
-    };
-
-    _voiceWs.onmessage = (ev) => {
-        const msg = JSON.parse(ev.data);
-        if (msg.type === 'ready') {
-            _voiceActive = true;
-            _startMic();
-            _setVoiceStatus('listening');
-        } else if (msg.type === 'audio') {
-            _setVoiceStatus('speaking');
-            _playPCM(msg.data);
-        } else if (msg.type === 'turn_done') {
-            _setVoiceStatus('listening');
-        } else if (msg.type === 'error') {
-            _stopVoice();
-            alert('Voice error: ' + msg.message);
-        }
-    };
-
-    _voiceWs.onclose = () => _stopVoice();
-    _voiceWs.onerror = () => { _stopVoice(); alert('Voice connection failed.'); };
-}
-
-function _startMic() {
-    _voiceMicCtx  = new AudioContext({ sampleRate: 16000 });
-    _voicePlayCtx = new AudioContext({ sampleRate: 24000 });
-    _voicePlayT   = _voicePlayCtx.currentTime;
-
-    const src  = _voiceMicCtx.createMediaStreamSource(_voiceStream);
-    _voiceProc = _voiceMicCtx.createScriptProcessor(4096, 1, 1);
-
-    _voiceProc.onaudioprocess = (e) => {
-        if (!_voiceActive || !_voiceWs || _voiceWs.readyState !== WebSocket.OPEN) return;
-        const f32 = e.inputBuffer.getChannelData(0);
-        const i16 = new Int16Array(f32.length);
-        for (let i = 0; i < f32.length; i++) {
-            const s = Math.max(-1, Math.min(1, f32[i]));
-            i16[i] = s < 0 ? s * 32768 : s * 32767;
-        }
-        // base64-encode the raw PCM bytes
-        const bytes = new Uint8Array(i16.buffer);
-        let bin = '';
-        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-        _voiceWs.send(JSON.stringify({ type: 'audio', data: btoa(bin) }));
-    };
-
-    src.connect(_voiceProc);
-    _voiceProc.connect(_voiceMicCtx.destination);
-
-    const btn = document.getElementById('voice-btn');
-    btn.textContent = '⏹ Stop';
-    btn.disabled = false;
-}
-
-function _playPCM(b64) {
-    if (!_voicePlayCtx) return;
-    // Decode base64 → Int16Array → Float32Array → AudioBuffer
-    const bin   = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    const i16   = new Int16Array(bytes.buffer);
-    const f32   = new Float32Array(i16.length);
-    for (let i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768.0;
-
-    const buf = _voicePlayCtx.createBuffer(1, f32.length, 24000);
-    buf.copyToChannel(f32, 0);
-    const src = _voicePlayCtx.createBufferSource();
-    src.buffer = buf;
-    src.connect(_voicePlayCtx.destination);
-    const t = Math.max(_voicePlayCtx.currentTime, _voicePlayT);
-    src.start(t);
-    _voicePlayT = t + buf.duration;
-}
-
-function _stopVoice() {
-    _voiceActive = false;
-    if (_voiceWs)    { try { _voiceWs.send(JSON.stringify({type:'stop'})); _voiceWs.close(); } catch(e){} _voiceWs = null; }
-    if (_voiceProc)  { _voiceProc.disconnect(); _voiceProc = null; }
-    if (_voiceMicCtx){ _voiceMicCtx.close();  _voiceMicCtx = null; }
-    if (_voicePlayCtx){ _voicePlayCtx.close(); _voicePlayCtx = null; }
-    if (_voiceStream){ _voiceStream.getTracks().forEach(t => t.stop()); _voiceStream = null; }
-    _setVoiceStatus('idle');
-}
-
-function _setVoiceStatus(state) {
-    const btn = document.getElementById('voice-btn');
-    const ind = document.getElementById('voice-indicator');
-    if (!btn || !ind) return;
-    btn.className = `voice-btn voice-${state}`;
-    if (state === 'listening') { ind.textContent = '● Listening…'; btn.textContent = '⏹ Stop'; btn.disabled = false; }
-    else if (state === 'speaking') { ind.textContent = '◆ Mentor speaking…'; }
-    else { ind.textContent = ''; btn.textContent = '🎙 Talk to mentor'; btn.disabled = false; }
-}
 </script>
-
-<!-- Floating voice button -->
-<div id="voice-panel">
-    <div id="voice-indicator"></div>
-    <button id="voice-btn" class="voice-btn voice-idle" onclick="toggleVoice()">🎙 Talk to mentor</button>
-</div>
 
 </body>
 </html>
