@@ -617,11 +617,13 @@ def get_batch_status(batch_id):
 
 
 def get_active_batch(student_id):
-    """Get the most recent in-progress batch for a student (if any)."""
+    """Get the most recent in-progress batch for a student (if any).
+    Ignores batches older than 2 minutes to avoid stale spinners."""
     conn = get_db()
     row = conn.execute(
         """SELECT batch_id, status FROM batch_status
            WHERE student_id = ? AND status NOT IN ('done', 'failed')
+             AND updated_at > datetime('now', '-2 minutes')
            ORDER BY updated_at DESC LIMIT 1""",
         (student_id,),
     ).fetchone()
