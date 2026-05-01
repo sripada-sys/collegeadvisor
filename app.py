@@ -175,10 +175,56 @@ def parse_ai_json(text):
     try:
         return json.loads(text)
     except json.JSONDecodeError:
-        # AI often writes raw LaTeX backslashes (\int, \frac, \,) inside JSON strings
-        # which are invalid JSON escape sequences. Fix by doubling lone backslashes.
-        # Only keep \\ \" \/ \n \r \t \uXXXX as valid — everything else must be doubled.
-        repaired = re.sub(r'\\(?!["\\\/nrtu])', r'\\\\', text)
+        # AI writes raw LaTeX backslashes (\theta, \frac, \int) inside JSON strings.
+        # These are invalid JSON escapes. Double all backslashes EXCEPT genuine
+        # JSON escapes: \\ \" \/ \n \r \t \b \f \uXXXX
+        # Key: \t in "\theta" is LaTeX (not tab) because "th" is a known LaTeX prefix.
+        _LATEX_PREFIXES = {
+            'th', 'ta', 'ti', 'to',  # \theta, \tan, \times, \top
+            'fr', 'fu',              # \frac, \func
+            'be', 'bi', 'bo',        # \beta, \binom, \bot
+            'nu',                    # \nu
+            'ne', 'no',              # \neg, \not
+            'na', 'ni',              # \nabla, \ni
+            'al', 'ap', 'ar',        # \alpha, \approx, \arctan
+            'si', 'sq', 'su', 'se',  # \sin, \sqrt, \sum, \sec
+            'co', 'cd', 'ci', 'cu',  # \cos, \cdot, \circ, \cup
+            'de', 'di', 'do',        # \delta, \div, \dot
+            'ga', 'ge',              # \gamma, \geq
+            'la', 'le', 'lo', 'ln',  # \lambda, \leq, \log, \ln
+            'mu',                    # \mu
+            'pi', 'ph', 'pm', 'pr',  # \pi, \phi, \pm, \prod
+            'rh', 'ri',              # \rho, \right
+            'ep', 'et', 'ex',        # \epsilon, \eta, \exists
+            'om', 'ov',              # \omega, \overline
+            'ps', 'pa', 'pe',        # \psi, \partial, \perp
+            'in', 'io', 'im',        # \int, \iota, \implies
+            'ka', 'xi', 'ze', 'ch',  # \kappa, \xi, \zeta, \chi
+            'ma', 'mi', 'mp',        # \mathbb, \min, \mp
+            'ha', 'hb', 'hs',        # \hat, \hbar, \hspace
+            'va', 've',              # \varepsilon, \vec
+            'wr',                    # \wrapfig
+            'up',                    # \uparrow
+        }
+
+        def _fix_backslash(m):
+            ch = m.group(1)   # char after backslash
+            nxt = m.group(2)  # char after that (may be empty)
+            # Always valid JSON escapes: \\ \" \/
+            if ch in '"\\/' :
+                return m.group(0)
+            # \uXXXX — but NOT \upsilon etc: check if followed by 4 hex digits
+            if ch == 'u' and re.match(r'[0-9a-fA-F]', nxt or ''):
+                return m.group(0)
+            # \n \r \t \b \f — valid JSON if the two-char combo is NOT a LaTeX prefix
+            combo = ch + nxt
+            if combo in _LATEX_PREFIXES:
+                return '\\\\' + ch + nxt
+            if ch in 'nrtbf':
+                return m.group(0)
+            # Everything else: double the backslash
+            return '\\\\' + ch + nxt
+        repaired = re.sub(r'\\(.)(.?)', _fix_backslash, text)
         return json.loads(repaired)
 
 
