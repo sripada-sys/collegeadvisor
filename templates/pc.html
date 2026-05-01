@@ -960,6 +960,7 @@ const STAGE_LABELS = {
     uploading: '📤 Receiving photos...',
     extracting: '🔍 Reading your handwriting...',
     evaluating: '🧠 Checking your work...',
+    processing: '🧠 Checking your work...',
     done: '✓ Done!',
     failed: '❌ Something went wrong'
 };
@@ -987,15 +988,7 @@ function startPolling() {
             const res = await fetch('/api/results/latest');
             const data = await res.json();
 
-            // Show processing indicator if there's an active batch
-            if (data.active_batch) {
-                _activeBatchId = data.active_batch.batch_id;
-                showProcessing(data.active_batch.status);
-            } else if (_processingShown && !data.active_batch) {
-                // Batch finished — hide processing
-                hideProcessing();
-            }
-
+            // Check for new results first
             if (data.results && data.results.length > 0) {
                 const batchId = data.results[0].batch_id;
                 if (batchId !== lastBatchId) {
@@ -1004,6 +997,15 @@ function startPolling() {
                     _sessionResults = _sessionResults.concat(data.results);
                     renderResults(_sessionResults);
                 }
+            }
+
+            // Show processing indicator only if there's an active batch
+            // that we haven't already rendered results for
+            if (data.active_batch && data.active_batch.batch_id !== lastBatchId) {
+                _activeBatchId = data.active_batch.batch_id;
+                showProcessing(data.active_batch.status);
+            } else if (_processingShown) {
+                hideProcessing();
             }
         } catch (e) {
             console.error('Poll error:', e);
