@@ -38,14 +38,6 @@
         }
         header h1 { font-size: 20px; font-weight: 700; }
         header h1 span { color: var(--accent); }
-        .models-badge {
-            display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text2);
-        }
-        .models-badge .dot {
-            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
-        }
-        .dot.active { background: var(--green); }
-        .dot.inactive { background: var(--border); }
 
         nav {
             display: flex; gap: 0; background: var(--surface);
@@ -428,21 +420,6 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
         }
 
-        .model-detail {
-            display: flex; align-items: center; gap: 6px; font-size: 12px;
-            color: var(--text2); padding: 4px 8px;
-        }
-        .model-detail .dot {
-            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
-        }
-        .model-detail .dot.ok { background: var(--green); }
-        .model-detail .dot.dead { background: var(--red); }
-        .model-detail .dot.off { background: var(--border); }
-        .model-detail .task-tag {
-            font-size: 10px; background: var(--surface2); padding: 1px 6px;
-            border-radius: 8px; color: var(--text2);
-        }
-
         /* Exams Calendar */
         .exam-toolbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -720,7 +697,6 @@
 <body>
     <header>
         <h1>Grades<span>Genie</span></h1>
-        <div class="models-badge" id="model-badges"></div>
     </header>
 
     <nav>
@@ -952,39 +928,6 @@ document.querySelectorAll('nav button').forEach(btn => {
         if (btn.dataset.tab === 'wow') loadWow();
     });
 });
-
-// ─── Model Status Badges ───
-const BILLING_URLS = {
-    gemini: 'https://aistudio.google.com/apikey',
-    claude: 'https://console.anthropic.com/settings/billing',
-    openai: 'https://platform.openai.com/settings/organization/billing',
-    perplexity: 'https://www.perplexity.ai/settings/api',
-};
-
-function renderModelBadges() {
-    const all = ['gemini', 'claude', 'openai', 'perplexity'];
-    const health = modelStatus.health || {};
-    const el = document.getElementById('model-badges');
-
-    el.innerHTML = all.map(m => {
-        const active = modelStatus.available.includes(m);
-        const h = health[m];
-        let cls = 'off';
-        if (active) cls = 'ok';
-        else if (h && h.status === 'no_credits') cls = 'dead';
-
-        // Show which tasks use this model
-        const tasks = Object.entries(modelStatus.assignments || {})
-            .filter(([t, model]) => model === m)
-            .map(([t]) => t);
-        const taskTags = tasks.map(t => `<span class="task-tag">${t}</span>`).join('');
-
-        return `<div class="model-detail">
-            <span class="dot ${cls}"></span>${m}${taskTags}
-        </div>`;
-    }).join('');
-}
-renderModelBadges();
 
 // ─── QR Code ───
 new QRCode(document.getElementById('qr-code'), {

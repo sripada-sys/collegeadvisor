@@ -1,16 +1,10 @@
 {
-  "exported_at": "2026-05-01T12:09:23.847777",
+  "exported_at": "2026-05-01T15:52:40.986589",
   "evaluations": [],
   "practice_problems": [],
   "wow_notes": [],
   "debate_logs": [],
   "app_log_tail": [
-    "2026-04-27 12:18:39,660 [INFO]   PC dashboard : http://localhost:5000/pc",
-    "2026-04-27 12:18:39,661 [INFO]   Phone upload : http://192.168.0.31:5000/phone",
-    "2026-04-27 12:18:39,661 [INFO]   Models       : openai, perplexity",
-    "2026-04-27 12:18:39,661 [INFO] ==================================================",
-    "2026-04-27 12:18:40,659 [INFO] Auto-update: already up to date",
-    "2026-04-27 12:18:40,666 [INFO] \u001b[31m\u001b[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.\u001b[0m",
     " * Running on all addresses (0.0.0.0)",
     " * Running on http://127.0.0.1:5000",
     " * Running on http://192.168.0.31:5000",
@@ -204,6 +198,12 @@
     "2026-05-01 12:09:18,540 [WARNING]   claude: NO CREDITS \u2014 disabling",
     "2026-05-01 12:09:19,192 [WARNING]   openai: ERROR \u2014 Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y",
     "2026-05-01 12:09:23,070 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt",
-    "2026-05-01 12:09:23,262 [WARNING] Google auth failed: Invalid token"
+    "2026-05-01 12:09:23,262 [WARNING] Google auth failed: Invalid token",
+    "2026-05-01 12:09:23,848 [WARNING] Backup skipped: git not found",
+    "2026-05-01 12:09:23,916 [WARNING] gemini ran out of credits mid-session! Falling back...",
+    "2026-05-01 15:52:36,911 [WARNING]   claude: NO CREDITS \u2014 disabling",
+    "2026-05-01 15:52:38,003 [WARNING]   openai: ERROR \u2014 Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y",
+    "2026-05-01 15:52:40,104 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt",
+    "2026-05-01 15:52:40,378 [WARNING] Google auth failed: Invalid token"
   ]
 }
