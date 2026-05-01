@@ -44,8 +44,8 @@ def require_auth(f):
         student = get_current_student()
         if not student:
             if request.is_json or request.path.startswith("/api/"):
-                return jsonify({"error": "Not logged in", "redirect": "/login"}), 401
-            return redirect("/login")
+                return jsonify({"error": "Not logged in", "redirect": "/"}), 401
+            return redirect("/")
         # Check trial/plan status
         plan = student.get("plan", "free_trial")
         if plan == "expired":
@@ -258,7 +258,7 @@ function verifyOTP() {{
     @app.route("/auth/logout")
     def logout():
         session.clear()
-        return redirect("/login")
+        return redirect("/")
 
     @app.route("/subscribe")
     def subscribe_page():
