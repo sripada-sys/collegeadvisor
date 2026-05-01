@@ -66,8 +66,6 @@ app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
 app.secret_key = SECRET_KEY
 app.permanent_session_lifetime = timedelta(days=30)
 
-import secrets
-
 db.init_db()
 db.run_migrations()
 router = ModelRouter()
@@ -75,41 +73,6 @@ router = ModelRouter()
 # Register auth routes (login, callback, verify-phone, logout, subscribe)
 from auth import register_auth_routes, require_auth
 register_auth_routes(app)
-
-# ─── Phone Pairing Tokens ───
-# PC generates a token after login → encoded in QR code → phone uses it to get a session.
-# Tokens are short-lived and single-use.
-
-_pair_tokens = {}  # token -> {"student_id": ..., "expires": datetime}
-_PAIR_TTL = timedelta(hours=12)
-
-
-def _cleanup_expired_tokens():
-    now = datetime.now()
-    expired = [t for t, v in _pair_tokens.items() if v["expires"] < now]
-    for t in expired:
-        del _pair_tokens[t]
-
-
-def generate_pair_token(student_id):
-    """Create a pairing token for the given student. Replaces any previous token."""
-    _cleanup_expired_tokens()
-    # Remove old tokens for this student (one active token per student)
-    old = [t for t, v in _pair_tokens.items() if v["student_id"] == student_id]
-    for t in old:
-        del _pair_tokens[t]
-    token = secrets.token_urlsafe(24)
-    _pair_tokens[token] = {"student_id": student_id, "expires": datetime.now() + _PAIR_TTL}
-    return token
-
-
-def validate_pair_token(token):
-    """Validate and consume a pairing token. Returns student_id or None."""
-    _cleanup_expired_tokens()
-    entry = _pair_tokens.get(token)
-    if not entry:
-        return None
-    return entry["student_id"]
 
 
 # ─── Analytics middleware ───
@@ -206,29 +169,13 @@ def index():
 
 
 @app.route("/pc")
-@require_auth
 def pc_dashboard():
-    token = generate_pair_token(request.student["id"])
-    return render_template("pc.html", ip=request.host, port=PORT, model_status=router.status(), pair_token=token)
+    return render_template("pc.html", ip=request.host, port=PORT, model_status=router.status())
 
 
 @app.route("/phone")
 def phone_page():
-    from flask import session as flask_session
-    token = request.args.get("pair", "")
-    if token:
-        student_id = validate_pair_token(token)
-        if student_id:
-            flask_session.permanent = True
-            flask_session["student_id"] = student_id
-            logger.info(f"Phone paired for student {student_id[:8]}...")
-            return render_template("phone.html", paired=True)
-        else:
-            return render_template("phone.html", paired=False, error="Invalid or expired pairing code. Scan the QR code on the PC again.")
-    # Already paired via session?
-    if flask_session.get("student_id"):
-        return render_template("phone.html", paired=True)
-    return render_template("phone.html", paired=False, error="Scan the QR code on the PC screen to connect.")
+    return render_template("phone.html")
 
 
 @app.route("/api/status")
@@ -348,7 +295,6 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, 
             question_images=[os.path.basename(p) for p in q_paths],
             answer_images=[os.path.basename(p) for p in a_paths],
             raw_response=raw_response,
-            student_id=student_id,
         )
 
     logger.info(f"Batch {batch_id}: evaluated {len(results)} problems")
@@ -377,7 +323,7 @@ def _schedule_debounced_backup(delay: int = 120):
 @app.route("/api/results/latest")
 @require_auth
 def api_results_latest():
-    batch = db.get_latest_batch(student_id=request.student["id"])
+    batch = db.get_latest_batch()
     return jsonify({"results": batch or [], "timestamp": datetime.now().isoformat()})
 
 
@@ -387,7 +333,7 @@ def api_results_batch(batch_id):
     # Sanitize batch_id — only allow hex characters
     if not all(c in "0123456789abcdef" for c in batch_id):
         return jsonify({"error": "Invalid batch ID"}), 400
-    batch = db.get_batch(batch_id, student_id=request.student["id"])
+    batch = db.get_batch(batch_id)
     return jsonify({"results": batch or []})
 
 
@@ -402,7 +348,7 @@ def api_practice():
     db.log_event(request.student["id"], "practice", {"subject": subject, "topic": topic, "difficulty": difficulty})
 
     if not topic:
-        stats = db.get_progress(student_id=request.student["id"])
+        stats = db.get_progress()
         weak = stats.get("weak_topics", [])
         if weak:
             topic = weak[0]["topic"]
@@ -467,18 +413,17 @@ def api_explain():
 @app.route("/api/progress")
 @require_auth
 def api_progress():
-    return jsonify(db.get_progress(student_id=request.student["id"]))
+    return jsonify(db.get_progress())
 
 
 @app.route("/api/history")
 @require_auth
 def api_history():
     limit = request.args.get("limit", 50, type=int)
-    return jsonify(db.get_history(min(limit, 200), student_id=request.student["id"]))
+    return jsonify(db.get_history(min(limit, 200)))
 
 
 @app.route("/uploads/<filename>")
-@require_auth
 def serve_upload(filename):
     safe_name = secure_filename(filename)
     if safe_name != filename:
@@ -520,7 +465,7 @@ def api_hint():
         return jsonify({"error": "Failed to generate hints. Try again."}), 500
 
 
-def _auto_save_wow(subject, topic, mentor_reply, student_message, student_id=None):
+def _auto_save_wow(subject, topic, mentor_reply, student_message):
     """Background: extract and auto-save insight from a debate exchange."""
     try:
         prompt = WOW_EXTRACT_PROMPT.format(
@@ -530,7 +475,7 @@ def _auto_save_wow(subject, topic, mentor_reply, student_message, student_id=Non
         )
         insight = router.call("explain", prompt).strip()
         if insight and insight.upper() != "SKIP" and len(insight) > 20:
-            db.save_wow_note(note=insight, subject=subject, topic=topic, source="auto", student_id=student_id)
+            db.save_wow_note(note=insight, subject=subject, topic=topic, source="auto")
             logger.info("Auto-saved wow note: %s", insight[:80])
     except Exception as e:
         logger.debug("Auto-wow skipped: %s", e)
@@ -621,13 +566,13 @@ def api_debate():
         # Save debate exchange to DB for parent progress review
         threading.Thread(
             target=db.save_debate_log,
-            args=(subject, topic, question_text, message or "", reply, request.student["id"]),
+            args=(subject, topic, question_text, message or "", reply),
             daemon=True,
         ).start()
         # Auto-extract and save key insight in background — no latency impact
         threading.Thread(
             target=_auto_save_wow,
-            args=(subject, topic, reply, message or "", request.student["id"]),
+            args=(subject, topic, reply, message or ""),
             daemon=True,
         ).start()
         return jsonify({"reply": reply})
@@ -648,7 +593,6 @@ def api_save_wow():
         subject=str(data.get("subject", ""))[:50],
         topic=str(data.get("topic", ""))[:100],
         source=str(data.get("source", "debate"))[:20],
-        student_id=request.student["id"],
     )
     return jsonify({"ok": True})
 
@@ -656,7 +600,7 @@ def api_save_wow():
 @app.route("/api/wow")
 @require_auth
 def api_get_wow():
-    notes = db.get_wow_notes(student_id=request.student["id"])
+    notes = db.get_wow_notes()
     return jsonify({"notes": notes})
 
 

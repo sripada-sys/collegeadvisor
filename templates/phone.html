@@ -145,14 +145,6 @@
         <p>Upload questions &amp; answers → check PC for feedback</p>
     </div>
 
-    {% if not paired %}
-    <div class="section" style="text-align:center; padding: 40px 20px;">
-        <div style="font-size: 48px; margin-bottom: 16px;">🔗</div>
-        <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Phone Not Connected</div>
-        <p style="color: var(--text2); font-size: 14px;">{{ error or 'Scan the QR code on the PC screen to connect.' }}</p>
-    </div>
-    {% else %}
-
     <!-- Subject -->
     <div class="section">
         <div class="section-title">Subject</div>
@@ -224,8 +216,6 @@
     </button>
 
     <div class="status-msg" id="status-msg"></div>
-
-{% endif %}
 
 <script>
 let selectedSubject = 'maths';

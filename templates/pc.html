@@ -718,7 +718,7 @@
                 <div id="qr-code"></div>
                 <div class="qr-info">
                     <h2>Scan with phone to upload</h2>
-                    <div class="url" id="phone-url">{{ ip }}/phone?pair=...</div>
+                    <div class="url" id="phone-url">{{ ip }}/phone</div>
                     <p>Open this URL on your phone — snap questions &amp; answers</p>
                 </div>
             </div>
@@ -931,14 +931,11 @@ document.querySelectorAll('nav button').forEach(btn => {
 });
 
 // ─── QR Code ───
-const pairToken = '{{ pair_token }}';
-const phoneUrl = window.location.origin + '/phone?pair=' + pairToken;
 new QRCode(document.getElementById('qr-code'), {
-    text: phoneUrl,
+    text: window.location.origin + '/phone',
     width: 120, height: 120,
     colorDark: '#6366f1', colorLight: '#ffffff',
 });
-document.getElementById('phone-url').textContent = window.location.host + '/phone';
 
 // ─── Polling for Results ───
 let pollInterval = null;
