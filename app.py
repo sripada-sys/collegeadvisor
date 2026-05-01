@@ -261,7 +261,9 @@ def index():
 @require_auth
 def pc_dashboard():
     token = generate_pair_token(request.student["id"])
-    return render_template("pc.html", ip=request.host, port=PORT, model_status=router.status(), pair_token=token)
+    name = request.student.get("name", "") or request.student.get("email", "?")
+    initial = name[0].upper() if name else "?"
+    return render_template("pc.html", ip=request.host, port=PORT, model_status=router.status(), pair_token=token, student_initial=initial)
 
 
 @app.route("/phone")
