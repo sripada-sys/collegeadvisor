@@ -103,7 +103,7 @@ def init_db():
 
 
 def save_evaluation(
-    batch_id, subject, exam, result, question_images=None, answer_images=None, raw_response=None
+    batch_id, subject, exam, result, question_images=None, answer_images=None, raw_response=None, student_id=None
 ):
     conn = get_db()
     conn.execute(
@@ -112,8 +112,8 @@ def save_evaluation(
             question_text, correct_answer, source,
             topic, subtopic, correctness, is_complete, what_went_right, where_it_broke,
             mistakes, missing_concept, hint, next_practice, encouragement,
-            question_images, answer_images, raw_response)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            question_images, answer_images, raw_response, student_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             batch_id,
             datetime.now().isoformat(),
@@ -138,17 +138,24 @@ def save_evaluation(
             json.dumps(question_images or []),
             json.dumps(answer_images or []),
             raw_response,
+            student_id,
         ),
     )
     conn.commit()
     conn.close()
 
 
-def get_latest_batch():
+def get_latest_batch(student_id=None):
     conn = get_db()
-    row = conn.execute(
-        "SELECT DISTINCT batch_id FROM evaluations ORDER BY id DESC LIMIT 1"
-    ).fetchone()
+    if student_id:
+        row = conn.execute(
+            "SELECT DISTINCT batch_id FROM evaluations WHERE student_id = ? ORDER BY id DESC LIMIT 1",
+            (student_id,)
+        ).fetchone()
+    else:
+        row = conn.execute(
+            "SELECT DISTINCT batch_id FROM evaluations ORDER BY id DESC LIMIT 1"
+        ).fetchone()
     if not row:
         conn.close()
         return None
@@ -160,58 +167,69 @@ def get_latest_batch():
     return [dict(r) for r in rows]
 
 
-def get_batch(batch_id):
+def get_batch(batch_id, student_id=None):
     conn = get_db()
-    rows = conn.execute(
-        "SELECT * FROM evaluations WHERE batch_id = ? ORDER BY id", (batch_id,)
-    ).fetchall()
+    if student_id:
+        rows = conn.execute(
+            "SELECT * FROM evaluations WHERE batch_id = ? AND student_id = ? ORDER BY id",
+            (batch_id, student_id)
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT * FROM evaluations WHERE batch_id = ? ORDER BY id", (batch_id,)
+        ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
 
-def get_progress():
+def get_progress(student_id=None):
     conn = get_db()
     stats = {}
 
-    stats["total"] = conn.execute("SELECT COUNT(*) as c FROM evaluations").fetchone()["c"]
+    filt = "WHERE student_id = ?" if student_id else ""
+    params = (student_id,) if student_id else ()
+
+    stats["total"] = conn.execute(f"SELECT COUNT(*) as c FROM evaluations {filt}", params).fetchone()["c"]
     if stats["total"] == 0:
         conn.close()
         return stats
 
     # By subject
     rows = conn.execute(
-        """SELECT subject, COUNT(*) as count, ROUND(AVG(correctness), 1) as avg_score,
+        f"""SELECT subject, COUNT(*) as count, ROUND(AVG(correctness), 1) as avg_score,
                   SUM(CASE WHEN correctness >= 4 THEN 1 ELSE 0 END) as solid
-           FROM evaluations GROUP BY subject"""
+           FROM evaluations {filt} GROUP BY subject""", params
     ).fetchall()
     stats["by_subject"] = [dict(r) for r in rows]
 
     # By exam
     rows = conn.execute(
-        """SELECT exam, COUNT(*) as count, ROUND(AVG(correctness), 1) as avg_score
-           FROM evaluations GROUP BY exam"""
+        f"""SELECT exam, COUNT(*) as count, ROUND(AVG(correctness), 1) as avg_score
+           FROM evaluations {filt} GROUP BY exam""", params
     ).fetchall()
     stats["by_exam"] = [dict(r) for r in rows]
 
     # Weakest topics
+    topic_filt = "WHERE student_id = ? AND topic != ''" if student_id else "WHERE topic != ''"
     rows = conn.execute(
-        """SELECT topic, subject, COUNT(*) as count, ROUND(AVG(correctness), 1) as avg_score
-           FROM evaluations WHERE topic != ''
-           GROUP BY topic ORDER BY avg_score ASC LIMIT 8"""
+        f"""SELECT topic, subject, COUNT(*) as count, ROUND(AVG(correctness), 1) as avg_score
+           FROM evaluations {topic_filt}
+           GROUP BY topic ORDER BY avg_score ASC LIMIT 8""", params
     ).fetchall()
     stats["weak_topics"] = [dict(r) for r in rows]
 
     # Strongest topics
     rows = conn.execute(
-        """SELECT topic, subject, COUNT(*) as count, ROUND(AVG(correctness), 1) as avg_score
-           FROM evaluations WHERE topic != ''
+        f"""SELECT topic, subject, COUNT(*) as count, ROUND(AVG(correctness), 1) as avg_score
+           FROM evaluations {topic_filt}
            GROUP BY topic HAVING AVG(correctness) >= 4
-           ORDER BY avg_score DESC LIMIT 5"""
+           ORDER BY avg_score DESC LIMIT 5""", params
     ).fetchall()
     stats["strong_topics"] = [dict(r) for r in rows]
 
     # Common mistakes
-    rows = conn.execute("SELECT mistakes FROM evaluations WHERE mistakes != '[]'").fetchall()
+    mistakes_filt = "WHERE student_id = ? AND mistakes != '[]'" if student_id else "WHERE mistakes != '[]'"
+    rows = conn.execute(f"SELECT mistakes FROM evaluations {mistakes_filt}", params).fetchall()
     all_mistakes = []
     for r in rows:
         try:
@@ -223,50 +241,65 @@ def get_progress():
 
     # Daily trend (last 14 days)
     rows = conn.execute(
-        """SELECT DATE(timestamp) as day, COUNT(*) as count,
+        f"""SELECT DATE(timestamp) as day, COUNT(*) as count,
                   ROUND(AVG(correctness), 1) as avg_score
-           FROM evaluations
-           GROUP BY DATE(timestamp) ORDER BY day DESC LIMIT 14"""
+           FROM evaluations {filt}
+           GROUP BY DATE(timestamp) ORDER BY day DESC LIMIT 14""", params
     ).fetchall()
     stats["daily_trend"] = [dict(r) for r in rows]
 
     stats["avg_score"] = round(
-        conn.execute("SELECT AVG(correctness) FROM evaluations").fetchone()[0] or 0, 1
+        conn.execute(f"SELECT AVG(correctness) FROM evaluations {filt}", params).fetchone()[0] or 0, 1
     )
 
     conn.close()
     return stats
 
 
-def get_history(limit=50):
+def get_history(limit=50, student_id=None):
     conn = get_db()
-    rows = conn.execute(
-        """SELECT id, timestamp, subject, exam, problem_number, topic, subtopic,
-                  correctness, is_complete, encouragement, batch_id,
-                  question_text, question_summary, what_went_right, where_it_broke,
-                  mistakes, missing_concept, correct_answer
-           FROM evaluations ORDER BY id DESC LIMIT ?""",
-        (limit,),
-    ).fetchall()
+    if student_id:
+        rows = conn.execute(
+            """SELECT id, timestamp, subject, exam, problem_number, topic, subtopic,
+                      correctness, is_complete, encouragement, batch_id,
+                      question_text, question_summary, what_went_right, where_it_broke,
+                      mistakes, missing_concept, correct_answer
+               FROM evaluations WHERE student_id = ? ORDER BY id DESC LIMIT ?""",
+            (student_id, limit),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            """SELECT id, timestamp, subject, exam, problem_number, topic, subtopic,
+                      correctness, is_complete, encouragement, batch_id,
+                      question_text, question_summary, what_went_right, where_it_broke,
+                      mistakes, missing_concept, correct_answer
+               FROM evaluations ORDER BY id DESC LIMIT ?""",
+            (limit,),
+        ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
 
-def save_wow_note(note, subject="", topic="", source="debate"):
+def save_wow_note(note, subject="", topic="", source="debate", student_id=None):
     conn = get_db()
     conn.execute(
-        "INSERT INTO wow_notes (timestamp, subject, topic, note, source) VALUES (?,?,?,?,?)",
-        (datetime.now().isoformat(), subject, topic, note, source),
+        "INSERT INTO wow_notes (timestamp, subject, topic, note, source, student_id) VALUES (?,?,?,?,?,?)",
+        (datetime.now().isoformat(), subject, topic, note, source, student_id),
     )
     conn.commit()
     conn.close()
 
 
-def get_wow_notes(limit=100):
+def get_wow_notes(limit=100, student_id=None):
     conn = get_db()
-    rows = conn.execute(
-        "SELECT * FROM wow_notes ORDER BY id DESC LIMIT ?", (limit,)
-    ).fetchall()
+    if student_id:
+        rows = conn.execute(
+            "SELECT * FROM wow_notes WHERE student_id = ? ORDER BY id DESC LIMIT ?", (student_id, limit)
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT * FROM wow_notes ORDER BY id DESC LIMIT ?", (limit,)
+        ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
@@ -406,14 +439,14 @@ def get_voice_context():
     return "\n".join(lines)
 
 
-def save_debate_log(subject, topic, question_text, student_message, mentor_reply):
+def save_debate_log(subject, topic, question_text, student_message, mentor_reply, student_id=None):
     conn = get_db()
     conn.execute(
         """INSERT INTO debate_logs
-           (timestamp, subject, topic, question_text, student_message, mentor_reply)
-           VALUES (?,?,?,?,?,?)""",
+           (timestamp, subject, topic, question_text, student_message, mentor_reply, student_id)
+           VALUES (?,?,?,?,?,?,?)""",
         (datetime.now().isoformat(), subject or "", topic or "",
-         question_text or "", student_message or "", mentor_reply or ""),
+         question_text or "", student_message or "", mentor_reply or "", student_id),
     )
     conn.commit()
     conn.close()
