@@ -87,43 +87,29 @@
             margin-bottom: 0;
         }
 
-        /* ─── Rolling Strip ─── */
-        .rolling-section {
-            padding: 48px 0;
-            overflow: hidden;
-            position: relative;
+        /* ─── Steps Grid ─── */
+        .steps-section {
+            padding: 48px 24px;
+            max-width: 900px;
+            margin: 0 auto;
         }
-        .rolling-section::before,
-        .rolling-section::after {
-            content: '';
-            position: absolute;
-            top: 0; bottom: 0;
-            width: 80px;
-            z-index: 2;
-            pointer-events: none;
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
-        .rolling-section::before { left: 0; background: linear-gradient(90deg, #FAFAFA, transparent); }
-        .rolling-section::after { right: 0; background: linear-gradient(270deg, #FAFAFA, transparent); }
-
-        .rolling-track {
-            display: flex;
-            gap: 24px;
-            animation: scroll 20s linear infinite;
-            width: max-content;
+        @media (max-width: 640px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
         }
-        @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .rolling-track:hover { animation-play-state: paused; }
 
         .roll-card {
-            flex-shrink: 0;
-            width: 260px;
             background: #FFFFFF;
             border: 1px solid #E5E7EB;
             border-radius: 16px;
-            padding: 20px;
+            padding: 24px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
         .roll-card .step-num {
@@ -334,9 +320,9 @@
 </section>
 
 <!-- Rolling How-It-Works Strip -->
-<section class="rolling-section">
-    <div class="rolling-track">
-        <!-- Set 1 -->
+<!-- How It Works -->
+<section class="steps-section">
+    <div class="steps-grid">
         <div class="roll-card">
             <div class="step-num">Step 1</div>
             <div class="step-icon">📸</div>
@@ -358,55 +344,7 @@
             <div class="step-num">Step 3</div>
             <div class="step-icon">✅</div>
             <h3>See what to fix</h3>
-            <p>Not just "wrong" — shows exactly which step broke and how to do it right.</p>
-        </div>
-        <div class="roll-card">
-            <div class="step-num">Real example</div>
-            <div class="step-icon">📝</div>
-            <h3>Product Rule Error</h3>
-            <p>"You applied d/dx to x² but forgot to differentiate sin(x) separately."</p>
-        </div>
-        <div class="roll-card">
-            <div class="step-num">Works on</div>
-            <div class="step-icon">📱</div>
-            <h3>Your phone</h3>
-            <p>No app download. Open in browser, snap, done. Uses 0 storage.</p>
-        </div>
-        <!-- Set 2 (duplicate for seamless loop) -->
-        <div class="roll-card">
-            <div class="step-num">Step 1</div>
-            <div class="step-icon">📸</div>
-            <h3>Snap your notebook</h3>
-            <p>Point your phone at your solved problem. Any handwriting works.</p>
-            <div class="notebook-mock">
-                <div class="line">dy/dx = x²·cos(x)</div>
-                <div class="line"><span class="wrong">+ 2x·sin(x)</span></div>
-                <div class="line">= x²cos(x) + 2x·sin(x)</div>
-            </div>
-        </div>
-        <div class="roll-card">
-            <div class="step-num">Step 2</div>
-            <div class="step-icon">🤖</div>
-            <h3>AI reads every step</h3>
-            <p>Checks your method, formulas, and arithmetic — line by line in 10 seconds.</p>
-        </div>
-        <div class="roll-card">
-            <div class="step-num">Step 3</div>
-            <div class="step-icon">✅</div>
-            <h3>See what to fix</h3>
-            <p>Not just "wrong" — shows exactly which step broke and how to do it right.</p>
-        </div>
-        <div class="roll-card">
-            <div class="step-num">Real example</div>
-            <div class="step-icon">📝</div>
-            <h3>Product Rule Error</h3>
-            <p>"You applied d/dx to x² but forgot to differentiate sin(x) separately."</p>
-        </div>
-        <div class="roll-card">
-            <div class="step-num">Works on</div>
-            <div class="step-icon">📱</div>
-            <h3>Your phone</h3>
-            <p>No app download. Open in browser, snap, done. Uses 0 storage.</p>
+            <p>Not just “wrong” — shows exactly which step broke and how to do it right.</p>
         </div>
     </div>
 </section>
