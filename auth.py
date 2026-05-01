@@ -102,19 +102,25 @@ def register_auth_routes(app):
             # Check if student exists
             student = db.get_student_by_google_id(google_id)
 
-            if student:
-                # Existing user — log them in
-                session["student_id"] = student["id"]
-                session.permanent = True
-                logger.info(f"Login: {email}")
-                return jsonify({"status": "ok", "needs_phone": False})
+            if not student:
+                # New user — create account immediately
+                client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+                student_id = db.create_student(
+                    google_id=google_id,
+                    email=email,
+                    name=name,
+                    avatar_url=avatar,
+                    phone="",
+                    signup_ip=client_ip,
+                )
+                logger.info(f"New signup: {email}")
             else:
-                # New user — need phone verification
-                session["pending_google_id"] = google_id
-                session["pending_email"] = email
-                session["pending_name"] = name
-                session["pending_avatar"] = avatar
-                return jsonify({"status": "ok", "needs_phone": True})
+                student_id = student["id"]
+                logger.info(f"Login: {email}")
+
+            session["student_id"] = student_id
+            session.permanent = True
+            return jsonify({"status": "ok"})
 
         except ValueError as e:
             logger.warning(f"Google auth failed: {e}")
@@ -282,7 +288,7 @@ function handleCredentialResponse(response) {{
         headers: {{'Content-Type': 'application/json'}},
         body: JSON.stringify({{credential: response.credential}})
     }}).then(r => r.json()).then(data => {{
-        if (data.needs_phone) window.location = '/verify-phone';
+        if (data.error) alert(data.error);
         else window.location = '/';
     }});
 }}
