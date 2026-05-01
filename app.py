@@ -75,6 +75,33 @@ from auth import register_auth_routes, require_auth
 register_auth_routes(app)
 
 
+# ─── Analytics middleware ───
+
+@app.before_request
+def _track_request():
+    """Log every request for analytics. Lightweight — no AI calls."""
+    # Skip static files and frequent polling
+    if request.path.startswith("/static") or request.path == "/favicon.ico":
+        return
+    try:
+        student_id = None
+        try:
+            from flask import session as flask_session
+            student_id = flask_session.get("student_id")
+        except Exception:
+            pass
+        meta = {
+            "path": request.path,
+            "method": request.method,
+            "ua": request.user_agent.string[:200],
+            "ip": request.remote_addr,
+            "referrer": (request.referrer or "")[:200],
+        }
+        db.log_event(student_id, "request", meta)
+    except Exception:
+        pass  # Never break the app for analytics
+
+
 # ─── Helpers ───
 
 
@@ -177,6 +204,7 @@ def api_upload():
 
     # Track batch status
     db.set_batch_status(batch_id, student_id, "processing")
+    db.log_event(student_id, "upload", {"subject": subject, "exam": exam, "questions": len(q_paths), "answers": len(a_paths), "batch_id": batch_id})
 
     # Process in background so phone gets immediate response
     def evaluate_async():
@@ -317,6 +345,7 @@ def api_practice():
     exam = data.get("exam", "general")
     topic = data.get("topic", "")
     difficulty = data.get("difficulty", "medium")
+    db.log_event(request.student["id"], "practice", {"subject": subject, "topic": topic, "difficulty": difficulty})
 
     if not topic:
         stats = db.get_progress()
@@ -375,6 +404,7 @@ def api_explain():
     if not topic:
         return jsonify({"error": "Topic is required"}), 400
 
+    db.log_event(request.student["id"], "explain", {"subject": subject, "topic": topic})
     prompt = EXPLAIN_PROMPT.format(subject=subject, exam=exam, topic=topic)
     response = router.call("explain", prompt)
     return jsonify({"explanation": response, "topic": topic, "subject": subject})
@@ -416,6 +446,7 @@ def api_hint():
     if not q_paths:
         return jsonify({"error": "No valid question images"}), 400
 
+    db.log_event(request.student["id"], "hint", {"subject": subject, "images": len(q_paths)})
     exam_context = EXAM_CONTEXTS.get(exam, EXAM_CONTEXTS["general"])
     prompt = HINT_PROMPT.format(subject=subject, exam_context=exam_context)
 
@@ -506,6 +537,8 @@ def api_debate():
 
     if not question_text:
         return jsonify({"error": "No question context. Try re-evaluating first."}), 400
+
+    db.log_event(request.student["id"], "debate", {"subject": subject, "topic": topic, "turns": len(history)})
 
     history_lines = []
     for entry in history:

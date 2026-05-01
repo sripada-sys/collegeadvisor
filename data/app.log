@@ -1547,3 +1547,9 @@
 2026-05-01 15:52:40,378 [WARNING] Google auth failed: Invalid token
 2026-05-01 15:52:40,987 [WARNING] Backup skipped: git not found
 2026-05-01 15:52:41,051 [WARNING] gemini ran out of credits mid-session! Falling back...
+2026-05-01 16:09:43,521 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:09:44,383 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 16:09:46,121 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 16:09:46,338 [WARNING] Google auth failed: Invalid token
+2026-05-01 16:09:46,948 [WARNING] Backup skipped: git not found
+2026-05-01 16:09:47,010 [WARNING] gemini ran out of credits mid-session! Falling back...

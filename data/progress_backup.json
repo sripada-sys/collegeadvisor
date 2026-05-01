@@ -1,16 +1,10 @@
 {
-  "exported_at": "2026-05-01T15:52:40.986589",
+  "exported_at": "2026-05-01T16:09:46.948587",
   "evaluations": [],
   "practice_problems": [],
   "wow_notes": [],
   "debate_logs": [],
   "app_log_tail": [
-    " * Running on all addresses (0.0.0.0)",
-    " * Running on http://127.0.0.1:5000",
-    " * Running on http://192.168.0.31:5000",
-    "2026-04-27 12:18:40,666 [INFO] \u001b[33mPress CTRL+C to quit\u001b[0m",
-    "2026-04-27 12:18:43,977 [INFO] Progress backed up to GitHub",
-    "2026-04-27 19:29:05,070 [INFO] Gemini: ready",
     "2026-04-27 19:29:05,647 [INFO] Claude: ready",
     "2026-04-27 19:29:06,207 [INFO] OpenAI: ready",
     "2026-04-27 19:29:06,259 [INFO] Perplexity: ready",
@@ -204,6 +198,12 @@
     "2026-05-01 15:52:36,911 [WARNING]   claude: NO CREDITS \u2014 disabling",
     "2026-05-01 15:52:38,003 [WARNING]   openai: ERROR \u2014 Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y",
     "2026-05-01 15:52:40,104 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt",
-    "2026-05-01 15:52:40,378 [WARNING] Google auth failed: Invalid token"
+    "2026-05-01 15:52:40,378 [WARNING] Google auth failed: Invalid token",
+    "2026-05-01 15:52:40,987 [WARNING] Backup skipped: git not found",
+    "2026-05-01 15:52:41,051 [WARNING] gemini ran out of credits mid-session! Falling back...",
+    "2026-05-01 16:09:43,521 [WARNING]   claude: NO CREDITS \u2014 disabling",
+    "2026-05-01 16:09:44,383 [WARNING]   openai: ERROR \u2014 Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y",
+    "2026-05-01 16:09:46,121 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt",
+    "2026-05-01 16:09:46,338 [WARNING] Google auth failed: Invalid token"
   ]
 }
