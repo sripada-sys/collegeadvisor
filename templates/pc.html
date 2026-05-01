@@ -935,8 +935,9 @@ const pairToken = '{{ pair_token }}';
 const phoneUrl = window.location.origin + '/phone?pair=' + pairToken;
 new QRCode(document.getElementById('qr-code'), {
     text: phoneUrl,
-    width: 120, height: 120,
-    colorDark: '#6366f1', colorLight: '#ffffff',
+    width: 200, height: 200,
+    colorDark: '#000000', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.L,
 });
 document.getElementById('phone-url').textContent = window.location.host + '/phone';
 
