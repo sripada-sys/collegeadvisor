@@ -19,6 +19,8 @@ For each problem visible:
    Worksheets (especially Kumon/NCERT) sometimes have answer blanks or labels before the expression.
    Always extract the mathematical expression itself in the correct left-to-right order as it appears.
    Example: if the photo shows "68 ÷ 2 = ___", the question is "68 ÷ 2", NOT "2 ÷ 68".
+   Students often abbreviate: "sin2θ" means sin²θ, "cos2x" means cos²x, "tan2A" means tan²A.
+   A number right after a trig function (sin, cos, tan) and before the variable is almost always a power/exponent.
 2. Read the student's handwritten solution STEP BY STEP — every line, every intermediate calculation, every scratch note.
 3. Note any visible source (book name, exam paper header, coaching watermark).
 
