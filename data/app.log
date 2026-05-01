@@ -1805,3 +1805,31 @@
 2026-05-01 20:03:53,898 [INFO] ==================================================
 2026-05-01 20:03:55,469 [INFO] Auto-update: packages up to date
 2026-05-01 20:03:55,469 [INFO] Auto-update: backing up local data before restart...
+2026-05-01 20:03:58,781 [INFO] Progress backed up to GitHub
+2026-05-01 20:03:59,665 [INFO] Auto-update: applied 84799a1c, restarting...
+2026-05-01 20:04:00,143 [INFO] Gemini: ready
+2026-05-01 20:04:00,284 [INFO] Claude: ready
+2026-05-01 20:04:00,423 [INFO] OpenAI: ready
+2026-05-01 20:04:00,433 [INFO] Perplexity: ready
+2026-05-01 20:04:00,433 [INFO] Running startup health check on all API keys...
+2026-05-01 20:04:00,433 [INFO] AFC is enabled with max remote calls: 10.
+2026-05-01 20:04:04,234 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2026-05-01 20:04:04,237 [INFO]   gemini: OK
+2026-05-01 20:04:04,544 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-05-01 20:04:04,547 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 20:04:05,431 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 20:04:05,441 [INFO]   openai: OK
+2026-05-01 20:04:08,180 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 20:04:08,183 [INFO]   perplexity: OK
+2026-05-01 20:04:08,183 [INFO] Available models: gemini, openai, perplexity
+2026-05-01 20:04:08,193 [INFO] ==================================================
+2026-05-01 20:04:08,193 [INFO]   GradesGenie is running!
+2026-05-01 20:04:08,193 [INFO]   URL    : http://0.0.0.0:5000
+2026-05-01 20:04:08,193 [INFO]   Models : gemini, openai, perplexity
+2026-05-01 20:04:08,193 [INFO] ==================================================
+2026-05-01 20:04:08,917 [INFO] Auto-update: already up to date
+2026-05-01 20:04:08,923 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.86.173:5000
+2026-05-01 20:04:08,923 [INFO] [33mPress CTRL+C to quit[0m
