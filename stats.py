@@ -18,7 +18,7 @@ import sys
 import time
 from datetime import datetime, timedelta
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "tutor.db")
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tutor.db")
 
 
 def get_db():
