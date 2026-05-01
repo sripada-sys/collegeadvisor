@@ -1002,7 +1002,7 @@ function startPolling() {
                 if (batchId !== lastBatchId) {
                     lastBatchId = batchId;
                     hideProcessing();
-                    _sessionResults = _sessionResults.concat(data.results);
+                    _sessionResults = data.results.concat(_sessionResults);
                     renderResults(_sessionResults);
                 }
             }
