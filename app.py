@@ -309,7 +309,6 @@ def api_upload():
     def evaluate_async():
         try:
             _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, student_id)
-            db.set_batch_status(batch_id, student_id, "done")
         except Exception as e:
             logger.error(f"Evaluation failed: {e}", exc_info=True)
             db.set_batch_status(batch_id, student_id, "failed", str(e)[:500])
@@ -405,6 +404,8 @@ def _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, 
             student_id=student_id,
         )
 
+    # Mark done immediately after saving — so polling sees done + results atomically
+    db.set_batch_status(batch_id, student_id, "done")
     logger.info(f"Batch {batch_id}: evaluated {len(results)} problems")
 
     # Debounced backup — waits 60s after the LAST evaluation before pushing.
@@ -464,7 +465,6 @@ def api_retry_batch(batch_id):
     def retry_async():
         try:
             _run_evaluation(batch_id, subject, exam, q_paths, a_paths, problem_numbers, student_id)
-            db.set_batch_status(batch_id, student_id, "done")
         except Exception as e:
             logger.error(f"Retry failed: {e}", exc_info=True)
             db.set_batch_status(batch_id, student_id, "failed", str(e)[:500])

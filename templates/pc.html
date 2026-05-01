@@ -988,7 +988,15 @@ function startPolling() {
             const res = await fetch('/api/results/latest');
             const data = await res.json();
 
-            // Check for new results first
+            // If there's an active (non-done) batch, show spinner
+            if (data.active_batch) {
+                showProcessing(data.active_batch.status);
+            } else if (_processingShown) {
+                // No active batch — hide spinner
+                hideProcessing();
+            }
+
+            // Check for new results
             if (data.results && data.results.length > 0) {
                 const batchId = data.results[0].batch_id;
                 if (batchId !== lastBatchId) {
@@ -997,15 +1005,6 @@ function startPolling() {
                     _sessionResults = _sessionResults.concat(data.results);
                     renderResults(_sessionResults);
                 }
-            }
-
-            // Show processing indicator only if there's an active batch
-            // that we haven't already rendered results for
-            if (data.active_batch && data.active_batch.batch_id !== lastBatchId) {
-                _activeBatchId = data.active_batch.batch_id;
-                showProcessing(data.active_batch.status);
-            } else if (_processingShown) {
-                hideProcessing();
             }
         } catch (e) {
             console.error('Poll error:', e);
