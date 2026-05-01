@@ -120,6 +120,71 @@ def register_auth_routes(app):
             logger.warning(f"Google auth failed: {e}")
             return jsonify({"error": "Invalid Google token"}), 401
 
+    @app.route("/verify-phone")
+    def verify_phone_page():
+        """Show phone verification page for new signups."""
+        if not session.get("pending_google_id"):
+            return redirect("/login")
+        from config import FIREBASE_API_KEY
+        return f"""<!DOCTYPE html>
+<html><head><title>GradesGenie — Verify Phone</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head><body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui;background:#f9fafb">
+<div style="text-align:center;max-width:400px;padding:2rem">
+<h1 style="font-size:1.5rem;margin-bottom:0.5rem">Verify Your Phone</h1>
+<p style="color:#6b7280;margin-bottom:1.5rem">One-time verification to prevent abuse</p>
+<div id="step1">
+  <input id="phoneInput" type="tel" placeholder="+91 98765 43210"
+    style="width:100%;padding:0.75rem;border:1px solid #d1d5db;border-radius:8px;font-size:1rem;margin-bottom:1rem">
+  <div id="recaptcha-container"></div>
+  <button onclick="sendOTP()" id="sendBtn"
+    style="width:100%;padding:0.75rem;background:#4285f4;color:white;border:none;border-radius:8px;font-size:1rem;cursor:pointer;margin-top:1rem">
+    Send OTP</button>
+</div>
+<div id="step2" style="display:none">
+  <input id="otpInput" type="text" placeholder="6-digit OTP" maxlength="6"
+    style="width:100%;padding:0.75rem;border:1px solid #d1d5db;border-radius:8px;font-size:1rem;margin-bottom:1rem;text-align:center;letter-spacing:0.5em">
+  <button onclick="verifyOTP()" id="verifyBtn"
+    style="width:100%;padding:0.75rem;background:#34a853;color:white;border:none;border-radius:8px;font-size:1rem;cursor:pointer">
+    Verify</button>
+</div>
+<p id="msg" style="color:#ef4444;margin-top:1rem"></p>
+<script>
+firebase.initializeApp({{apiKey: "{FIREBASE_API_KEY}", authDomain: "gradesgenie.firebaseapp.com"}});
+const auth = firebase.auth();
+let confirmationResult;
+window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {{size: 'normal'}});
+function sendOTP() {{
+    const phone = document.getElementById('phoneInput').value.trim();
+    if (!phone.startsWith('+')) {{ document.getElementById('msg').textContent = 'Include country code, e.g. +91...'; return; }}
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('sendBtn').textContent = 'Sending...';
+    auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+        .then(r => {{ confirmationResult = r; document.getElementById('step1').style.display='none'; document.getElementById('step2').style.display='block'; }})
+        .catch(e => {{ document.getElementById('msg').textContent = e.message; document.getElementById('sendBtn').disabled = false; document.getElementById('sendBtn').textContent = 'Send OTP'; }});
+}}
+function verifyOTP() {{
+    const code = document.getElementById('otpInput').value.trim();
+    document.getElementById('verifyBtn').disabled = true;
+    document.getElementById('verifyBtn').textContent = 'Verifying...';
+    confirmationResult.confirm(code).then(result => {{
+        return result.user.getIdToken();
+    }}).then(idToken => {{
+        return fetch('/auth/verify-phone', {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify({{id_token: idToken}})
+        }});
+    }}).then(r => r.json()).then(data => {{
+        if (data.error) {{ document.getElementById('msg').textContent = data.error; document.getElementById('verifyBtn').disabled = false; document.getElementById('verifyBtn').textContent = 'Verify'; }}
+        else window.location = '/';
+    }}).catch(e => {{ document.getElementById('msg').textContent = e.message; document.getElementById('verifyBtn').disabled = false; document.getElementById('verifyBtn').textContent = 'Verify'; }});
+}}
+</script>
+</div></body></html>"""
+
     @app.route("/auth/verify-phone", methods=["POST"])
     def verify_phone():
         """Verify Firebase phone OTP token and complete signup."""
