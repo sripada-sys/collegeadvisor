@@ -10,13 +10,18 @@ import pytest
 class TestPublicRoutes:
     """Routes that don't require authentication."""
 
-    def test_index_redirects_mobile(self, app_client):
-        resp = app_client.get("/", headers={"User-Agent": "iPhone Mobile Safari"})
+    def test_index_shows_landing_when_not_logged_in(self, app_client):
+        resp = app_client.get("/")
+        assert resp.status_code == 200
+        assert b"GradesGenie" in resp.data
+
+    def test_index_redirects_mobile_when_logged_in(self, authed_client):
+        resp = authed_client.get("/", headers={"User-Agent": "iPhone Mobile Safari"})
         assert resp.status_code == 302
         assert "/phone" in resp.headers["Location"]
 
-    def test_index_redirects_desktop(self, app_client):
-        resp = app_client.get("/", headers={"User-Agent": "Mozilla/5.0 Windows Chrome"})
+    def test_index_redirects_desktop_when_logged_in(self, authed_client):
+        resp = authed_client.get("/", headers={"User-Agent": "Mozilla/5.0 Windows Chrome"})
         assert resp.status_code == 302
         assert "/pc" in resp.headers["Location"]
 

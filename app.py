@@ -30,6 +30,7 @@ from flask import (
     render_template,
     request,
     send_from_directory,
+    session,
 )
 from werkzeug.utils import secure_filename
 
@@ -245,10 +246,15 @@ from prompts import (
 
 @app.route("/")
 def index():
-    ua = request.user_agent.string.lower()
-    if any(m in ua for m in ["iphone", "android", "mobile"]):
-        return redirect("/phone")
-    return redirect("/pc")
+    # If logged in, go straight to app
+    if session.get("student_id"):
+        ua = request.user_agent.string.lower()
+        if any(m in ua for m in ["iphone", "android", "mobile"]):
+            return redirect("/phone")
+        return redirect("/pc")
+    # Not logged in — show landing page
+    from config import GOOGLE_CLIENT_ID
+    return render_template("landing.html", google_client_id=GOOGLE_CLIENT_ID)
 
 
 @app.route("/pc")

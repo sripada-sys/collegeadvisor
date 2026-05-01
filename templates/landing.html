@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GradesGenie — Know exactly where your child goes wrong</title>
+    <meta name="description" content="AI tutor that reads your child's handwritten solutions and tells them exactly which step went wrong and why. For JEE, Boards, and competitive exam prep.">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #242835;
+            --border: #2e3348;
+            --text: #e4e4e7;
+            --text2: #9ca3af;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --green: #22c55e;
+            --red: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        a { color: var(--accent-light); text-decoration: none; }
+
+        /* ─── Hero ─── */
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px;
+            text-align: center;
+            background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 60%);
+        }
+        .hero-inner { max-width: 720px; }
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero .subtitle {
+            font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+            color: var(--text2);
+            margin-bottom: 40px;
+            max-width: 580px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero .highlight {
+            color: var(--accent-light);
+            font-weight: 600;
+        }
+
+        /* ─── CTA Section ─── */
+        .cta-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 28px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        .cta-box .price {
+            font-size: 14px;
+            color: var(--text2);
+            margin-top: 16px;
+        }
+        .cta-box .price strong {
+            color: var(--green);
+            font-size: 16px;
+        }
+        .spots {
+            display: inline-block;
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: var(--red);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .wa-link {
+            display: inline-block;
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text2);
+        }
+        .wa-link a { color: #25D366; font-weight: 600; }
+
+        /* ─── Problem Section ─── */
+        .section {
+            padding: 80px 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section h2 {
+            font-size: clamp(1.5rem, 3.5vw, 2rem);
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .section p {
+            color: var(--text2);
+            font-size: 1.05rem;
+            margin-bottom: 16px;
+        }
+
+        /* ─── Problem Cards ─── */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        @media (min-width: 640px) { .problem-grid { grid-template-columns: 1fr 1fr; } }
+        .problem-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .problem-card .icon { font-size: 28px; margin-bottom: 12px; }
+        .problem-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+        .problem-card p { font-size: 0.9rem; color: var(--text2); margin: 0; }
+
+        /* ─── How It Works ─── */
+        .steps {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-top: 40px;
+        }
+        @media (min-width: 640px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+        .step {
+            text-align: center;
+            padding: 24px 16px;
+        }
+        .step .num {
+            display: inline-flex;
+            width: 40px; height: 40px;
+            align-items: center; justify-content: center;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 14px;
+        }
+        .step h3 { font-size: 1rem; margin-bottom: 6px; }
+        .step p { font-size: 0.88rem; color: var(--text2); margin: 0; }
+
+        /* ─── Contrast ─── */
+        .contrast-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 32px;
+            font-size: 0.95rem;
+        }
+        .contrast-table th {
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text2);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .contrast-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .contrast-table .old { color: var(--text2); }
+        .contrast-table .new { color: var(--green); font-weight: 500; }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--text2);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 480px) {
+            .hero { padding: 40px 16px; min-height: 80vh; }
+            .cta-box { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-inner">
+        <h1>Your child doesn't need more study material.<br>They need to know where they're going wrong.</h1>
+        <p class="subtitle">
+            Books, coaching, YouTube — there's no shortage of content. But when your child solves a problem wrong,
+            <span class="highlight">who tells them exactly which step broke and why?</span>
+            That's what separates toppers from the rest.
+        </p>
+
+        <div class="cta-box">
+            <span class="spots">🔥 Only 47 spots left at this price</span>
+
+            <div id="g_id_onload"
+                 data-client_id="{{ google_client_id }}"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false"></div>
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-size="large"
+                 data-theme="filled_black"
+                 data-text="continue_with"
+                 data-shape="pill"
+                 data-width="280"></div>
+
+            <p class="price">First 2 weeks free. Then <strong>₹499/month</strong> <span style="text-decoration:line-through;color:var(--text2)">₹999</span></p>
+        </div>
+
+        <p class="wa-link">Questions? <a href="https://wa.me/919876543210?text=Hi%2C%20I%20want%20to%20know%20more%20about%20GradesGenie" target="_blank">WhatsApp us →</a></p>
+    </div>
+</section>
+
+<!-- The Real Problem -->
+<section class="section">
+    <h2>The real problem isn't lack of practice</h2>
+    <p>Your child solves 50 problems a day. But when they get one wrong, what happens?</p>
+
+    <div class="problem-grid">
+        <div class="problem-card">
+            <div class="icon">📕</div>
+            <h3>Answer keys say "wrong"</h3>
+            <p>They see the final answer but not <em>where their logic broke</em>. So they repeat the same mistake.</p>
+        </div>
+        <div class="problem-card">
+            <div class="icon">👨‍🏫</div>
+            <h3>Tutors can't catch every step</h3>
+            <p>A tutor checks 5 problems in an hour. Your child solves 50. Most mistakes go unnoticed.</p>
+        </div>
+        <div class="problem-card">
+            <div class="icon">⏱️</div>
+            <h3>JEE tests speed AND accuracy</h3>
+            <p>Getting the right answer in 10 minutes doesn't help if the exam gives you 3. You need to know which shortcuts break.</p>
+        </div>
+        <div class="problem-card">
+            <div class="icon">🔄</div>
+            <h3>Same mistakes, different paper</h3>
+            <p>Sign errors, missed negative marks, wrong formula application — they keep repeating because nobody pointed it out clearly.</p>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="section" style="background:var(--surface);border-radius:0;max-width:100%;padding-left:24px;padding-right:24px">
+    <div style="max-width:800px;margin:0 auto">
+        <h2>How GradesGenie works</h2>
+        <p style="text-align:center;color:var(--text2)">Takes 10 seconds. No typing. Just photos.</p>
+
+        <div class="steps">
+            <div class="step">
+                <div class="num">1</div>
+                <h3>Snap the solution</h3>
+                <p>Your child takes a photo of their handwritten work from their phone</p>
+            </div>
+            <div class="step">
+                <div class="num">2</div>
+                <h3>AI reads every step</h3>
+                <p>Reads handwriting, identifies the approach, checks every line of working</p>
+            </div>
+            <div class="step">
+                <div class="num">3</div>
+                <h3>Pinpoints the exact error</h3>
+                <p>"Step 3: you applied chain rule but missed the inner derivative of sin²x"</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contrast -->
+<section class="section">
+    <h2>This isn't another coaching app</h2>
+
+    <table class="contrast-table">
+        <thead>
+            <tr><th>What exists</th><th>What GradesGenie does</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="old">Video lectures (watch passively)</td>
+                <td class="new">Reads your child's actual work</td>
+            </tr>
+            <tr>
+                <td class="old">Answer keys (just final answer)</td>
+                <td class="new">Shows which exact step broke</td>
+            </tr>
+            <tr>
+                <td class="old">Tutors (limited time, misses things)</td>
+                <td class="new">Checks every problem, every step, instantly</td>
+            </tr>
+            <tr>
+                <td class="old">Practice apps (more questions)</td>
+                <td class="new">Fewer mistakes = faster improvement</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Final CTA -->
+<section class="section" style="text-align:center;padding-bottom:100px">
+    <h2>Try it free for 2 weeks</h2>
+    <p style="max-width:480px;margin:0 auto 32px;color:var(--text2)">
+        No credit card needed. Your child uploads one solved problem and sees exactly how it works.
+        If it doesn't help — just stop. No questions asked.
+    </p>
+
+    <div class="cta-box">
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="large"
+             data-theme="filled_black"
+             data-text="continue_with"
+             data-shape="pill"
+             data-width="280"></div>
+        <p class="price">2 weeks free → <strong>₹499/month</strong></p>
+    </div>
+
+    <p class="wa-link" style="margin-top:24px">Prefer to talk first? <a href="https://wa.me/919876543210?text=Hi%2C%20tell%20me%20more%20about%20GradesGenie" target="_blank">WhatsApp us →</a></p>
+</section>
+
+<footer>
+    GradesGenie · AI-powered exam prep for JEE & Boards<br>
+    <span style="margin-top:8px;display:inline-block">Physics · Chemistry · Mathematics</span>
+</footer>
+
+<script>
+function handleCredentialResponse(response) {
+    fetch('/auth/google/callback', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({credential: response.credential})
+    }).then(r => r.json()).then(data => {
+        if (data.error) alert(data.error);
+        else window.location = '/pc';
+    });
+}
+</script>
+</body>
+</html>
