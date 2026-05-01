@@ -735,22 +735,22 @@
 
             <div id="hint-container" style="display:none;margin-bottom:16px"></div>
 
+            <!-- Processing indicator (hidden by default) -->
+            <div id="processing-indicator" style="display:none;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
+                <div style="margin-bottom:12px">
+                    <div class="processing-spinner" style="display:inline-block;width:36px;height:36px;border:3px solid var(--border);border-top:3px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite"></div>
+                </div>
+                <div id="processing-stage" style="font-size:15px;font-weight:600;color:var(--accent)">Uploading...</div>
+                <div id="processing-detail" style="font-size:13px;color:var(--text2);margin-top:6px">This usually takes 10-15 seconds</div>
+            </div>
+            <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
             <div id="results-container">
                 <div class="empty-state">
                     <div class="icon">📷</div>
                     <p>Upload question &amp; answer photos from your phone.<br>Results will appear here automatically.</p>
                 </div>
             </div>
-
-            <!-- Processing indicator (hidden by default) -->
-            <div id="processing-indicator" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;margin-bottom:16px">
-                <div style="margin-bottom:12px">
-                    <div class="processing-spinner" style="display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top:3px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite"></div>
-                </div>
-                <div id="processing-stage" style="font-size:15px;font-weight:600;color:var(--accent)">Uploading...</div>
-                <div id="processing-detail" style="font-size:13px;color:var(--text2);margin-top:6px">This usually takes 10-15 seconds</div>
-            </div>
-            <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
         </section>
 
         <!-- Practice Tab -->
@@ -968,6 +968,10 @@ function showProcessing(stage) {
     const ind = document.getElementById('processing-indicator');
     ind.style.display = 'block';
     document.getElementById('processing-stage').textContent = STAGE_LABELS[stage] || stage;
+    document.getElementById('processing-detail').textContent = 'This usually takes 10-15 seconds';
+    // Hide empty state while processing
+    const empty = document.querySelector('#results-container .empty-state');
+    if (empty) empty.style.display = 'none';
     _processingShown = true;
 }
 
