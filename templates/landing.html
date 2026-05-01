@@ -8,116 +8,173 @@
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
-        :root {
-            --bg: #FAFBFC;
-            --surface: #FFFFFF;
-            --surface2: #F3F4F6;
-            --border: #E5E7EB;
-            --text: #1F2937;
-            --text2: #6B7280;
-            --accent: #4F46E5;
-            --green: #059669;
-            --green-light: #D1FAE5;
-            --warm: #FEF3C7;
-        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0A0A0F;
+            color: #E5E7EB;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
 
         /* ─── Nav ─── */
         nav {
-            padding: 16px 24px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background: rgba(10,10,15,0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        nav .inner {
             max-width: 900px;
             margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
         }
-        .brand { font-size: 1.2rem; font-weight: 700; }
-        .brand span { color: var(--accent); }
+        .brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #818CF8, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
         /* ─── Hero ─── */
         .hero {
             text-align: center;
-            padding: 60px 24px 40px;
-            max-width: 600px;
+            padding: 140px 24px 48px;
+            max-width: 640px;
             margin: 0 auto;
         }
         .hero h1 {
-            font-size: clamp(1.6rem, 4.5vw, 2.5rem);
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
             font-weight: 800;
-            line-height: 1.3;
-            margin-bottom: 16px;
+            line-height: 1.25;
+            margin-bottom: 18px;
+            color: #FFFFFF;
         }
-        .hero h1 em { font-style: normal; color: var(--accent); }
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, #818CF8, #C084FC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         .hero .sub {
             font-size: 1.05rem;
-            color: var(--text2);
-            margin-bottom: 32px;
+            color: #9CA3AF;
+            margin-bottom: 36px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .cta-sub { margin-top: 10px; font-size: 13px; color: var(--text2); }
         .google-btn-wrap { display: inline-block; }
+        .cta-sub {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #6B7280;
+        }
 
         /* ─── Preview ─── */
         .preview {
-            max-width: 620px;
-            margin: 48px auto 0;
+            max-width: 600px;
+            margin: 56px auto 0;
             padding: 0 24px;
         }
         .preview-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
             padding: 28px;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.05);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
         .preview-q {
             font-size: 0.95rem;
-            padding: 10px 14px;
-            background: var(--surface2);
-            border-radius: 8px;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
             margin-bottom: 16px;
+            color: #D1D5DB;
         }
         .fb {
-            padding: 10px 14px;
-            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            border-radius: 0 10px 10px 0;
             margin-bottom: 10px;
         }
         .fb:last-child { margin-bottom: 0; }
-        .fb-good { border-left: 3px solid var(--green); background: var(--green-light); }
-        .fb-fix { border-left: 3px solid #F59E0B; background: var(--warm); }
-        .fb b { font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 2px; }
-        .fb-good b { color: var(--green); }
-        .fb-fix b { color: #D97706; }
-        .fb p { font-size: 0.9rem; margin: 0; }
+        .fb-good {
+            border-left: 3px solid #34D399;
+            background: rgba(52,211,153,0.08);
+        }
+        .fb-fix {
+            border-left: 3px solid #FBBF24;
+            background: rgba(251,191,36,0.08);
+        }
+        .fb b {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .fb-good b { color: #34D399; }
+        .fb-fix b { color: #FBBF24; }
+        .fb p { font-size: 0.9rem; margin: 0; color: #D1D5DB; }
 
         /* ─── Bottom ─── */
         .bottom {
             text-align: center;
-            padding: 64px 24px 48px;
+            padding: 72px 24px 56px;
             max-width: 500px;
             margin: 0 auto;
         }
         .bottom p {
-            font-size: 0.95rem;
-            color: var(--text2);
-            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #6B7280;
+            margin-bottom: 6px;
         }
+
+        /* ─── Footer ─── */
         footer {
             text-align: center;
             padding: 24px;
             font-size: 12px;
-            color: var(--text2);
-            border-top: 1px solid var(--border);
+            color: #4B5563;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
-        footer a { color: var(--text2); }
+
+        /* ─── Glow ─── */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(129,140,248,0.12) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .hero { position: relative; }
 
         @media (max-width: 480px) {
-            .hero { padding: 40px 16px 32px; }
+            .hero { padding: 120px 16px 40px; }
             .preview-box { padding: 18px; }
+            .hero::before { width: 300px; height: 200px; }
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <div class="brand">Grades<span>Genie</span></div>
+    <div class="inner">
+        <div class="brand">GradesGenie</div>
+    </div>
 </nav>
 
 <section class="hero">
@@ -132,7 +189,7 @@
         <div class="g_id_signin"
              data-type="standard"
              data-size="large"
-             data-theme="outline"
+             data-theme="filled_black"
              data-text="continue_with"
              data-shape="pill"
              data-width="260"></div>
