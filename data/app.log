@@ -1603,3 +1603,91 @@
  * Running on http://127.0.0.1:5000
  * Running on http://10.3.10.131:5000
 2026-05-01 16:36:17,633 [INFO] [33mPress CTRL+C to quit[0m
+2026-05-01 16:36:20,265 [INFO] Progress backed up to GitHub
+2026-05-01 16:36:38,384 [INFO] 127.0.0.1 - - [01/May/2026 16:36:38] "[32mGET / HTTP/1.1[0m" 302 -
+2026-05-01 16:36:38,393 [INFO] 127.0.0.1 - - [01/May/2026 16:36:38] "GET /pc HTTP/1.1" 200 -
+2026-05-01 16:36:38,942 [INFO] 127.0.0.1 - - [01/May/2026 16:36:38] "GET /static/favicon.svg HTTP/1.1" 200 -
+2026-05-01 16:36:41,856 [INFO] 127.0.0.1 - - [01/May/2026 16:36:41] "[31m[1mGET /api/results/latest HTTP/1.1[0m" 401 -
+2026-05-01 16:36:44,851 [INFO] 127.0.0.1 - - [01/May/2026 16:36:44] "[31m[1mGET /api/results/latest HTTP/1.1[0m" 401 -
+2026-05-01 16:41:22,329 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:41:23,038 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 16:42:09,457 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:42:09,820 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 16:42:13,808 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 16:42:13,992 [WARNING] Google auth failed: Invalid token
+2026-05-01 16:42:14,652 [WARNING] Backup skipped: git not found
+2026-05-01 16:42:14,718 [WARNING] gemini ran out of credits mid-session! Falling back...
+2026-05-01 16:48:21,068 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:48:21,807 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 16:48:26,196 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 16:48:26,377 [WARNING] Google auth failed: Invalid token
+2026-05-01 16:48:46,088 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:48:46,457 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 16:48:48,384 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 16:48:48,593 [WARNING] Google auth failed: Invalid token
+2026-05-01 16:49:05,635 [INFO] Gemini: ready
+2026-05-01 16:49:05,789 [INFO] Claude: ready
+2026-05-01 16:49:05,930 [INFO] OpenAI: ready
+2026-05-01 16:49:05,939 [INFO] Perplexity: ready
+2026-05-01 16:49:05,940 [INFO] Running startup health check on all API keys...
+2026-05-01 16:49:05,940 [INFO] AFC is enabled with max remote calls: 10.
+2026-05-01 16:49:06,332 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
+2026-05-01 16:49:06,336 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API
+2026-05-01 16:49:06,730 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-05-01 16:49:06,732 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:49:07,388 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2026-05-01 16:49:07,389 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: x. You can find your API key at
+2026-05-01 16:49:08,874 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 16:49:08,880 [INFO]   perplexity: OK
+2026-05-01 16:49:08,884 [INFO] Available models: perplexity
+2026-05-01 16:49:18,333 [INFO] Gemini: ready
+2026-05-01 16:49:18,487 [INFO] Claude: ready
+2026-05-01 16:49:18,632 [INFO] OpenAI: ready
+2026-05-01 16:49:18,642 [INFO] Perplexity: ready
+2026-05-01 16:49:18,642 [INFO] Running startup health check on all API keys...
+2026-05-01 16:49:18,642 [INFO] AFC is enabled with max remote calls: 10.
+2026-05-01 16:49:18,980 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 400 Bad Request"
+2026-05-01 16:49:18,982 [WARNING]   gemini: ERROR — 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API
+2026-05-01 16:49:19,349 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-05-01 16:49:19,350 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:49:19,711 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2026-05-01 16:49:19,713 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: x. You can find your API key at
+2026-05-01 16:49:22,083 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 16:49:22,093 [INFO]   perplexity: OK
+2026-05-01 16:49:22,098 [INFO] Available models: perplexity
+2026-05-01 16:49:34,794 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:49:35,444 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 16:49:37,410 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 16:49:37,608 [WARNING] Google auth failed: Invalid token
+2026-05-01 16:49:51,559 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:49:51,942 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 16:49:53,848 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 16:49:54,052 [WARNING] Google auth failed: Invalid token
+2026-05-01 16:50:09,740 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 16:50:10,212 [WARNING]   openai: ERROR — Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find y
+2026-05-01 16:50:12,531 [WARNING] Batch test_batch_003: JSON parse failed, retrying with JSON-only prompt
+2026-05-01 16:50:12,730 [WARNING] Google auth failed: Invalid token
+2026-05-01 16:50:13,347 [WARNING] Backup skipped: git not found
+2026-05-01 16:50:13,415 [WARNING] gemini ran out of credits mid-session! Falling back...
+2026-05-01 19:57:40,713 [INFO] Gemini: ready
+2026-05-01 19:57:40,923 [INFO] Claude: ready
+2026-05-01 19:57:41,131 [INFO] OpenAI: ready
+2026-05-01 19:57:41,141 [INFO] Perplexity: ready
+2026-05-01 19:57:41,141 [INFO] Running startup health check on all API keys...
+2026-05-01 19:57:41,141 [INFO] AFC is enabled with max remote calls: 10.
+2026-05-01 19:57:42,135 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-05-01 19:57:42,136 [WARNING]   gemini: ERROR — 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again lat
+2026-05-01 19:57:42,689 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-05-01 19:57:42,691 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 19:57:45,125 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 19:57:45,137 [INFO]   openai: OK
+2026-05-01 19:57:47,478 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 19:57:47,479 [INFO]   perplexity: OK
+2026-05-01 19:57:47,484 [INFO] Available models: openai, perplexity
+2026-05-01 19:57:47,488 [INFO] ==================================================
+2026-05-01 19:57:47,488 [INFO]   GradesGenie is running!
+2026-05-01 19:57:47,488 [INFO]   URL    : http://0.0.0.0:5000
+2026-05-01 19:57:47,488 [INFO]   Models : openai, perplexity
+2026-05-01 19:57:47,488 [INFO] ==================================================
+2026-05-01 19:57:49,257 [INFO] Auto-update: packages up to date
+2026-05-01 19:57:49,258 [INFO] Auto-update: backing up local data before restart...
