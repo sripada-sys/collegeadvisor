@@ -1691,3 +1691,26 @@
 2026-05-01 19:57:47,488 [INFO] ==================================================
 2026-05-01 19:57:49,257 [INFO] Auto-update: packages up to date
 2026-05-01 19:57:49,258 [INFO] Auto-update: backing up local data before restart...
+2026-05-01 19:57:51,727 [INFO] Progress backed up to GitHub
+2026-05-01 19:57:54,789 [INFO] Auto-update: applied ba31e9fc, restarting...
+2026-05-01 19:57:55,377 [INFO] Gemini: ready
+2026-05-01 19:57:55,531 [INFO] Claude: ready
+2026-05-01 19:57:55,686 [INFO] OpenAI: ready
+2026-05-01 19:57:55,697 [INFO] Perplexity: ready
+2026-05-01 19:57:55,698 [INFO] Running startup health check on all API keys...
+2026-05-01 19:57:55,698 [INFO] AFC is enabled with max remote calls: 10.
+2026-05-01 19:57:56,587 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-05-01 19:57:56,588 [WARNING]   gemini: ERROR — 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again lat
+2026-05-01 19:57:56,909 [INFO] HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+2026-05-01 19:57:56,910 [WARNING]   claude: NO CREDITS — disabling
+2026-05-01 19:57:59,213 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 19:57:59,221 [INFO]   openai: OK
+2026-05-01 19:58:02,763 [INFO] HTTP Request: POST https://api.perplexity.ai/chat/completions "HTTP/1.1 200 OK"
+2026-05-01 19:58:02,765 [INFO]   perplexity: OK
+2026-05-01 19:58:02,771 [INFO] Available models: openai, perplexity
+2026-05-01 19:58:02,778 [INFO] ==================================================
+2026-05-01 19:58:02,778 [INFO]   GradesGenie is running!
+2026-05-01 19:58:02,778 [INFO]   URL    : http://0.0.0.0:5000
+2026-05-01 19:58:02,778 [INFO]   Models : openai, perplexity
+2026-05-01 19:58:02,778 [INFO] ==================================================
+2026-05-01 19:58:03,503 [INFO] Auto-update: already up to date
