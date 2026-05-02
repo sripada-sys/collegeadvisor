@@ -536,7 +536,7 @@ def create_student(google_id, email, name, avatar_url, phone, signup_ip=""):
         """INSERT INTO students (id, google_id, email, name, avatar_url, phone,
            plan, trial_start, signup_ip, created_at)
            VALUES (?, ?, ?, ?, ?, ?, 'free_trial', ?, ?, ?)""",
-        (student_id, google_id, email, name, avatar_url, phone,
+        (student_id, google_id, email, name, avatar_url, phone or None,
          datetime.now().isoformat(), signup_ip, datetime.now().isoformat()),
     )
     conn.commit()
