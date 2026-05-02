@@ -1,0 +1,56 @@
+[
+  {
+    "test_case": {
+      "id": "c05",
+      "subject": "chemistry",
+      "difficulty": "easy",
+      "topic": "pH",
+      "question_file": "c05_question.jpg",
+      "answer_file": "c05_answer.jpg",
+      "is_correct": true,
+      "correct_answer": "pH = 2",
+      "error": null,
+      "expected_score_min": 4,
+      "expected_score_max": 5
+    },
+    "pipeline_output": {
+      "batch_id": "d3fb7778c777",
+      "results": [
+        {
+          "answer_images": "[\"c05_answer_20260502_083739_6d2606.jpg\"]",
+          "batch_id": "d3fb7778c777",
+          "correct_answer": "\\ce{HCl} is a strong acid, which means it dissociates completely in water.\\n$$ \\ce{HCl(aq) -> H+(aq) + Cl-(aq)} $$\\nGiven concentration of \\ce{HCl} is $0.01 \\text{ M}$.\\nDue to complete dissociation, the concentration of \\ce{H+} ions will be equal to the initial concentration of \\ce{HCl}.\\n$$ [\\ce{H+}] = 0.01 \\text{ M} = 10^{-2} \\text{ M} $$\\nThe pH is calculated using the formula:\\n$$ \\text{pH} = -\\log[\\ce{H+}] $$\\nSubstitute the concentration of \\ce{H+}:\\n$$ \\text{pH} = -\\log(10^{-2}) $$\\nUsing the logarithm property $\\log(a^b) = b \\log(a)$:\\n$$ \\text{pH} = -(-2 \\log(10)) $$\\nSince $\\log(10) = 1$:\\n$$ \\text{pH} = -(-2 \\times 1) $$\\n$$ \\text{pH} = 2 $$\\nThe final pH is $2$.",
+          "correctness": 5,
+          "encouragement": "Excellent work! You demonstrated a clear and accurate understanding of how to calculate the pH of a strong acid. Every step was perfectly executed.",
+          "exam": "jee_main",
+          "hint": "none",
+          "id": 1,
+          "is_complete": 1,
+          "missing_concept": "none",
+          "mistakes": "[]",
+          "next_practice": "To deepen your understanding, try calculating the pH of a strong base solution (e.g., $0.001 \\text{ M NaOH}$) or a weak acid solution (e.g., $0.1 \\text{ M CH3COOH}$ given $K_a$) to practice different scenarios.",
+          "problem_number": "005",
+          "question_images": "[\"c05_question_20260502_083739_35bf3c.jpg\"]",
+          "question_summary": "Find pH of 0.01 M HCl",
+          "question_text": "Find pH of $0.01 \text{ M HCl}$",
+          "raw_response": "[\n  {\n    \"problem_number\": \"005\",\n    \"question_summary\": \"Find pH of 0.01 M HCl\",\n    \"question_text\": \"Find pH of $0.01 \\text{ M HCl}$\",\n    \"correct_answer\": \"\\\\ce{HCl} is a strong acid, which means it dissociates completely in water.\\\\n$$ \\\\ce{HCl(aq) -> H+(aq) + Cl-(aq)} $$\\\\nGiven concentration of \\\\ce{HCl} is $0.01 \\\\text{ M}$.\\\\nDue to complete dissociation, the concentration of \\\\ce{H+} ions will be equal to the initial concentration of \\\\ce{HCl}.\\\\n$$ [\\\\ce{H+}] = 0.01 \\\\text{ M} = 10^{-2} \\\\text{ M} $$\\\\nThe pH is calculated using the formula:\\\\n$$ \\\\text{pH} = -\\\\log[\\\\ce{H+}] $$\\\\nSubstitute the concentration of \\\\ce{H+}:\\\\n$$ \\\\text{pH} = -\\\\log(10^{-2}) $$\\\\nUsing the logarithm property $\\\\log(a^b) = b \\\\log(a)$:\\\\n$$ \\\\text{pH} = -(-2 \\\\log(10)) $$\\\\nSince $\\\\log(10) = 1$:\\\\n$$ \\\\text{pH} = -(-2 \\\\times 1) $$\\\\n$$ \\\\text{pH} = 2 $$\\\\nThe final pH is $2$.\",\n    \"subject\": \"chemistry\",\n    \"topic\": \"Acid-Base Chemistry\",\n    \"subtopic\": \"pH calculation of strong acids\",\n    \"correctness\": 5,\n    \"is_complete\": true,\n    \"source\": \"unknown\",\n    \"what_went_right\": \"The student correctly identified \\\\ce{HCl} as a strong acid, understood that it fully dissociates, accurately calculated the hydrogen ion concentration, and applied the pH formula correctly to arrive at the right answer.\",\n    \"where_it_broke\": \"nowhere\",\n    \"mistakes\": [],\n    \"missing_concept\": \"none\",\n    \"hint_not_answer\": \"none\",\n    \"next_practice\": \"To deepen your understanding, try calculating the pH of a strong base solution (e.g., $0.001 \\\\text{ M NaOH}$) or a weak acid solution (e.g., $0.1 \\\\text{ M CH3COOH}$ given $K_a$) to practice different scenarios.\",\n    \"encouragement\": \"Excellent work! You demonstrated a clear and accurate understanding of how to calculate the pH of a strong acid. Every step was perfectly executed.\"\n  }\n]",
+          "source": "unknown",
+          "student_id": "13ee19023b0d4eab",
+          "subject": "chemistry",
+          "subtopic": "pH calculation of strong acids",
+          "timestamp": "2026-05-02T08:37:50.408534",
+          "topic": "Acid-Base Chemistry",
+          "what_went_right": "The student correctly identified \\ce{HCl} as a strong acid, understood that it fully dissociates, accurately calculated the hydrogen ion concentration, and applied the pH formula correctly to arrive at the right answer.",
+          "where_it_broke": "nowhere"
+        }
+      ]
+    },
+    "evaluation": {
+      "pass": true,
+      "issues": [],
+      "score": 5,
+      "where_it_broke": "nowhere",
+      "question_detected": "Find pH of $0.01 \text{ M HCl}$"
+    }
+  }
+]

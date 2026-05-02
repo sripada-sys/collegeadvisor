@@ -14,17 +14,17 @@
         onload="renderMathInPage()"></script>
     <style>
         :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface2: #242835;
-            --border: #2e3348;
-            --text: #e4e4e7;
-            --text2: #9ca3af;
-            --accent: #6366f1;
-            --green: #22c55e;
-            --yellow: #eab308;
-            --red: #ef4444;
-            --orange: #f97316;
+            --bg: #FAFAFA;
+            --surface: #FFFFFF;
+            --surface2: #F3F4F6;
+            --border: #E5E7EB;
+            --text: #1F2937;
+            --text2: #6B7280;
+            --accent: #4F46E5;
+            --green: #059669;
+            --yellow: #D97706;
+            --red: #DC2626;
+            --orange: #EA580C;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -700,7 +700,7 @@
         <h1>Grades<span>Genie</span></h1>
         <div style="position:relative">
             <button id="user-menu-btn" onclick="document.getElementById('user-dropdown').classList.toggle('show')" style="background:var(--accent);color:white;border:none;width:32px;height:32px;border-radius:50%;font-size:14px;font-weight:600;cursor:pointer" title="Account">{{ student_initial }}</button>
-            <div id="user-dropdown" style="display:none;position:absolute;right:0;top:40px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 0;min-width:140px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100">
+            <div id="user-dropdown" style="display:none;position:absolute;right:0;top:40px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 0;min-width:140px;box-shadow:0 4px 12px rgba(0,0,0,0.1);z-index:100">
                 <a href="/auth/logout" style="display:block;padding:8px 16px;color:var(--text2);text-decoration:none;font-size:13px">Sign out</a>
             </div>
         </div>

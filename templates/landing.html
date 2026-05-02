@@ -11,8 +11,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0F0F1A;
-            color: #E5E7EB;
+            background: #FAFAFA;
+            color: #1F2937;
             line-height: 1.6;
             overflow-x: hidden;
         }
@@ -29,17 +29,17 @@
         .brand {
             font-size: 1.4rem;
             font-weight: 800;
-            color: #818CF8;
+            color: #4F46E5;
             letter-spacing: -0.5px;
         }
         .nav-counter {
             font-size: 0.75rem;
-            color: #9CA3AF;
-            background: rgba(255,255,255,0.06);
+            color: #6B7280;
+            background: #F3F4F6;
             padding: 4px 10px;
             border-radius: 20px;
         }
-        .nav-counter b { color: #818CF8; }
+        .nav-counter b { color: #4F46E5; }
 
         /* ─── Hero ─── */
         .hero {
@@ -52,12 +52,12 @@
             font-size: clamp(1.8rem, 5.5vw, 2.8rem);
             font-weight: 800;
             line-height: 1.2;
-            color: #FFFFFF;
+            color: #111827;
             margin-bottom: 14px;
         }
         .hero .sub {
             font-size: 1.05rem;
-            color: #9CA3AF;
+            color: #6B7280;
             margin-bottom: 20px;
         }
 
@@ -74,16 +74,16 @@
             font-weight: 600;
             padding: 4px 12px;
             border-radius: 20px;
-            background: rgba(129,140,248,0.1);
-            color: #A5B4FC;
-            border: 1px solid rgba(129,140,248,0.2);
+            background: #EEF2FF;
+            color: #4F46E5;
+            border: 1px solid #E0E7FF;
         }
-        .chip-green { background: rgba(52,211,153,0.1); color: #6EE7B7; border-color: rgba(52,211,153,0.2); }
-        .chip-amber { background: rgba(251,191,36,0.1); color: #FCD34D; border-color: rgba(251,191,36,0.2); }
+        .chip-green { background: #ECFDF5; color: #059669; border-color: #D1FAE5; }
+        .chip-amber { background: #FFFBEB; color: #D97706; border-color: #FEF3C7; }
 
         .lang-note {
             font-size: 0.8rem;
-            color: #6B7280;
+            color: #9CA3AF;
             margin-bottom: 0;
         }
 
@@ -106,18 +106,18 @@
         }
 
         .roll-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
         .roll-card .step-num {
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #818CF8;
+            color: #4F46E5;
             margin-bottom: 8px;
         }
         .roll-card .step-icon {
@@ -128,22 +128,22 @@
             font-size: 0.95rem;
             font-weight: 700;
             margin-bottom: 4px;
-            color: #FFFFFF;
+            color: #111827;
         }
         .roll-card p {
             font-size: 0.8rem;
-            color: #9CA3AF;
+            color: #6B7280;
             margin: 0;
         }
         /* Notebook mock inside roll card */
         .notebook-mock {
-            background: rgba(255,255,240,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: #FFFEF5;
+            border: 1px solid #E5E7EB;
             border-radius: 8px;
             padding: 10px;
             font-family: 'Kalam', cursive, sans-serif;
             font-size: 0.75rem;
-            color: #D1D5DB;
+            color: #374151;
             line-height: 1.8;
             margin-top: 8px;
             position: relative;
@@ -153,11 +153,11 @@
             position: absolute;
             left: 28px; top: 0; bottom: 0;
             width: 1px;
-            background: rgba(254,202,202,0.3);
+            background: #FECACA;
         }
-        .notebook-mock .line { padding-left: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .notebook-mock .line { padding-left: 24px; border-bottom: 1px solid #E5E7EB; }
         .notebook-mock .line:last-child { border: none; }
-        .notebook-mock .wrong { color: #F87171; text-decoration: line-through; }
+        .notebook-mock .wrong { color: #DC2626; text-decoration: line-through; }
 
         /* ─── Preview / Demo ─── */
         .demo-section {
@@ -196,12 +196,12 @@
             margin-bottom: 8px;
         }
         .fb:last-child { margin-bottom: 0; }
-        .fb-good { border-left: 3px solid #34D399; background: rgba(52,211,153,0.08); }
-        .fb-fix { border-left: 3px solid #FBBF24; background: rgba(251,191,36,0.08); }
+        .fb-good { border-left: 3px solid #10B981; background: #ECFDF5; }
+        .fb-fix { border-left: 3px solid #F59E0B; background: #FFFBEB; }
         .fb b { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
-        .fb-good b { color: #34D399; }
-        .fb-fix b { color: #FBBF24; }
-        .fb p { font-size: 0.85rem; margin: 0; color: #D1D5DB; line-height: 1.5; }
+        .fb-good b { color: #059669; }
+        .fb-fix b { color: #D97706; }
+        .fb p { font-size: 0.85rem; margin: 0; color: #374151; line-height: 1.5; }
 
         /* ─── CTA Section ─── */
         .cta-section {
@@ -214,7 +214,7 @@
             display: block;
             width: 100%;
             padding: 14px 24px;
-            background: #6366F1;
+            background: #4F46E5;
             color: #FFFFFF;
             font-size: 1rem;
             font-weight: 700;
@@ -223,12 +223,12 @@
             cursor: pointer;
             margin-bottom: 12px;
             transition: background 0.15s;
-            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.25);
         }
-        .cta-btn:hover { background: #4F46E5; }
+        .cta-btn:hover { background: #4338CA; }
         .cta-small {
             font-size: 0.8rem;
-            color: #6B7280;
+            color: #9CA3AF;
             margin-bottom: 16px;
         }
         .google-btn-wrap { display: inline-block; }
@@ -243,7 +243,7 @@
         }
         .trust span {
             font-size: 0.75rem;
-            color: #9CA3AF;
+            color: #6B7280;
         }
 
         /* ─── Quote ─── */
@@ -256,14 +256,14 @@
         .quote-section blockquote {
             font-size: 0.95rem;
             font-style: italic;
-            color: #D1D5DB;
+            color: #4B5563;
             margin-bottom: 8px;
             line-height: 1.6;
         }
         .quote-section cite {
             font-size: 0.8rem;
             font-style: normal;
-            color: #6B7280;
+            color: #9CA3AF;
         }
 
         /* ─── Identity Line ─── */
@@ -271,19 +271,19 @@
             text-align: center;
             padding: 0 24px 48px;
             font-size: 0.9rem;
-            color: #9CA3AF;
+            color: #6B7280;
             max-width: 500px;
             margin: 0 auto;
         }
-        .identity b { color: #E5E7EB; }
+        .identity b { color: #374151; }
 
         /* ─── Footer ─── */
         footer {
             text-align: center;
             padding: 24px;
             font-size: 0.75rem;
-            color: #6B7280;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            color: #9CA3AF;
+            border-top: 1px solid #F3F4F6;
         }
 
         @media (max-width: 480px) {
@@ -362,7 +362,7 @@
         <div class="g_id_signin"
              data-type="standard"
              data-size="medium"
-             data-theme="filled_black"
+             data-theme="outline"
              data-text="continue_with"
              data-shape="pill"
              data-width="200"></div>

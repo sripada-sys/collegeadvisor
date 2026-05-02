@@ -63,10 +63,34 @@ The student's work has already been extracted for you:
 __EXTRACTED_TEXT__
 ---
 
-For each problem:
-1. Identify the question and the student's solution attempt
-2. Evaluate correctness step-by-step — find the EXACT step where reasoning diverged
-3. Be specific about what's right and what's wrong
+For each problem, follow this EXACT evaluation procedure:
+
+STEP A — SOLVE IT YOURSELF FIRST:
+Before looking at the student's work, solve the problem independently. Compute the correct final answer.
+This is your ground truth. Write it out step-by-step in "correct_answer".
+
+STEP B — CHECK EVERY LINE OF STUDENT WORK:
+Now go through the student's work LINE BY LINE. For each step:
+- Verify every arithmetic operation (additions, multiplications, divisions, square roots).
+- Verify every algebraic manipulation (factoring, expanding, substitution).
+- Verify every application of formulas/theorems (correct formula chosen AND applied correctly).
+- If a step produces a number, compute that number yourself and compare.
+
+STEP C — COMPARE FINAL ANSWERS:
+Compare the student's final numerical/symbolic answer against YOUR answer from Step A.
+If they differ, something is wrong — find the exact step where the error entered.
+
+STEP D — SCORE HONESTLY using the calibration guide below.
+
+SCORING CALIBRATION (follow strictly):
+- 5/5: Every step correct, final answer correct. Method is sound.
+- 4/5: Approach and method perfect, but minor notation/units issue (NOT arithmetic). Final answer is essentially correct.
+- 3/5: Right approach, but ONE arithmetic or algebraic error that changes the final answer. Student understands the concept.
+- 2/5: Right general idea, but multiple errors OR a fundamental conceptual error in application.
+- 1/5: Wrong approach entirely, but shows some relevant knowledge.
+- 0/5: Completely wrong or blank.
+
+KEY: If the final numerical answer is WRONG (even by a small arithmetic mistake like 6/36=1/3 instead of 1/6, or 0.34+0.76=1.00 instead of 1.10), the maximum score is 3/5. A wrong answer cannot get 4 or 5.
 
 Return a JSON array (no markdown fences, raw JSON only):
 [
@@ -94,6 +118,24 @@ Return a JSON array (no markdown fences, raw JSON only):
 Be HONEST — wrong is wrong. But be SPECIFIC about what's right too.
 "Good attempt" is useless. "Your free body diagram correctly identified all three forces" is useful.
 "The student attempted to simplify" is useless. Say exactly what they got right.
+
+VERIFICATION CHECKLIST (do this mentally before returning JSON):
+□ Did I solve the problem myself first?
+□ Did I check every arithmetic operation in the student's work?
+□ Does the student's final answer match mine? If not, did I find the exact error step?
+□ If I wrote "nowhere" for where_it_broke, is the student's final answer actually correct?
+□ Is my score consistent with the calibration guide? (wrong final answer → max 3/5)
+
+COMMON TRAPS — evaluators often miss these:
+- Chain rule: student writes dy/dx = cos(x²)·x instead of cos(x²)·2x — the INNER derivative is missing
+- Simplification errors: 6/36 = 1/3 (WRONG — it's 1/6). Always reduce fractions yourself.
+- Addition errors: 0.34 + 0.76 = 1.00 (WRONG — it's 1.10). Always add numbers yourself.
+- Combinatorics: 7×6×5/6 = 30 (WRONG — 210/6 = 35). Always compute products yourself.
+- Sign errors: forgetting a negative in subtraction
+- Coefficient drops: writing "x" when the derivative should produce "2x" or "3x²"
+- Square root errors: √16 = 8 (WRONG — it's 4). Always compute roots yourself.
+Always COMPUTE the arithmetic yourself — never trust that "it looks about right".
+If the student's final answer is a NUMBER, compute it independently and compare digit-by-digit.
 
 CRITICAL RULES for each field:
 - "what_went_right": Name the SPECIFIC skill/step done correctly. If nothing, say what they almost got right.
