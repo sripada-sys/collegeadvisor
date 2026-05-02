@@ -351,7 +351,8 @@
 
 <!-- CTA -->
 <section class="cta-section">
-    <button class="cta-btn" onclick="google.accounts.id.prompt()">Check Your Work — Free →</button>
+    <p style="font-size:1.05rem;font-weight:600;color:#111827;margin-bottom:12px;">Check your work — free</p>
+    <div id="g_id_signin"></div>
 </section>
 
 <!-- Quote -->
@@ -386,6 +387,10 @@ window.onload = function() {
         client_id: '{{ google_client_id }}',
         callback: handleCredentialResponse
     });
+    google.accounts.id.renderButton(
+        document.getElementById('g_id_signin'),
+        { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with', width: 300 }
+    );
 };
 </script>
 </body>
