@@ -351,7 +351,15 @@
 
 <!-- CTA -->
 <section class="cta-section">
-    <button class="cta-btn" onclick="google.accounts.id.prompt()">Check My Answer — Free →</button>
+    <div id="g_id_signin"
+         class="g_id_signin"
+         data-type="standard"
+         data-size="large"
+         data-theme="filled_blue"
+         data-text="continue_with"
+         data-shape="pill"
+         data-logo_alignment="left"
+         data-width="320"></div>
 </section>
 
 <!-- Quote -->
@@ -386,6 +394,10 @@ window.onload = function() {
         client_id: '{{ google_client_id }}',
         callback: handleCredentialResponse
     });
+    google.accounts.id.renderButton(
+        document.getElementById('g_id_signin'),
+        { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with', width: 320 }
+    );
 };
 </script>
 </body>
