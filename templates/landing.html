@@ -352,20 +352,6 @@
 <!-- CTA -->
 <section class="cta-section">
     <button class="cta-btn" onclick="google.accounts.id.prompt()">Check My Answer — Free →</button>
-
-    <div class="google-btn-wrap" style="display:none">
-        <div id="g_id_onload"
-             data-client_id="{{ google_client_id }}"
-             data-callback="handleCredentialResponse"
-             data-auto_prompt="false"></div>
-        <div class="g_id_signin"
-             data-type="standard"
-             data-size="large"
-             data-theme="outline"
-             data-text="continue_with"
-             data-shape="pill"
-             data-width="300"></div>
-    </div>
 </section>
 
 <!-- Quote -->
@@ -394,6 +380,13 @@ function handleCredentialResponse(response) {
         else window.location = '/pc';
     });
 }
+
+window.onload = function() {
+    google.accounts.id.initialize({
+        client_id: '{{ google_client_id }}',
+        callback: handleCredentialResponse
+    });
+};
 </script>
 </body>
 </html>
